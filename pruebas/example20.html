@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang=es>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="">
+	<title>Organizador de Proyectos</title>
+  <!-- Copia este enlace completo y rápido dentro de tu <head> -->
+  <link rel="stylesheet" href="https://cloudflare.com" integrity="sha512-9a1S9M9v7TfSTpTqmdf6XwSnyvK7wsUf1H1NcoN8v2K9XU1p9ZUXW6YyvK48X7X_M7S2P0uS_M6T4mU6D_A7Q==" crossorigin="anonymous" referrerpolicy="no-referrer">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://googleapis.com" />
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+  <link rel="shortcut icon" href="">
+</head>
+<body>
+  <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+      <a class="navbar-brand ms-2" href="#">ClassExpress</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="file:///C:/Users/rodrigo/Desktop/CCC/pruebas/example1.html">Classroom <span class="sr-only">(current)</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="file:///C:/Users/rodrigo/Desktop/CCC/pruebas/example2.html">Friends</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="file:///C:/Users/rodrigo/Desktop/CCC/pruebas/example16.html">Profile</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  <div class="container-fluid px-4" style="margin-top: 10em;">
+    <div class="row">
+      <div class="form-check col-12">
+        <label for="inputTextoEjemplo" class="form-label">Título</label>
+        <input type="text" class="form-control" id="inputTextoEjemplo" placeholder="Escribe el título de la clase.">
+      </div>
+    </div>
+    <div class="row">
+      <div class="form-check col-6">
+        <label for="inputCantidad" class="form-label">Precio mínimo:</label>
+        <input type="number" class="form-control" id="inputCantidad" placeholder="0" min="0" step="1">
+      </div>
+      <div class="form-check col-6">
+        <label for="inputCantidad" class="form-label">Precio máximo:</label>
+        <input type="number" class="form-control" id="inputCantidad" placeholder="0" min="0" step="1">
+      </div>
+    </div>
+    <div class="row">
+      <div class="form-check col-6">
+        <label for="inputCantidad" class="form-label">Cantidad mínima de alumnos:</label>
+        <input type="number" class="form-control" id="inputCantidad" placeholder="0" min="0" step="1">
+      </div>
+      <div class="form-check col-6">
+        <label for="inputCantidad" class="form-label">Cantidad máxima de alumnos:</label>
+        <input type="number" class="form-control" id="inputCantidad" placeholder="0" min="0" step="1">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12 text-center">
+        <button class="btn btn-dark btn-lg mt-5" type="submit">Confirmar Clase</button>
+      </div>
+    </div>
+    
+  </div>
+
+  <footer class="mastfoot mt-auto">
+    <div class="inner float-end">
+      <p>ClassExpress done <a href="https://getbootstrap.com/">Bootstrap</a>, by <a href="https://www.facebook.com/rodrigo.alejandro.1848816?locale=es_LA">@RodrigoConejeros</a>.</p>
+    </div>
+  </footer>
+
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+	<script
+  	src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+	<script type="text/javascript" src="./presentacion/odp_ajax.js"></script>
+	<script type="text/javascript" src="./presentacion/js/scripts.js"></script>
+  <script type="text/javascript" src="./script.js"></script>
+</body>

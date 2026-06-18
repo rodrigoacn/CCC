@@ -1,0 +1,253 @@
+.title-white {
+  color: white; /* Color del texto */
+  font-size: 3rem; /* Tamaño de la fuente */
+  font-weight: bold; /* Recomendado para que el borde se note bien */
+  text-shadow: 
+    -1px -1px 0 #000,  
+     1px -1px 0 #000,
+    -1px  1px 0 #000,  
+     1px  1px 0 #000;
+}
+.text-white {
+    color: white; /* Color del texto */
+}
+.rating-container {
+  background-color: #f8f9fa; /* Fondo claro */
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.mt-10 {
+  margin-top: 10em;
+}
+
+.rate {
+    border-bottom-right-radius: 12px;
+    border-bottom-left-radius: 12px
+}
+
+.rating {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: center
+}
+
+.rating>input {
+    display: none
+}
+
+.rating>label {
+    position: relative;
+    width: 1em;
+    font-size: 100px;
+    font-weight: 300;
+    color: #FFD600;
+    cursor: pointer
+}
+
+.rating>label::before {
+    content: "\2605";
+    position: absolute;
+    opacity: 0
+}
+
+.rating>label:hover:before,
+.rating>label:hover~label:before {
+    opacity: 1 !important
+}
+
+.rating>input:checked~label:before {
+    opacity: 1
+}
+
+.rating:hover>input:checked~label:before {
+    opacity: 0.4
+}
+
+.buttons {
+    top: 36px;
+    position: relative
+}
+
+.big-caption {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+#input-busqueda::placeholder {
+    color: #ffffff !important;
+    opacity: 1 !important; /* Evita que el navegador le aplique transparencia */
+}
+
+
+        /* Estilo ultra compacto para el marco físico */
+        .marco-fotografico {
+            background-color: #1e1e1e;
+            border: 8px solid #2d2d2d;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(0,0,0,0.6);
+            border-radius: 4px;
+            padding: 12px;
+            margin: 0 auto;
+            max-width: 100%;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .marco-fotografico:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(13, 110, 253, 0.3), inset 0 0 10px rgba(0,0,0,0.6); /* Destello sutil azul */
+        }
+
+        /* Contenedor de la imagen */
+        .contenedor-imagen {
+            border: 2px solid #121212;
+            overflow: hidden;
+            background-color: #121212;
+            border-radius: 2px;
+        }
+
+        /* Estrellas escaladas para ser más pequeñas */
+        .contenedor-estrellas {
+            position: relative;
+            display: inline-block;
+            font-size: 1rem;
+            color: #333333; 
+        }
+
+        .estrellas-activas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            color: #ffc107; 
+        }
+        
+        .text-dorado {
+            color: #FFD700; /* Color dorado */
+            font-weight: bold;
+        }
+
+.account-settings .user-profile {
+    text-align: center;
+}
+.account-settings .user-profile .user-avatar {
+    margin: 0 0 1rem 0;
+}
+.account-settings .user-profile .user-avatar img {
+    width: 90px;
+    height: 90px;
+    -webkit-border-radius: 100px;
+    -moz-border-radius: 100px;
+    border-radius: 100px;
+}
+.account-settings .user-profile h5.user-name {
+    margin: 0 0 0.5rem 0;
+}
+.account-settings .user-profile h6.user-email {
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: #9fa8b9;
+}
+.account-settings .about {
+    text-align: center;
+}
+.account-settings .about h5 {
+    margin: 0 0 15px 0;
+    color: #007ae1;
+}
+.account-settings .about p {
+    font-size: 0.825rem;
+}
+.form-control {
+    border: 1px solid #cfd1d8;
+    -webkit-border-radius: 2px;
+    -moz-border-radius: 2px;
+    border-radius: 2px;
+    font-size: .825rem;
+    background: #ffffff;
+    color: #2e323c;
+}
+
+.card {
+    background: #ffffff;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    border: 0;
+    margin-bottom: 1rem;
+}
+
+.form-check-input:checked {
+    background-color: gray;
+    border-color: black;
+}
+
+.form-check-input-s {
+    background-color: gray;
+    border-color: black;
+    border: 3px solid #000000 !important; /* 3px da el grosor semigrueso */
+    border-radius: 6px; /* Esquinas ligeramente redondeadas */
+    padding: 12px 16px; /* Espacio interno para que no se pegue al borde */
+    display: inline-block; /* Ajusta el marco al tamaño del contenido */
+}
+
+ .main-layout {
+            height: calc(100vh - 56px);
+        }
+
+        /* Distribución exacta: 80% Aula / 20% Chat */
+        @media (min-width: 992px) {
+            .classroom-section {
+                width: 80% !important;
+                flex: 0 0 80% !important;
+            }
+            .chat-section {
+                width: 20% !important;
+                flex: 0 0 20% !important;
+            }
+        }
+
+        .bg-classexpress-dark {
+            background-color: #121212;
+        }
+        .bg-classexpress-chat {
+            background-color: #1a1a1a;
+        }
+        .border-grey {
+            border-color: #2e2e2e !important;
+        }
+
+        /* Ajuste para que todo el texto dentro del chat sea blanco puro */
+        .chat-container {
+            overflow-y: auto;
+            word-break: break-word;
+            color: #ffffff !important;
+        }
+        
+        .chat-container strong {
+            color: #ffffff !important;
+        }
+
+        .btn-disabled-status {
+            background-color: #dc3545 !important;
+            border-color: #dc3545 !important;
+            color: #ffffff !important;
+        }
+        .btn-active-hand {
+            background-color: #ffc107 !important;
+            border-color: #ffc107 !important;
+            color: #000000 !important;
+        }
+        .btn-classexpress {
+            background-color: #ffffff;
+            color: #000000;
+            border: 1px solid #ffffff;
+            font-weight: 500;
+        }
+        .btn-classexpress:hover {
+            background-color: #cccccc;
+            color: #000000;
+            border-color: #cccccc;
+        }
