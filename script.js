@@ -344,3 +344,63 @@ async function startWebcam() {
 }
 // 3. Ejecuta la función inmediatamente al cargar la página
 startWebcam();
+
+$(document).ready(function() {
+    $('#btn-enviar-seleccionados').on('click', function() {
+        // 1. Buscar filas usando la clase nativa de Bootstrap (.form-check-input)
+        var $filasMarcadas = $('.form-check-input:checked').closest('tr');
+        var totalSeleccionados = $filasMarcadas.length;
+
+        // 2. Validar límite de 5 tuplas
+        if (totalSeleccionados === 0) {
+            alert('Por favor, selecciona al menos una fila.');
+            return;
+        }
+        if (totalSeleccionados > 5) {
+            alert('Solo puedes enviar un máximo de 5 filas. Has seleccionado ' + totalSeleccionados + '.');
+            return;
+        }
+
+        var paginaOrigen = window.location.pathname.split("/").pop();
+        var $form = $('<form>', { action: 'destino.php', method: 'POST' });
+        $form.append($('<input>', { type: 'hidden', name: 'origen_pagina', value: paginaOrigen }));
+
+        // 3. Recorrer las filas seleccionadas
+        $filasMarcadas.each(function(index, elemento) {
+            var $fila = $(elemento);
+            
+            // Encontrar la celda (th o td) que contiene el checkbox para empezar a contar
+            var $celdaCheckbox = $fila.find('.form-check-input').closest('th, td');
+            
+            // Capturar todos los TD que le siguen a esa celda
+            var $celdasTexto = $celdaCheckbox.nextAll('td');
+
+            var textoPrimerTD = "";
+            var textoSegundoTD = "";
+
+            // Extraer el texto del primer TD (si tiene un <label>, toma su texto; si no, toma el del TD)
+            if ($celdasTexto.length >= 1) {
+                var $primerTD = $($celdasTexto[0]);
+                var $labelUno = $primerTD.find('label');
+                textoPrimerTD = $labelUno.length ? $labelUno.text().trim() : $primerTD.text().trim();
+            }
+            
+            // Extraer el texto del segundo TD (si existe)
+            if ($celdasTexto.length >= 2) {
+                var $segundoTD = $($celdasTexto[1]);
+                var $labelDos = $segundoTD.find('label');
+                textoSegundoTD = $labelDos.length ? $labelDos.text().trim() : $segundoTD.text().trim();
+            }
+
+            // Guardamos solo las columnas de texto sin enviar ninguna variable de ID
+            $form.append(
+                $('<input>', { type: 'hidden', name: 'columna_uno[]', value: textoPrimerTD }),
+                $('<input>', { type: 'hidden', name: 'columna_dos[]', value: textoSegundoTD })
+            );
+        });
+
+        // 4. Enviar y Redirigir a destino.php
+        $('body').append($form);
+        $form.submit();
+    });
+});
