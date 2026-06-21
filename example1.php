@@ -8,7 +8,7 @@
               <img src="mathematics.png" class="card-img" alt="Math">
               <div class="card-img-overlay d-flex flex-column justify-content-center align-items-center">
                 <h5 class="card-title fs-1 title-white text-white">Math</h5>
-                <a href="file:///C:/Users/rodrigo/Desktop/CCC/pruebas/example4.html" class="btn btn-light btn-lg fs-1 border-dark">Go</a>
+                <a href="example4.php" class="btn btn-light btn-lg fs-1 border-dark">Go</a>
               </div>
             </div>
           </div>
@@ -19,7 +19,7 @@
               <img src="biology.png" class="card-img" alt="Science">
               <div class="card-img-overlay d-flex flex-column justify-content-center align-items-center">
                 <h5 class="card-title fs-1 title-white text-white">Biology</h5>
-                <a href="file:///C:/Users/rodrigo/Desktop/CCC/pruebas/example8.html" class="btn btn-light btn-lg fs-1 border-dark">Go</a>
+                <a href="example8.php" class="btn btn-light btn-lg fs-1 border-dark">Go</a>
               </div>
             </div>
           </div>
@@ -30,7 +30,7 @@
               <img src="chemistry.png" class="card-img" alt="Physics">
               <div class="card-img-overlay d-flex flex-column justify-content-center align-items-center">
                 <h5 class="card-title fs-1 title-white text-white">Chemistry</h5>
-                <a href="file:///C:/Users/rodrigo/Desktop/CCC/pruebas/example7.html" class="btn btn-light btn-lg fs-1 border-dark">Go</a>
+                <a href="example7.php" class="btn btn-light btn-lg fs-1 border-dark">Go</a>
               </div>
             </div>
           </div>
@@ -43,7 +43,7 @@
               <img src="physics.png" class="card-img" alt="Physics">
               <div class="card-img-overlay d-flex flex-column justify-content-center align-items-center">
                 <h5 class="card-title fs-1 title-white text-white">Physics</h5>
-                <a href="file:///C:/Users/rodrigo/Desktop/CCC/pruebas/example9.html" class="btn btn-light btn-lg fs-1 border-dark">Go</a>
+                <a href="example9.php" class="btn btn-light btn-lg fs-1 border-dark">Go</a>
               </div>
             </div>
           </div>
@@ -54,7 +54,7 @@
               <img src="history.png" class="card-img" alt="Biology">
               <div class="card-img-overlay d-flex flex-column justify-content-center align-items-center">
                 <h5 class="card-title fs-1 title-white text-white">History</h5>
-                <a href="file:///C:/Users/rodrigo/Desktop/CCC/pruebas/example5.html" class="btn btn-light btn-lg fs-1 border-dark">Go</a>
+                <a href="example5.php" class="btn btn-light btn-lg fs-1 border-dark">Go</a>
               </div>
             </div>
           </div>
@@ -65,7 +65,7 @@
               <img src="geography.png" class="card-img" alt="Geography">
               <div class="card-img-overlay d-flex flex-column justify-content-center align-items-center">
                 <h5 class="card-title fs-1 title-white text-white">Geography</h5>
-                <a href="file:///C:/Users/rodrigo/Desktop/CCC/pruebas/example10.html" class="btn btn-light btn-lg fs-1 border-dark">Go</a>
+                <a href="example10.php" class="btn btn-light btn-lg fs-1 border-dark">Go</a>
               </div>
             </div>
           </div>
@@ -78,7 +78,7 @@
               <img src="literature.png" class="card-img" alt="English">
               <div class="card-img-overlay d-flex flex-column justify-content-center align-items-center">
                 <h5 class="card-title fs-1 title-white text-white">Literature</h5>
-                <a href="file:///C:/Users/rodrigo/Desktop/CCC/pruebas/example6.html" class="btn btn-light btn-lg fs-1 border-dark">Go</a>
+                <a href="example6.php" class="btn btn-light btn-lg fs-1 border-dark">Go</a>
               </div>
             </div>
           </div>
@@ -89,7 +89,7 @@
               <img src="foreign_languages.png" class="card-img" alt="Language / Literature">
               <div class="card-img-overlay d-flex flex-column justify-content-center align-items-center">
                 <h5 class="card-title fs-1 title-white text-white">Foreign Languages</h5>
-                <a href="file:///C:/Users/rodrigo/Desktop/CCC/pruebas/example13.html" class="btn btn-light btn-lg fs-1 border-dark">Go</a>
+                <a href="example13.php" class="btn btn-light btn-lg fs-1 border-dark">Go</a>
               </div>
             </div>
           </div>
@@ -100,7 +100,7 @@
               <img src="art.png" class="card-img" alt="History">
               <div class="card-img-overlay d-flex flex-column justify-content-center align-items-center">
                 <h5 class="card-title fs-1 title-white text-white">Art and Music</h5>
-                <a href="file:///C:/Users/rodrigo/Desktop/CCC/pruebas/example11.html" class="btn btn-light btn-lg fs-1 border-dark">Go</a>
+                <a href="example11.php" class="btn btn-light btn-lg fs-1 border-dark">Go</a>
               </div>
             </div>
           </div>
@@ -113,7 +113,7 @@
               <img src="technology.png" class="card-img" alt="Social Studies">
               <div class="card-img-overlay d-flex flex-column justify-content-center align-items-center">
                 <h5 class="card-title fs-1 title-white text-white">Technology</h5>
-                <a href="file:///C:/Users/rodrigo/Desktop/CCC/pruebas/example14.html" class="btn btn-light btn-lg fs-1 border-dark">Go</a>
+                <a href="example14.php" class="btn btn-light btn-lg fs-1 border-dark">Go</a>
               </div>
             </div>
           </div>
@@ -124,7 +124,7 @@
               <img src="physical_education.png" class="card-img" alt="Foreign Language">
               <div class="card-img-overlay d-flex flex-column justify-content-center align-items-center">
                 <h5 class="card-title fs-1 title-white text-white">Physical Education</h5>
-                <a href="file:///C:/Users/rodrigo/Desktop/CCC/pruebas/example12.html" class="btn btn-light btn-lg fs-1 border-dark">Go</a>
+                <a href="example12.php" class="btn btn-light btn-lg fs-1 border-dark">Go</a>
               </div>
             </div>
           </div>
