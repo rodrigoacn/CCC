@@ -1,20 +1,7 @@
 <?php
 session_start();
+require_once 'db.php';
 
-// DB connection helper
-function getDB() {
-    $host    = 'localhost';
-    $db      = 'ce';
-    $user    = 'root';
-    $pass    = 'v6h470fdz0';
-    $charset = 'utf8mb4';
-    $dsn     = "mysql:host=$host;dbname=$db;charset=$charset";
-    $options = [
-        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    ];
-    return new PDO($dsn, $user, $pass, $options);
-}
 
 $error_login  = '';
 $error_signup = '';
@@ -61,6 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $email    = trim($_POST['email_signup'] ?? '');
     $password = $_POST['password_signup'] ?? '';
     $confirm  = $_POST['password_confirm'] ?? '';
+    $pais_id  = (int)($_POST['pais_id'] ?? 0) ?: null;
 
     if (!$nombre || !$email || !$password || !$confirm) {
         $error_signup = 'Please fill in all fields.';
@@ -91,14 +79,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 $token = bin2hex(random_bytes(32));
 
                 $insert = $pdo->prepare(
-                    "INSERT INTO usuarios (nombre, email, password, verificado, token_verificacion, ultimoContenido, ultimaClase, ultimaSala)
-                     VALUES (:nombre, :email, :password, 0, :token, '', '', '')"
+                    "INSERT INTO usuarios (nombre, email, password, verificado, token_verificacion, pais_id, ultimoContenido, ultimaClase, ultimaSala)
+                     VALUES (:nombre, :email, :password, 0, :token, :pais_id, '', '', '')"
                 );
                 $insert->execute([
                     'nombre'   => $nombre,
                     'email'    => $email,
                     'password' => $hash,
                     'token'    => $token,
+                    'pais_id'  => $pais_id,
                 ]);
 
                 // Build verification link
@@ -126,6 +115,9 @@ if (isset($_SESSION['usuarioId'])) {
     header('Location: example1.php');
     exit;
 }
+
+// Load LATAM countries for signup dropdown
+$paises_list = dbAll("SELECT paisId, nombre, codigo_moneda, simbolo FROM paises ORDER BY nombre ASC");
 
 $resultados = [
     "ultimoContenido"    => "",
@@ -272,10 +264,23 @@ $resultados = [
                   <input type="password" class="form-control" id="password_signup" name="password_signup"
                          placeholder="••••••••" required>
                 </div>
-                <div class="mb-4">
+                <div class="mb-3">
                   <label for="password_confirm" class="form-label">Confirm password</label>
                   <input type="password" class="form-control" id="password_confirm" name="password_confirm"
                          placeholder="••••••••" required>
+                </div>
+                <div class="mb-4">
+                  <label for="pais_id" class="form-label">Country <span class="text-secondary">(for LATAM payments)</span></label>
+                  <select class="form-select" id="pais_id" name="pais_id">
+                    <option value="">— Select your country —</option>
+                    <?php foreach ($paises_list as $p): ?>
+                      <option value="<?= $p['paisId'] ?>"
+                              <?= (int)($_POST['pais_id'] ?? 0) === (int)$p['paisId'] ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($p['nombre']) ?>
+                        (<?= htmlspecialchars($p['simbolo'] . ' ' . $p['codigo_moneda']) ?>)
+                      </option>
+                    <?php endforeach; ?>
+                  </select>
                 </div>
                 <button type="submit" class="btn btn-dark border-secondary w-100 fw-semibold">Create Account</button>
               </form>

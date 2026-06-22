@@ -1,0 +1,1 @@
+- [ClassExpress DB & payment flow](classexpress-flow.md) — login.php must NOT redeclare getDB(); use require_once 'db.php' only
