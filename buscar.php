@@ -35,6 +35,15 @@ $estudiantes = dbAll(
 
 // ── Materias for filter ───────────────────────────────────────────────────────
 $materias = dbAll("SELECT materiaId, nombre FROM materias ORDER BY orden ASC");
+
+// ── Pre-filter from URL (e.g. coming from profesores.php or tecnologia.php) ───
+$preMateria = '';
+if (!empty($_GET['materia'])) {
+    $mid = (int)$_GET['materia'];
+    foreach ($materias as $m) {
+        if ((int)$m['materiaId'] === $mid) { $preMateria = $m['nombre']; break; }
+    }
+}
 ?>
 
   <div class="container mt-10">
@@ -73,7 +82,8 @@ $materias = dbAll("SELECT materiaId, nombre FROM materias ORDER BY orden ASC");
             <select id="filter-materia" class="form-select bg-dark text-white border-secondary">
               <option value="">All subjects</option>
               <?php foreach ($materias as $m): ?>
-                <option value="<?= htmlspecialchars($m['nombre']) ?>">
+                <option value="<?= htmlspecialchars($m['nombre']) ?>"
+                        <?= $preMateria === $m['nombre'] ? 'selected' : '' ?>>
                   <?= htmlspecialchars($m['nombre']) ?>
                 </option>
               <?php endforeach; ?>
@@ -254,6 +264,10 @@ $materias = dbAll("SELECT materiaId, nombre FROM materias ORDER BY orden ASC");
   document.getElementById('filter-title').addEventListener('keyup', filterClases);
   document.getElementById('filter-materia').addEventListener('change', filterClases);
   document.getElementById('filter-max-price').addEventListener('input', filterClases);
+  // Auto-run filter if a subject was pre-selected from a subject page
+  <?php if ($preMateria): ?>
+  document.addEventListener('DOMContentLoaded', filterClases);
+  <?php endif; ?>
   </script>
 </body>
 </html>

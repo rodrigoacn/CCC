@@ -1,3 +1,8 @@
+body {
+  background-color: #1a1a1a !important;
+  color: #dee2e6 !important;
+}
+
 .title-white {
   color: white; /* Color del texto */
   font-size: 3rem; /* Tamaño de la fuente */
