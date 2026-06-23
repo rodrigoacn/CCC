@@ -1,1 +1,3 @@
 - [ClassExpress DB & payment flow](classexpress-flow.md) — login.php must NOT redeclare getDB(); use require_once 'db.php' only
+- [PostgreSQL migration](postgres-migration.md) — app migrated from MySQL to Replit's built-in PostgreSQL; db.php uses PG env vars; lowercase key normalization required.
+- [PostgreSQL GROUP BY strictness](postgres-groupby.md) — PG requires all non-aggregated SELECT columns in GROUP BY; MySQL allowed partial GROUP BY.

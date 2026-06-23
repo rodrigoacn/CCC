@@ -35,7 +35,10 @@ $clases = dbAll(
      LEFT JOIN sesiones_clase sc ON sc.claseId = cp.claseId AND sc.fin IS NULL
      WHERE cp.activa = 1
      $whereMateria
-     GROUP BY cp.claseId
+     GROUP BY cp.claseId, cp.titulo, cp.descripcion, cp.precio_base, cp.codigo_moneda,
+              cp.alumnos_min, cp.alumnos_max, cp.solo_yo, cp.created_at,
+              u.usuarioId, u.nombre, u.avatar, u.calificacion, u.num_resenas, u.biografia,
+              pa.nombre, pa.simbolo, pa.codigo_moneda, m.nombre, m.imagen
      ORDER BY alumnos_activos DESC, cp.created_at DESC",
     $params
 );
@@ -244,7 +247,7 @@ function timeAgo(string $ts): string {
               <?php if ($full): ?>
                 <button class="btn btn-secondary w-100" disabled>Class Full</button>
               <?php else: ?>
-                <a href="sala.php?clase=<?= $c['claseId'] ?>"
+                <a href="sala.php?clase=<?= $c['claseid'] ?>"
                    class="btn <?= $active ? 'btn-success' : 'btn-dark border-secondary' ?> w-100 fw-semibold">
                   <?= $active ? '🟢 Join Live Class →' : 'Start Session →' ?>
                 </a>

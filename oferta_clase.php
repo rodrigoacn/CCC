@@ -91,8 +91,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <select name="materiaId" class="form-select bg-dark text-white border-secondary">
               <option value="">— Any subject —</option>
               <?php foreach ($materias as $m): ?>
-                <option value="<?= $m['materiaId'] ?>"
-                        <?= (int)($_POST['materiaId'] ?? 0) === (int)$m['materiaId'] ? 'selected' : '' ?>>
+                <option value="<?= $m['materiaid'] ?>"
+                        <?= (int)($_POST['materiaId'] ?? 0) === (int)$m['materiaid'] ? 'selected' : '' ?>>
                   <?= htmlspecialchars($m['nombre']) ?>
                 </option>
               <?php endforeach; ?>

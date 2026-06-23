@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$already_paid) {
             )->execute([
                 'sid'  => $sesionId,
                 'est'  => $uid,
-                'prof' => $sesion['instructorId'],
+                'prof' => $sesion['instructorid'],
                 'usd'  => $precio_usd,
                 'loc'  => $monto_local,
                 'mon'  => $mon_local,

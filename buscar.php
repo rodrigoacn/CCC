@@ -41,7 +41,7 @@ $preMateria = '';
 if (!empty($_GET['materia'])) {
     $mid = (int)$_GET['materia'];
     foreach ($materias as $m) {
-        if ((int)$m['materiaId'] === $mid) { $preMateria = $m['nombre']; break; }
+        if ((int)$m['materiaid'] === $mid) { $preMateria = $m['nombre']; break; }
     }
 }
 ?>
@@ -167,7 +167,7 @@ if (!empty($_GET['materia'])) {
                   <?php if ($full): ?>
                     <button class="btn btn-secondary w-100" disabled>Class Full</button>
                   <?php else: ?>
-                    <a href="sala.php?clase=<?= $c['claseId'] ?>"
+                    <a href="sala.php?clase=<?= $c['claseid'] ?>"
                        class="btn btn-dark border-secondary w-100 text-white">
                       Join Class →
                     </a>
@@ -222,7 +222,7 @@ if (!empty($_GET['materia'])) {
                   </div>
                 </div>
                 <div class="card-footer bg-dark border-secondary">
-                  <a href="crear_clase.php?invite=<?= $e['usuarioId'] ?>"
+                  <a href="crear_clase.php?invite=<?= $e['usuarioid'] ?>"
                      class="btn btn-dark border-secondary w-100 text-white small">
                     Invite to a Class →
                   </a>

@@ -31,7 +31,7 @@ if ($token !== '') {
             $message = 'Your email is already verified. You can sign in.';
         } else {
             $upd = $pdo->prepare("UPDATE usuarios SET verificado = 1, token_verificacion = '' WHERE usuarioId = :id");
-            $upd->execute(['id' => $row['usuarioId']]);
+            $upd->execute(['id' => $row['usuarioid']]);
             $status  = 'success';
             $message = 'Email verified successfully! You can now sign in.';
         }

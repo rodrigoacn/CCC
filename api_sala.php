@@ -67,7 +67,7 @@ if ($action === 'join') {
     );
 
     if ($existing) {
-        $sesionId = $existing['sesionId'];
+        $sesionId = $existing['sesionid'];
     } else {
         $sesionId = dbExec(
             "INSERT INTO sesiones_clase
@@ -76,7 +76,7 @@ if ($action === 'join') {
             [
                 'c'  => $claseId,
                 'u'  => $uid,
-                's'  => $clase['salaId'] ?? null,
+                's'  => $clase['salaid'] ?? null,
                 'pu' => $precio_usd,
                 'ml' => $monto_local,
                 'mon'=> $moneda_local,
@@ -92,7 +92,7 @@ if ($action === 'join') {
             "INSERT INTO participantes_sala (salaId, usuarioId, camara_activa, microfono_activo)
              VALUES (:s, :u, 0, 0)
              ON DUPLICATE KEY UPDATE camara_activa=0, microfono_activo=0"
-        )->execute(['s' => $clase['salaId'] ?? 0, 'u' => $uid]);
+        )->execute(['s' => $clase['salaid'] ?? 0, 'u' => $uid]);
     }
 
     echo json_encode([
@@ -185,7 +185,7 @@ if ($action === 'pay') {
     )->execute([
         'sid'  => $sesionId,
         'est'  => $uid,
-        'prof' => $sesion['instructorId'],
+        'prof' => $sesion['instructorid'],
         'usd'  => $sesion['precio_usd'],
         'loc'  => $sesion['monto_local'],
         'mon'  => $sesion['moneda_local'],

@@ -17,26 +17,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     if (!$email || !$password) {
         $error_login = 'Please fill in all fields.';
     } else {
-        try {
-            $pdo  = getDB();
-            $stmt = $pdo->prepare("SELECT usuarioId, nombre, password, verificado FROM usuarios WHERE email = :email LIMIT 1");
-            $stmt->execute(['email' => $email]);
-            $row = $stmt->fetch();
-
-            if (!$row) {
-                $error_login = 'No account found with that email. Please sign up.';
-            } elseif (!password_verify($password, $row['password'])) {
-                $error_login = 'Incorrect password.';
-            } elseif (!$row['verificado']) {
-                $error_login = 'Please verify your email before logging in. Check your inbox.';
-            } else {
-                $_SESSION['usuarioId'] = $row['usuarioId'];
-                $_SESSION['nombre']    = $row['nombre'];
-                header('Location: materias.php');
-                exit;
-            }
-        } catch (PDOException $e) {
+        $row = dbOne("SELECT usuarioId, nombre, rol, password, verificado FROM usuarios WHERE email = :email LIMIT 1", ['email' => $email]);
+        if ($row === null && !getDB()) {
             $error_login = 'Database unavailable. Please try again later.';
+        } elseif (!$row) {
+            $error_login = 'No account found with that email. Please sign up.';
+        } elseif (!password_verify($password, $row['password'])) {
+            $error_login = 'Incorrect password.';
+        } elseif (!$row['verificado']) {
+            $error_login = 'Please verify your email before logging in. Check your inbox.';
+        } else {
+            $_SESSION['usuarioId'] = $row['usuarioid'];
+            $_SESSION['nombre']    = $row['nombre'];
+            $_SESSION['rol']       = $row['rol'];
+            $dest = ($row['rol'] !== 'student') ? 'dashboard_profesor.php' : 'materias.php';
+            header('Location: ' . $dest);
+            exit;
         }
     }
 }
@@ -59,13 +55,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     } elseif ($password !== $confirm) {
         $error_signup = 'Passwords do not match.';
     } else {
-        try {
-            $pdo = getDB();
-
-            // Check if email already registered
-            $check = $pdo->prepare("SELECT usuarioId, verificado FROM usuarios WHERE email = :email LIMIT 1");
-            $check->execute(['email' => $email]);
-            $existing = $check->fetch();
+        if (!getDB()) {
+            $error_signup = 'Database unavailable. Please try again later.';
+        } else {
+            $existing = dbOne("SELECT usuarioId, verificado FROM usuarios WHERE email = :email LIMIT 1", ['email' => $email]);
 
             if ($existing) {
                 if ($existing['verificado']) {
@@ -74,23 +67,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     $error_signup = 'That email is registered but not yet verified. Check your inbox.';
                 }
             } else {
-                // New user — create account
                 $hash  = password_hash($password, PASSWORD_DEFAULT);
                 $token = bin2hex(random_bytes(32));
 
-                $insert = $pdo->prepare(
+                dbExec(
                     "INSERT INTO usuarios (nombre, email, password, verificado, token_verificacion, pais_id, ultimoContenido, ultimaClase, ultimaSala)
-                     VALUES (:nombre, :email, :password, 0, :token, :pais_id, '', '', '')"
+                     VALUES (:nombre, :email, :password, 0, :token, :pais_id, '', '', '')",
+                    ['nombre' => $nombre, 'email' => $email, 'password' => $hash, 'token' => $token, 'pais_id' => $pais_id]
                 );
-                $insert->execute([
-                    'nombre'   => $nombre,
-                    'email'    => $email,
-                    'password' => $hash,
-                    'token'    => $token,
-                    'pais_id'  => $pais_id,
-                ]);
 
-                // Build verification link
                 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
                 $host_url = $protocol . '://' . $_SERVER['HTTP_HOST'];
                 $link     = $host_url . '/verify.php?token=' . urlencode($token);
@@ -104,8 +89,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 $success_msg = "Account created! A verification link has been sent to <strong>" . htmlspecialchars($email) . "</strong>. Please check your inbox (and spam folder) to activate your account.";
                 $active_tab  = 'signup';
             }
-        } catch (PDOException $e) {
-            $error_signup = 'Database unavailable. Please try again later.';
         }
     }
 }
@@ -274,8 +257,8 @@ $resultados = [
                   <select class="form-select" id="pais_id" name="pais_id">
                     <option value="">— Select your country —</option>
                     <?php foreach ($paises_list as $p): ?>
-                      <option value="<?= $p['paisId'] ?>"
-                              <?= (int)($_POST['pais_id'] ?? 0) === (int)$p['paisId'] ? 'selected' : '' ?>>
+                      <option value="<?= $p['paisid'] ?>"
+                              <?= (int)($_POST['pais_id'] ?? 0) === (int)$p['paisid'] ? 'selected' : '' ?>>
                         <?= htmlspecialchars($p['nombre']) ?>
                         (<?= htmlspecialchars($p['simbolo'] . ' ' . $p['codigo_moneda']) ?>)
                       </option>

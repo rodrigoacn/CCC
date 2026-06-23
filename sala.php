@@ -50,11 +50,11 @@ $moneda_local = $student['codigo_moneda'] ?? 'USD';
 $simbolo      = $student['simbolo'] ?? '$';
 
 // Get sala ID (create one if class doesn't have one yet)
-$salaId = $clase['salaId'] ?? 0;
+$salaId = $clase['salaid'] ?? 0;
 if (!$salaId) {
     $salaId = dbExec(
         "INSERT INTO salas (titulo, curso, instructorId) VALUES (:t, :c, :i)",
-        ['t' => $clase['titulo'], 'c' => $clase['materia'] ?? '', 'i' => $clase['instructorId']]
+        ['t' => $clase['titulo'], 'c' => $clase['materia'] ?? '', 'i' => $clase['instructorid']]
     );
     dbExec("UPDATE clases_programadas SET salaId=:s WHERE claseId=:c", ['s'=>$salaId,'c'=>$claseId]);
 }
@@ -203,7 +203,7 @@ $spots_left = max(0, $clase['alumnos_max'] - $activos);
   let sesionId    = null;
   let stream      = null;
   let chatPollId  = null;
-  let lastMsgId   = <?= !empty($chat) ? end($chat)['mensajeId'] ?? 0 : 0 ?>;
+  let lastMsgId   = <?= !empty($chat) ? end($chat)['mensajeid'] ?? 0 : 0 ?>;
   let micOn       = true;
   let camOn       = true;
   let handUp      = false;

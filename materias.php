@@ -44,7 +44,7 @@ $rows = array_chunk($subjects, 3);
     <?php foreach ($rows as $row): ?>
     <div class="row mt-5">
       <?php foreach ($row as $s):
-        $id   = (int)$s['materiaId'];
+        $id   = (int)$s['materiaid'];
         $href = $pageMap[$id] ?? 'materias.php';
         $img  = htmlspecialchars($s['imagen']);
         $name = htmlspecialchars($s['nombre']);

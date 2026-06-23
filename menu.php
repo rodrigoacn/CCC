@@ -10,18 +10,6 @@ $resultados = [
     "esVisibleSala" => "hidden",
 ];
 
-$host    = 'localhost';
-$db      = 'ce';
-$user    = 'root';
-$pass    = 'v6h470fdz0';
-$charset = 'utf8mb4';
-
-$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
-$options = [
-    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-];
-
 // Map legacy numeric page IDs → new filenames (stored in usuarios.ultimoContenido / ultimaClase)
 $page_map = [
     '1'  => 'materias',        '2'  => 'amigos',          '3'  => 'calificar',
@@ -41,23 +29,34 @@ if (isset($_SESSION['ultimoContenido']) || isset($_SESSION['ultimaClase']) || is
     $resultados["esVisibleClases"] = ($resultados["ultimaClase"] != "") ? "visible" : "hidden";
     $resultados["esVisibleSala"] = ($resultados["ultimaSala"] != "") ? "visible" : "hidden";
 } elseif (isset($_SESSION['usuarioId'])) {
-    try {
-        $pdo = new PDO($dsn, $user, $pass, $options);
-        $sql = "SELECT ultimoContenido, ultimaClase, ultimaSala FROM usuarios WHERE usuarioId = :usuarioId";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute(['usuarioId' => $_SESSION['usuarioId']]);
-        $row = $stmt->fetchAll();
-        if (!empty($row)) {
-            $resultados = $row[0];
-            $resultados["esVisibleContenidos"] = ($resultados["ultimoContenido"] != "") ? "visible" : "hidden";
-            $resultados["esVisibleClases"] = ($resultados["ultimaClase"] != "") ? "visible" : "hidden";
-            $resultados["esVisibleSala"] = ($resultados["ultimaSala"] != "") ? "visible" : "hidden";
-            $_SESSION['ultimoContenido'] = $resultados["ultimoContenido"];
-            $_SESSION['ultimaClase'] = $resultados["ultimaClase"];
-            $_SESSION['ultimaSala'] = $resultados["ultimaSala"];
-        }
-    } catch (PDOException $e) {
-        // DB not available - continue with defaults
+    // Use db.php helper if already included, otherwise connect directly
+    if (function_exists('dbOne')) {
+        $row = dbOne("SELECT ultimoContenido, ultimaClase, ultimaSala FROM usuarios WHERE usuarioId = :uid", ['uid' => $_SESSION['usuarioId']]);
+    } else {
+        $row = null;
+        try {
+            $_pghost = getenv('PGHOST') ?: 'localhost';
+            $_pgport = getenv('PGPORT') ?: '5432';
+            $_pgname = getenv('PGDATABASE') ?: 'replit_db';
+            $_pguser = getenv('PGUSER') ?: 'postgres';
+            $_pgpass = getenv('PGPASSWORD') ?: '';
+            $_pdo = new PDO("pgsql:host=$_pghost;port=$_pgport;dbname=$_pgname", $_pguser, $_pgpass,
+                [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]);
+            $stmt = $_pdo->prepare("SELECT ultimoContenido, ultimaClase, ultimaSala FROM usuarios WHERE usuarioId = :uid");
+            $stmt->execute(['uid' => $_SESSION['usuarioId']]);
+            $row = $stmt->fetch() ?: null;
+        } catch (PDOException $e) {}
+    }
+    if ($row) {
+        $resultados["ultimoContenido"] = $row["ultimocontenido"] ?? '';
+        $resultados["ultimaClase"]     = $row["ultimaclase"]     ?? '';
+        $resultados["ultimaSala"]      = $row["ultimasala"]      ?? '';
+        $resultados["esVisibleContenidos"] = ($resultados["ultimoContenido"] != "") ? "visible" : "hidden";
+        $resultados["esVisibleClases"]     = ($resultados["ultimaClase"]     != "") ? "visible" : "hidden";
+        $resultados["esVisibleSala"]       = ($resultados["ultimaSala"]      != "") ? "visible" : "hidden";
+        $_SESSION['ultimoContenido'] = $resultados["ultimoContenido"];
+        $_SESSION['ultimaClase']     = $resultados["ultimaClase"];
+        $_SESSION['ultimaSala']      = $resultados["ultimaSala"];
     }
 }
 ?>
@@ -93,6 +92,11 @@ if (isset($_SESSION['ultimoContenido']) || isset($_SESSION['ultimaClase']) || is
           <li class="nav-item" style="visibility: <?= $resultados["esVisibleSala"] ?>;">
             <a class="nav-link" href="aula_virtual.php?<?= htmlspecialchars($resultados["ultimaSala"]) ?>">Sala</a>
           </li>
+          <?php if (isset($_SESSION['usuarioId']) && ($_SESSION['rol'] ?? 'student') !== 'student'): ?>
+          <li class="nav-item">
+            <a class="nav-link" href="dashboard_profesor.php">My Dashboard</a>
+          </li>
+          <?php endif; ?>
           <li class="nav-item">
             <a class="nav-link" href="amigos.php">Friends</a>
           </li>
