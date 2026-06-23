@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           </div>
         <?php endif; ?>
 
-        <form method="POST" action="example19.php" class="card bg-dark border-secondary p-4">
+        <form method="POST" action="oferta_clase.php" class="card bg-dark border-secondary p-4">
 
           <!-- Subject -->
           <div class="mb-3">
@@ -142,7 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
           <div class="d-flex gap-2">
             <button type="submit" class="btn btn-secondary flex-grow-1">Save Offer</button>
-            <a href="example20.php" class="btn btn-dark border-secondary">Add Title →</a>
+            <a href="crear_clase.php" class="btn btn-dark border-secondary">Add Title →</a>
           </div>
         </form>
 

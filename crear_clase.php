@@ -89,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           </div>
         <?php endif; ?>
 
-        <form method="POST" action="example20.php" class="card bg-dark border-secondary p-4">
+        <form method="POST" action="crear_clase.php" class="card bg-dark border-secondary p-4">
 
           <!-- Title -->
           <div class="mb-3">

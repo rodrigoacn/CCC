@@ -175,7 +175,7 @@ $materias = dbAll("SELECT materiaId, nombre FROM materias ORDER BY orden ASC");
 
         <div class="d-flex justify-content-between align-items-center mb-4">
           <p class="text-secondary mb-0">Students currently looking for a class to join:</p>
-          <a href="example20.php" class="btn btn-dark border-secondary text-white">+ Post a New Class</a>
+          <a href="crear_clase.php" class="btn btn-dark border-secondary text-white">+ Post a New Class</a>
         </div>
 
         <?php if (empty($estudiantes)): ?>
@@ -212,7 +212,7 @@ $materias = dbAll("SELECT materiaId, nombre FROM materias ORDER BY orden ASC");
                   </div>
                 </div>
                 <div class="card-footer bg-dark border-secondary">
-                  <a href="example20.php?invite=<?= $e['usuarioId'] ?>"
+                  <a href="crear_clase.php?invite=<?= $e['usuarioId'] ?>"
                      class="btn btn-dark border-secondary w-100 text-white small">
                     Invite to a Class →
                   </a>

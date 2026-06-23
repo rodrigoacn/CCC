@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             } else {
                 $_SESSION['usuarioId'] = $row['usuarioId'];
                 $_SESSION['nombre']    = $row['nombre'];
-                header('Location: example1.php');
+                header('Location: materias.php');
                 exit;
             }
         } catch (PDOException $e) {
@@ -112,7 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 // Redirect already-logged-in users
 if (isset($_SESSION['usuarioId'])) {
-    header('Location: example1.php');
+    header('Location: materias.php');
     exit;
 }
 
@@ -175,7 +175,7 @@ $resultados = [
 </head>
 <body>
   <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-      <a class="navbar-brand ms-2" href="example1.php">ClassExpress</a>
+      <a class="navbar-brand ms-2" href="materias.php">ClassExpress</a>
   </nav>
 
   <div class="container mt-10">

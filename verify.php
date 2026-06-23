@@ -69,7 +69,7 @@ $resultados = [
 </head>
 <body>
   <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-      <a class="navbar-brand ms-2" href="example1.php">ClassExpress</a>
+      <a class="navbar-brand ms-2" href="materias.php">ClassExpress</a>
   </nav>
 
   <div class="container mt-10">

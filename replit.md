@@ -1,6 +1,6 @@
 # ClassExpress
 
-An educational management web application built with PHP, Bootstrap 5, and jQuery. Students can track their progress across academic subjects, view syllabi, manage schedules, and use a virtual classroom interface.
+An educational management web application built with PHP, Bootstrap 5, and jQuery. Students find teachers for online classes; teachers post class offers. On disconnect, students are charged in their LATAM local currency.
 
 ## Stack
 
@@ -10,18 +10,39 @@ An educational management web application built with PHP, Bootstrap 5, and jQuer
 
 ## Project Structure
 
-- `example1.php` — Subjects dashboard (main landing page)
-- `example2.php` — Friends page
-- `example3.php` — Notifications
-- `example4–15.php` — Subject content pages (Math, Biology, Chemistry, Physics, etc.)
-- `example16.php` — User profile
-- `example17.php` — Checkout/settings form
-- `example18.php` — Virtual classroom (webcam + chat)
-- `example19–20.php` — Additional pages
-- `menu.php` — Shared navbar + DB connection (included by all pages)
-- `script.js` — jQuery interactivity (progress tracking, webcam mock, chat)
-- `styles.css` — Custom styles extending Bootstrap
-- `presentacion/` — Stub JS files (odp_ajax.js, scripts.js)
+| File | Purpose |
+|---|---|
+| `index.php` | Redirects to `materias.php` |
+| `materias.php` | Subjects dashboard — main landing page |
+| `amigos.php` | Friends list |
+| `calificar.php` | Rate a session / notifications |
+| `matematicas.php` | Mathematics subject page |
+| `historia.php` | History subject page |
+| `literatura.php` | Language & Literature subject page |
+| `quimica.php` | Chemistry subject page |
+| `biologia.php` | Biology subject page |
+| `fisica.php` | Physics subject page |
+| `geografia.php` | Geography subject page |
+| `arte.php` | Art & Music subject page |
+| `educacion_fisica.php` | Physical Education subject page |
+| `idiomas.php` | Foreign Languages subject page |
+| `tecnologia.php` | Technology subject page |
+| `profesores.php` | Teacher/instructor gallery |
+| `perfil.php` | User profile |
+| `checkout.php` | Cart / settings form |
+| `aula_virtual.php` | Virtual classroom (webcam + chat) |
+| `oferta_clase.php` | Teacher: quick class offer (price range, no title) |
+| `crear_clase.php` | Teacher: full class creation form |
+| `buscar.php` | Student ↔ teacher matching / search |
+| `sala.php` | Live classroom with WebRTC camera & payment trigger |
+| `pago.php` | Payment confirmation in student's LATAM local currency |
+| `api_sala.php` | JSON API: join/leave/chat/messages/pay |
+| `login.php` | Sign in / Sign up (with email verification & country) |
+| `verify.php` | Email verification token handler |
+| `menu.php` | Shared navbar + DB connection (included by all pages) |
+| `db.php` | PDO singleton + helpers: `getDB()`, `dbOne()`, `dbAll()`, `dbExec()` |
+| `script.js` | jQuery interactivity (progress tracking, webcam mock, chat) |
+| `styles.css` | Custom styles extending Bootstrap |
 
 ## Running Locally
 
@@ -31,11 +52,15 @@ The app is served via PHP's built-in server on port 5000:
 php -S 0.0.0.0:5000 -t /home/runner/workspace/
 ```
 
-Visit `example1.php` as the entry point.
+Visit `materias.php` (or just `/`) as the entry point.
 
 ## Database
 
-The app tries to connect to a MySQL database named `ce` on localhost. If the DB is unavailable, it falls back to PHP sessions for state and continues working normally.
+The app tries to connect to a MySQL database named `ce` on localhost. If the DB is unavailable, it falls back to PHP sessions for state. Schema files: `database.sql`, `alter.sql`, `seed.sql`.
+
+## Payment Flow
+
+Teacher → `crear_clase.php` → `buscar.php` → student joins `sala.php` → on leave → `pago.php` (amount shown in student's local LATAM currency, e.g. CLP, ARS, MXN).
 
 ## User Preferences
 

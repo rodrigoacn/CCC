@@ -101,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$already_paid) {
             <small class="text-secondary">≈ $<?= number_format($precio_usd, 2) ?> USD</small>
           </div>
           <a href="buscar.php" class="btn btn-secondary mt-3">Find Another Class</a>
-          <a href="example1.php" class="btn btn-dark border-secondary mt-3 ms-2">Back to Subjects</a>
+          <a href="materias.php" class="btn btn-dark border-secondary mt-3 ms-2">Back to Subjects</a>
         </div>
 
         <?php elseif ($already_paid): ?>

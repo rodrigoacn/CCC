@@ -22,6 +22,17 @@ $options = [
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
 ];
 
+// Map legacy numeric page IDs → new filenames (stored in usuarios.ultimoContenido / ultimaClase)
+$page_map = [
+    '1'  => 'materias',        '2'  => 'amigos',          '3'  => 'calificar',
+    '4'  => 'matematicas',     '5'  => 'historia',         '6'  => 'literatura',
+    '7'  => 'quimica',         '8'  => 'biologia',         '9'  => 'fisica',
+    '10' => 'geografia',       '11' => 'arte',             '12' => 'educacion_fisica',
+    '13' => 'idiomas',         '14' => 'tecnologia',       '15' => 'profesores',
+    '16' => 'perfil',          '17' => 'checkout',         '18' => 'aula_virtual',
+    '19' => 'oferta_clase',    '20' => 'crear_clase',
+];
+
 if (isset($_SESSION['ultimoContenido']) || isset($_SESSION['ultimaClase']) || isset($_SESSION['ultimaSala'])) {
     $resultados["ultimoContenido"] = $_SESSION['ultimoContenido'] ?? '';
     $resultados["ultimaClase"] = $_SESSION['ultimaClase'] ?? '';
@@ -71,22 +82,22 @@ if (isset($_SESSION['ultimoContenido']) || isset($_SESSION['ultimaClase']) || is
       <div class="collapse navbar-collapse" id="navbarsExampleDefault">
         <ul class="navbar-nav ms-auto">
           <li class="nav-item active">
-            <a class="nav-link" href="example1.php">Materias <span class="sr-only">(current)</span></a>
+            <a class="nav-link" href="materias.php">Materias <span class="sr-only">(current)</span></a>
           </li>
           <li class="nav-item" style="visibility: <?= $resultados["esVisibleContenidos"] ?>;">
-            <a class="nav-link" href="example<?= htmlspecialchars($resultados["ultimoContenido"]) ?>.php">Contenidos</a>
+            <a class="nav-link" href="<?= htmlspecialchars($page_map[$resultados["ultimoContenido"]] ?? 'materias') ?>.php">Contenidos</a>
           </li>
           <li class="nav-item" style="visibility: <?= $resultados["esVisibleClases"] ?>;">
-            <a class="nav-link" href="example<?= htmlspecialchars($resultados["ultimaClase"]) ?>.php">Clases</a>
+            <a class="nav-link" href="<?= htmlspecialchars($page_map[$resultados["ultimaClase"]] ?? 'materias') ?>.php">Clases</a>
           </li>
           <li class="nav-item" style="visibility: <?= $resultados["esVisibleSala"] ?>;">
-            <a class="nav-link" href="example18.php?<?= htmlspecialchars($resultados["ultimaSala"]) ?>">Sala</a>
+            <a class="nav-link" href="aula_virtual.php?<?= htmlspecialchars($resultados["ultimaSala"]) ?>">Sala</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="example2.php">Friends</a>
+            <a class="nav-link" href="amigos.php">Friends</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="example16.php">Profile</a>
+            <a class="nav-link" href="perfil.php">Profile</a>
           </li>
         </ul>
       </div>
