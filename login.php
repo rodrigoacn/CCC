@@ -69,24 +69,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     $error_signup = 'That email is registered but not yet verified. Check your inbox.';
                 }
             } else {
-                $hash  = password_hash($password, PASSWORD_DEFAULT);
-                $token = bin2hex(random_bytes(32));
+                $hash = password_hash($password, PASSWORD_DEFAULT);
 
                 dbExec(
-                    "INSERT INTO usuarios (nombre, email, password, verificado, token_verificacion, pais_id, ultimoContenido, ultimaClase, ultimaSala)
-                     VALUES (:nombre, :email, :password, 0, :token, :pais_id, '', '', '')",
-                    ['nombre' => $nombre, 'email' => $email, 'password' => $hash, 'token' => $token, 'pais_id' => $pais_id]
+                    "INSERT INTO usuarios (nombre, email, password, verificado, token_verificacion, pais_id, creditos, ultimoContenido, ultimaClase, ultimaSala)
+                     VALUES (:nombre, :email, :password, 1, '', :pais_id, 100, '', '', '')",
+                    ['nombre' => $nombre, 'email' => $email, 'password' => $hash, 'pais_id' => $pais_id]
                 );
 
-                $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-                $host_url = $protocol . '://' . $_SERVER['HTTP_HOST'];
-                $link     = $host_url . '/verify.php?token=' . urlencode($token);
-
-                require_once 'email_helper.php';
-                ceSendVerify($email, $nombre, $link);
-
-                $success_msg = "Account created! A verification link has been sent to <strong>" . htmlspecialchars($email) . "</strong>. Please check your inbox (and spam folder) to activate your account.";
-                $active_tab  = 'signup';
+                // Auto-login after signup
+                $newUser = dbOne(
+                    "SELECT usuarioId, nombre, rol, creditos FROM usuarios WHERE email = :email LIMIT 1",
+                    ['email' => $email]
+                );
+                if ($newUser) {
+                    $_SESSION['usuarioId'] = $newUser['usuarioid'];
+                    $_SESSION['nombre']    = $newUser['nombre'];
+                    $_SESSION['rol']       = $newUser['rol'] ?? 'student';
+                    $_SESSION['creditos']  = (int)($newUser['creditos'] ?? 100);
+                    $rol  = $_SESSION['rol'];
+                    header('Location: ' . ($rol !== 'estudiante' && $rol !== 'student' ? 'dashboard_profesor.php' : 'materias.php'));
+                    exit;
+                }
+                $success_msg = "Account created! You can now sign in.";
+                $active_tab  = 'login';
             }
         }
     }

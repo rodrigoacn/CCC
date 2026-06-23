@@ -12,13 +12,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_once __DIR__ . '/db.php';
 
 $pdo = getDB();
-$pdo->exec("CREATE TABLE IF NOT EXISTS mobile_tokens (
-    id SERIAL PRIMARY KEY,
-    usuario_id INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
-    token VARCHAR(64) UNIQUE NOT NULL,
-    created_at TIMESTAMP DEFAULT NOW(),
-    expires_at TIMESTAMP DEFAULT NOW() + INTERVAL '30 days'
-)");
+try {
+    $pdo->exec("CREATE TABLE IF NOT EXISTS mobile_tokens (
+        id SERIAL PRIMARY KEY,
+        usuario_id INTEGER NOT NULL REFERENCES usuarios(usuarioid) ON DELETE CASCADE,
+        token VARCHAR(64) UNIQUE NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW(),
+        expires_at TIMESTAMP DEFAULT NOW() + INTERVAL '30 days'
+    )");
+} catch (Exception $_e) {
+    // Table existed with wrong schema; recreate it
+    $pdo->exec("DROP TABLE IF EXISTS mobile_tokens");
+    $pdo->exec("CREATE TABLE mobile_tokens (
+        id SERIAL PRIMARY KEY,
+        usuario_id INTEGER NOT NULL REFERENCES usuarios(usuarioid) ON DELETE CASCADE,
+        token VARCHAR(64) UNIQUE NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW(),
+        expires_at TIMESTAMP DEFAULT NOW() + INTERVAL '30 days'
+    )");
+}
 
 function jsonOut(array $data, int $code = 200): void {
     http_response_code($code);
@@ -34,7 +46,7 @@ function getAuthUser(): array {
     $token = $m[1];
     $row = dbOne(
         "SELECT u.* FROM usuarios u
-         JOIN mobile_tokens t ON t.usuario_id = u.id
+         JOIN mobile_tokens t ON t.usuario_id = u.usuarioid
          WHERE t.token = ? AND t.expires_at > NOW()",
         [$token]
     );
@@ -44,7 +56,7 @@ function getAuthUser(): array {
 
 function formatUser(array $u): array {
     return [
-        'id'         => (int)$u['id'],
+        'id'         => (int)($u['usuarioid'] ?? $u['id'] ?? 0),
         'nombre'     => $u['nombre'],
         'email'      => $u['email'],
         'rol'        => $u['rol'],
@@ -86,16 +98,16 @@ function handleLogin(array $body): void {
     if (!$email || !$password) jsonOut(['error' => 'Email y contraseña requeridos'], 400);
 
     $user = dbOne("SELECT * FROM usuarios WHERE email = ?", [$email]);
-    if (!$user || !password_verify($password, $user['password_hash'])) {
+    if (!$user || !password_verify($password, $user['password'])) {
         jsonOut(['error' => 'Credenciales incorrectas'], 401);
     }
     if (empty($user['verificado'])) {
-        jsonOut(['error' => 'Cuenta no verificada. Revisa tu correo.'], 403);
+        jsonOut(['error' => 'Cuenta no verificada. Contacta soporte.'], 403);
     }
 
     $token = bin2hex(random_bytes(32));
     dbExec("INSERT INTO mobile_tokens (usuario_id, token) VALUES (?, ?)
-            ON CONFLICT (token) DO NOTHING", [$user['id'], $token]);
+            ON CONFLICT (token) DO NOTHING", [$user['usuarioid'], $token]);
 
     jsonOut(['token' => $token, 'user' => formatUser($user)]);
 }
@@ -105,32 +117,34 @@ function handleRegister(array $body): void {
     $email    = trim($body['email'] ?? '');
     $password = $body['password'] ?? '';
     $pais_id  = (int)($body['pais_id'] ?? 0);
-    $rol      = in_array($body['rol'] ?? '', ['estudiante', 'instructor']) ? $body['rol'] : 'estudiante';
+    $rol      = in_array($body['rol'] ?? '', ['estudiante', 'instructor']) ? $body['rol'] : 'student';
 
     if (!$nombre || !$email || !$password) jsonOut(['error' => 'Todos los campos son requeridos'], 400);
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) jsonOut(['error' => 'Email inválido'], 400);
+    if (strlen($password) < 6) jsonOut(['error' => 'La contraseña debe tener al menos 6 caracteres'], 400);
 
-    $exists = dbOne("SELECT id FROM usuarios WHERE email = ?", [$email]);
+    $exists = dbOne("SELECT usuarioid FROM usuarios WHERE email = ?", [$email]);
     if ($exists) jsonOut(['error' => 'Email ya registrado'], 409);
 
-    $hash  = password_hash($password, PASSWORD_DEFAULT);
-    $vt    = bin2hex(random_bytes(16));
+    $hash = password_hash($password, PASSWORD_DEFAULT);
 
     dbExec(
-        "INSERT INTO usuarios (nombre, email, password_hash, rol, pais_id, creditos, verificado, verification_token)
-         VALUES (?, ?, ?, ?, ?, 100, false, ?)",
-        [$nombre, $email, $hash, $rol, $pais_id ?: null, $vt]
+        "INSERT INTO usuarios (nombre, email, password, rol, pais_id, creditos, verificado, token_verificacion, ultimocontenido, ultimaclase, ultimasala)
+         VALUES (?, ?, ?, ?, ?, 100, 1, '', '', '', '')",
+        [$nombre, $email, $hash, $rol, $pais_id ?: null]
     );
 
     $user = dbOne("SELECT * FROM usuarios WHERE email = ?", [$email]);
+    if (!$user) jsonOut(['error' => 'Error al crear la cuenta'], 500);
 
-    require_once __DIR__ . '/email_helper.php';
-    $proto   = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-    $host    = $_SERVER['HTTP_HOST'] ?? 'localhost';
-    $vurl    = "$proto://$host/verify.php?token=$vt";
-    @ceSendVerify($email, $nombre, $vurl);
+    // Auto-login: create a mobile token so the app can proceed immediately
+    $token = bin2hex(random_bytes(32));
+    dbExec(
+        "INSERT INTO mobile_tokens (usuario_id, token) VALUES (?, ?) ON CONFLICT (token) DO NOTHING",
+        [$user['usuarioid'], $token]
+    );
 
-    jsonOut(['message' => 'Cuenta creada. Verifica tu email para ingresar.', 'user_id' => (int)$user['id']]);
+    jsonOut(['token' => $token, 'user' => formatUser($user), 'message' => 'Cuenta creada exitosamente.']);
 }
 
 function handleProfile(): void {

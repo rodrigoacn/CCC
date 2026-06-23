@@ -54,13 +54,13 @@ export default function LoginScreen() {
 
   const handleRegister = async () => {
     if (!nombre || !email || !password) { Alert.alert('Completa todos los campos'); return; }
+    if (password.length < 6) { Alert.alert('Error', 'La contraseña debe tener al menos 6 caracteres'); return; }
     setLoading(true);
     try {
-      await apiRegister({ nombre: nombre.trim(), email: email.trim(), password, pais_id: paisId, rol });
+      const { token, user } = await apiRegister({ nombre: nombre.trim(), email: email.trim(), password, pais_id: paisId, rol });
+      await login(token, user);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert('¡Listo!', 'Cuenta creada. Verifica tu email para ingresar.', [
-        { text: 'OK', onPress: () => setTab('login') },
-      ]);
+      router.replace('/(tabs)');
     } catch (e: any) {
       Alert.alert('Error', e.message);
     } finally {

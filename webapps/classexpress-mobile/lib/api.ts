@@ -40,7 +40,7 @@ export const apiLogin = (email: string, password: string) =>
 
 export const apiRegister = (data: {
   nombre: string; email: string; password: string; pais_id: number; rol: string;
-}) => request<{ message: string; user_id: number }>('register', data);
+}) => request<{ token: string; user: User; message: string }>('register', data);
 
 export const apiProfile = () => get<{ user: User }>('profile');
 
