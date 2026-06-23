@@ -62,3 +62,7 @@ run = ["php", "-S", "0.0.0.0:5000", "-t", "/home/runner/workspace/"]
 
 [userenv.shared]
 EXPO_PUBLIC_API_URL = "https://7d5a0f92-918a-4c8b-ab63-9c2dc33cb42a-00-2hdolphw1avkm.worf.replit.dev"
+
+[postMerge]
+path = "scripts/post-merge.sh"
+timeoutMs = 120000

@@ -497,5 +497,6 @@ function handleActiveRooms(): void {
 }
 
 function handleCountries(): void {
-    jsonOut(['countries' => dbAll("SELECT id, nombre, codigo, moneda FROM paises ORDER BY nombre")]);
+    $rows = dbAll("SELECT paisid AS id, nombre, codigo_iso AS codigo, moneda, codigo_moneda, simbolo FROM paises ORDER BY nombre");
+    jsonOut(['countries' => $rows]);
 }
