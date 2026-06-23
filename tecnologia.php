@@ -15,10 +15,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['temas'])) {
 $completados = [];
 if (isset($_SESSION['usuarioId'])) {
     $rows = dbAll(
-        "SELECT tema FROM progreso_usuario WHERE usuarioId = :u AND materiaId = 10",
+        "SELECT slug FROM progreso_usuario WHERE usuarioid = :u AND slug != '' AND completado = 1",
         ['u' => $_SESSION['usuarioId']]
     );
-    foreach ($rows as $r) $completados[] = $r['tema'];
+    foreach ($rows as $r) $completados[] = $r['slug'];
 }
 
 // All themes grouped by section

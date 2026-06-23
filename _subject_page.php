@@ -8,14 +8,14 @@
  *   $secciones    array   [ 'Section Title' => [ ['slug'=>…,'title'=>…,'desc'=>…], … ] ]
  */
 
-// Load progress for the logged-in student
+// Load completed topic slugs for the logged-in student
 $completados = [];
 if (isset($_SESSION['usuarioId'])) {
     $rows = dbAll(
-        "SELECT tema FROM progreso_usuario WHERE usuarioId = :u AND materiaId = :m",
-        ['u' => $_SESSION['usuarioId'], 'm' => $materiaId]
+        "SELECT slug FROM progreso_usuario WHERE usuarioid = :u AND slug != '' AND completado = 1",
+        ['u' => $_SESSION['usuarioId']]
     );
-    foreach ($rows as $r) $completados[] = $r['tema'];
+    foreach ($rows as $r) $completados[] = $r['slug'];
 }
 
 $slug = strtolower(preg_replace('/[^a-z0-9]+/i', '-', $subjectName));
