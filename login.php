@@ -210,7 +210,10 @@ $resultados = [
                          value="<?= htmlspecialchars($_POST['email'] ?? '') ?>" required>
                 </div>
                 <div class="mb-4">
-                  <label for="password" class="form-label">Password</label>
+                  <div class="d-flex justify-content-between align-items-baseline">
+                    <label for="password" class="form-label">Password</label>
+                    <a href="forgot_password.php" class="text-secondary small">Forgot your password?</a>
+                  </div>
                   <input type="password" class="form-control" id="password" name="password"
                          placeholder="••••••••" required>
                 </div>
