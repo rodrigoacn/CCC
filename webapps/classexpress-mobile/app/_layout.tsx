@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
+import { Platform } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { KeyboardProvider } from 'react-native-keyboard-controller';
 import * as SplashScreen from 'expo-splash-screen';
 import {
   useFonts,
@@ -92,16 +92,24 @@ function Inner() {
   );
 }
 
+function AppProviders({ children }: { children: React.ReactNode }) {
+  if (Platform.OS === 'web') {
+    return <>{children}</>;
+  }
+  const { KeyboardProvider } = require('react-native-keyboard-controller');
+  return <KeyboardProvider>{children}</KeyboardProvider>;
+}
+
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
-          <KeyboardProvider>
+          <AppProviders>
             <AuthProvider>
               <Inner />
             </AuthProvider>
-          </KeyboardProvider>
+          </AppProviders>
         </QueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
