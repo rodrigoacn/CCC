@@ -24,11 +24,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
             $link     = $protocol . '://' . $_SERVER['HTTP_HOST'] . '/reset_password.php?token=' . urlencode($token);
-            $subject  = 'ClassExpress – Reset your password';
-            $body     = "Hello {$row['nombre']},\n\nWe received a request to reset your ClassExpress password.\n\nClick the link below to set a new password (valid for 1 hour):\n\n{$link}\n\nIf you did not request a password reset, you can safely ignore this email.\n\nClassExpress Team";
-            $headers  = "From: noreply@classexpress.app\r\nX-Mailer: PHP/" . phpversion();
 
-            mail($email, $subject, $body, $headers);
+            require_once 'email_helper.php';
+            ceSendReset($email, $row['nombre'], $link);
         }
 
         // Always show the same message (don't reveal whether the email exists)

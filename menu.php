@@ -70,6 +70,7 @@ if (isset($_SESSION['ultimoContenido']) || isset($_SESSION['ultimaClase']) || is
   <link rel="stylesheet" href="./styles.css">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
         <link rel="icon" href="favico.svg" type="image/svg+xml">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 </head>
 <body>
   <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
@@ -95,6 +96,13 @@ if (isset($_SESSION['ultimoContenido']) || isset($_SESSION['ultimaClase']) || is
           <?php if (isset($_SESSION['usuarioId']) && ($_SESSION['rol'] ?? 'student') !== 'student'): ?>
           <li class="nav-item">
             <a class="nav-link" href="dashboard_profesor.php">My Dashboard</a>
+          </li>
+          <?php endif; ?>
+          <?php if (isset($_SESSION['usuarioId'])): ?>
+          <li class="nav-item">
+            <a class="nav-link" href="creditos.php">
+              <i class="bi bi-coin me-1"></i>Credits
+            </a>
           </li>
           <?php endif; ?>
           <li class="nav-item">

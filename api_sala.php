@@ -86,13 +86,14 @@ if ($action === 'join') {
     }
 
     // Record participant state
-    $db = getDB();
-    if ($db) {
-        $db->prepare(
+    $psalaId = (int)($clase['salaid'] ?? 0);
+    if ($psalaId) {
+        dbExec(
             "INSERT INTO participantes_sala (salaId, usuarioId, camara_activa, microfono_activo)
              VALUES (:s, :u, 0, 0)
-             ON DUPLICATE KEY UPDATE camara_activa=0, microfono_activo=0"
-        )->execute(['s' => $clase['salaid'] ?? 0, 'u' => $uid]);
+             ON CONFLICT (salaId, usuarioId) DO UPDATE SET camara_activa=0, microfono_activo=0",
+            ['s' => $psalaId, 'u' => $uid]
+        );
     }
 
     echo json_encode([
@@ -227,6 +228,60 @@ if ($action === 'messages') {
         ['s'=>$salaId,'a'=>$afterId]
     );
     echo json_encode(['ok'=>true,'messages'=>$msgs]);
+    exit;
+}
+
+// ── WEBRTC SIGNAL SEND ────────────────────────────────────────────────────────
+if ($action === 'signal') {
+    $salaId  = (int)($_POST['salaId'] ?? 0);
+    $toUid   = (int)($_POST['toUid'] ?? 0) ?: null;
+    $tipo    = in_array($_POST['tipo'] ?? '', ['offer','answer','candidate','bye'])
+               ? $_POST['tipo'] : '';
+    $payload = $_POST['payload'] ?? '';
+    if (!$salaId || !$tipo || $payload === '') {
+        echo json_encode(['ok'=>false,'error'=>'Missing signal data']); exit;
+    }
+    $sigId = dbExec(
+        "INSERT INTO webrtc_signals (sala_id, from_uid, to_uid, tipo, payload)
+         VALUES (:s, :f, :t, :tp, :p)",
+        ['s'=>$salaId,'f'=>$uid,'t'=>$toUid,'tp'=>$tipo,'p'=>$payload]
+    );
+    echo json_encode(['ok'=>true,'signalId'=>$sigId]);
+    exit;
+}
+
+// ── WEBRTC SIGNAL POLL ────────────────────────────────────────────────────────
+if ($action === 'signals') {
+    $salaId  = (int)($_GET['salaId'] ?? 0);
+    $afterId = (int)($_GET['afterId'] ?? 0);
+    $rows = dbAll(
+        "SELECT signalId, from_uid, tipo, payload FROM webrtc_signals
+         WHERE sala_id=:s AND signal_id > :a
+           AND (to_uid IS NULL OR to_uid=:u)
+           AND from_uid != :u2
+         ORDER BY signalId ASC LIMIT 20",
+        ['s'=>$salaId,'a'=>$afterId,'u'=>$uid,'u2'=>$uid]
+    );
+    // fallback: column name may be signalid (lowercase)
+    if ($rows === false || $rows === null) $rows = [];
+    echo json_encode(['ok'=>true,'signals'=>$rows]);
+    exit;
+}
+
+// ── WEBRTC SIGNAL POLL (lowercase col) ───────────────────────────────────────
+if ($action === 'poll_signals') {
+    $salaId  = (int)($_GET['salaId'] ?? 0);
+    $afterId = (int)($_GET['afterId'] ?? 0);
+    $rows = dbAll(
+        "SELECT signalid AS signalId, from_uid, tipo, payload FROM webrtc_signals
+         WHERE sala_id=:s AND signalid > :a
+           AND (to_uid IS NULL OR to_uid=:u)
+           AND from_uid != :u2
+         ORDER BY signalid ASC LIMIT 20",
+        ['s'=>$salaId,'a'=>$afterId,'u'=>$uid,'u2'=>$uid]
+    );
+    if (!is_array($rows)) $rows = [];
+    echo json_encode(['ok'=>true,'signals'=>$rows]);
     exit;
 }
 

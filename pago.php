@@ -50,15 +50,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$already_paid) {
     $metodo = in_array($_POST['metodo'] ?? '', ['tarjeta','transferencia','efectivo'])
               ? $_POST['metodo'] : 'tarjeta';
 
-    $db = getDB();
-    if ($db) {
-        try {
-            $db->prepare(
-                "INSERT INTO pagos
-                     (sesionId, estudianteId, profesorId, monto_usd, monto_local,
-                      moneda_local, simbolo_local, metodo, estado)
-                 VALUES (:sid,:est,:prof,:usd,:loc,:mon,:sim,:met,'completado')"
-            )->execute([
+    try {
+        dbExec(
+            "INSERT INTO pagos
+                 (sesionId, estudianteId, profesorId, monto_usd, monto_local,
+                  moneda_local, simbolo_local, metodo, estado)
+             VALUES (:sid,:est,:prof,:usd,:loc,:mon,:sim,:met,'completado')",
+            [
                 'sid'  => $sesionId,
                 'est'  => $uid,
                 'prof' => $sesion['instructorid'],
@@ -67,15 +65,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$already_paid) {
                 'mon'  => $mon_local,
                 'sim'  => $simbolo,
                 'met'  => $metodo,
+            ]
+        );
+        dbExec("UPDATE sesiones_clase SET pagado=1 WHERE sesionId=:id", ['id'=>$sesionId]);
+
+        // Deduct credits from student
+        dbExec("UPDATE usuarios SET creditos = creditos - :amt WHERE usuarioId = :id",
+               ['amt' => $precio_usd, 'id' => $uid]);
+
+        // Send HTML receipt email
+        $student_info = dbOne("SELECT email, nombre FROM usuarios WHERE usuarioId=:id", ['id'=>$uid]);
+        if ($student_info) {
+            require_once 'email_helper.php';
+            ceSendSessionReceipt($student_info['email'], $student_info['nombre'], [
+                'simbolo'      => $simbolo,
+                'monto_local'  => $monto_local,
+                'moneda_local' => $mon_local,
+                'monto_usd'    => $precio_usd,
+                'profesor'     => $sesion['prof_nombre'],
+                'clase'        => $sesion['clase_titulo'],
+                'duracion_min' => $sesion['duracion_min'] ?? 0,
             ]);
-            dbExec("UPDATE sesiones_clase SET pagado=1 WHERE sesionId=:id", ['id'=>$sesionId]);
-            $success      = true;
-            $already_paid = true;
-        } catch (PDOException $e) {
-            $pay_error = 'Payment could not be recorded. Please try again.';
         }
-    } else {
-        $pay_error = 'Database unavailable.';
+
+        $success      = true;
+        $already_paid = true;
+    } catch (PDOException $e) {
+        $pay_error = 'Payment could not be recorded. Please try again.';
     }
 }
 ?>

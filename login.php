@@ -80,11 +80,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 $host_url = $protocol . '://' . $_SERVER['HTTP_HOST'];
                 $link     = $host_url . '/verify.php?token=' . urlencode($token);
 
-                $subject = 'ClassExpress – Verify your email';
-                $body    = "Hello {$nombre},\n\nThank you for signing up to ClassExpress!\n\nPlease click the link below to verify your email address:\n\n{$link}\n\nIf you did not create an account, you can ignore this email.\n\nClassExpress Team";
-                $headers = "From: noreply@classexpress.app\r\nX-Mailer: PHP/" . phpversion();
-
-                mail($email, $subject, $body, $headers);
+                require_once 'email_helper.php';
+                ceSendVerify($email, $nombre, $link);
 
                 $success_msg = "Account created! A verification link has been sent to <strong>" . htmlspecialchars($email) . "</strong>. Please check your inbox (and spam folder) to activate your account.";
                 $active_tab  = 'signup';
