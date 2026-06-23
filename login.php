@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     if (!$email || !$password) {
         $error_login = 'Please fill in all fields.';
     } else {
-        $row = dbOne("SELECT usuarioId, nombre, rol, password, verificado FROM usuarios WHERE email = :email LIMIT 1", ['email' => $email]);
+        $row = dbOne("SELECT usuarioId, nombre, rol, password, verificado, creditos FROM usuarios WHERE email = :email LIMIT 1", ['email' => $email]);
         if ($row === null && !getDB()) {
             $error_login = 'Database unavailable. Please try again later.';
         } elseif (!$row) {
@@ -30,7 +30,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $_SESSION['usuarioId'] = $row['usuarioid'];
             $_SESSION['nombre']    = $row['nombre'];
             $_SESSION['rol']       = $row['rol'];
-            $dest = ($row['rol'] !== 'student') ? 'dashboard_profesor.php' : 'materias.php';
+            $_SESSION['creditos']  = (int)($row['creditos'] ?? 0);
+            $rol  = $row['rol'];
+            $dest = ($rol !== 'estudiante' && $rol !== 'student') ? 'dashboard_profesor.php' : 'materias.php';
             header('Location: ' . $dest);
             exit;
         }
@@ -90,9 +92,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-// Redirect already-logged-in users
+// Redirect already-logged-in users to the right page
 if (isset($_SESSION['usuarioId'])) {
-    header('Location: materias.php');
+    $rol = $_SESSION['rol'] ?? 'estudiante';
+    header('Location: ' . ($rol !== 'estudiante' && $rol !== 'student' ? 'dashboard_profesor.php' : 'materias.php'));
     exit;
 }
 
