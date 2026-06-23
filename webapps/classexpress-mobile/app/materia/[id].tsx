@@ -96,7 +96,7 @@ export default function MateriaScreen() {
 const styles = StyleSheet.create({
   pageTitle:  { fontFamily: 'Poppins_700Bold', fontSize: 26 },
   pageSub:    { fontFamily: 'Poppins_400Regular', fontSize: 14 },
-  card:       { borderRadius: 18, padding: 16, flexDirection: 'row', gap: 12, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 8, shadowOffset: { width: 0, height: 2 } },
+  card:       { borderRadius: 18, padding: 16, flexDirection: 'row', gap: 12, boxShadow: '0px 2px 8px rgba(0,0,0,0.05)' },
   cardTop:    { flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginBottom: 4 },
   titulo:     { flex: 1, fontFamily: 'Poppins_600SemiBold', fontSize: 15 },
   profesor:   { fontFamily: 'Poppins_400Regular', fontSize: 13 },

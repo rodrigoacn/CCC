@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
   greeting:  { fontSize: 13, fontFamily: 'Poppins_400Regular' },
   headTitle: { fontSize: 24, fontFamily: 'Poppins_700Bold' },
   dashBtn:   { width: 44, height: 44, borderRadius: 14, justifyContent: 'center', alignItems: 'center' },
-  card:      { flex: 1, borderRadius: 18, padding: 16, minHeight: 130, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 8, shadowOffset: { width: 0, height: 2 } },
+  card:      { flex: 1, borderRadius: 18, padding: 16, minHeight: 130, boxShadow: '0px 2px 8px rgba(0,0,0,0.05)' },
   iconBox:   { width: 48, height: 48, borderRadius: 14, justifyContent: 'center', alignItems: 'center', marginBottom: 10 },
   cardTitle: { fontFamily: 'Poppins_600SemiBold', fontSize: 14, flex: 1 },
   badge:     { marginTop: 8, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 20, alignSelf: 'flex-start' },

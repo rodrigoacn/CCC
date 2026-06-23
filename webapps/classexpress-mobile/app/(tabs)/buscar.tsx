@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
   searchInput: { flex: 1, fontFamily: 'Poppins_400Regular', fontSize: 14 },
   filterRow:   { flexDirection: 'row', alignItems: 'center', gap: 8 },
   filterChip:  { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, backgroundColor: '#88888833' },
-  item:        { borderRadius: 16, padding: 16, flexDirection: 'row', alignItems: 'center', shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 6, shadowOffset: { width: 0, height: 2 } },
+  item:        { borderRadius: 16, padding: 16, flexDirection: 'row', alignItems: 'center', boxShadow: '0px 2px 6px rgba(0,0,0,0.05)' },
   titulo:      { fontFamily: 'Poppins_600SemiBold', fontSize: 14, marginBottom: 4 },
   sub:         { fontFamily: 'Poppins_400Regular', fontSize: 12 },
   precio:      { fontFamily: 'Poppins_700Bold', fontSize: 16 },

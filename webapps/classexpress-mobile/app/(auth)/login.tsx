@@ -193,7 +193,7 @@ const styles = (c: any) => StyleSheet.create({
   tabRow:      { flexDirection: 'row', backgroundColor: c.muted, borderRadius: 12, padding: 4, marginBottom: 24 },
   tabBtn:      { flex: 1, paddingVertical: 10, borderRadius: 10, alignItems: 'center' },
   tabText:     { fontFamily: 'Poppins_600SemiBold', fontSize: 13 },
-  card:        { backgroundColor: c.card, borderRadius: 20, padding: 20, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 12, shadowOffset: { width: 0, height: 4 } },
+  card:        { backgroundColor: c.card, borderRadius: 20, padding: 20, boxShadow: '0px 4px 12px rgba(0,0,0,0.06)' },
   label:       { fontFamily: 'Poppins_500Medium', fontSize: 13, color: c.subtext, marginBottom: 6 },
   input:       { backgroundColor: c.muted, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, fontSize: 15, color: c.foreground, marginBottom: 16, fontFamily: 'Poppins_400Regular' },
   pwRow:       { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16 },

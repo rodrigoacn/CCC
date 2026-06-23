@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
   createBtn:  { flexDirection: 'row', alignItems: 'center', gap: 8, borderRadius: 14, padding: 14, marginBottom: 20 },
   createTxt:  { fontFamily: 'Poppins_600SemiBold', fontSize: 15 },
   section:    { fontFamily: 'Poppins_700Bold', fontSize: 18, marginBottom: 12 },
-  claseItem:  { borderRadius: 16, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 6, shadowOffset: { width: 0, height: 2 } },
+  claseItem:  { borderRadius: 16, padding: 16, flexDirection: 'row', alignItems: 'center', gap: 12, boxShadow: '0px 2px 6px rgba(0,0,0,0.05)' },
   claseTitle: { fontFamily: 'Poppins_600SemiBold', fontSize: 15 },
   claseSub:   { fontFamily: 'Poppins_400Regular', fontSize: 13, marginTop: 2 },
   livePill:   { alignSelf: 'flex-start', marginTop: 6, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 20 },

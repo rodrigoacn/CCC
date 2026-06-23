@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
   balanceTxt:   { fontFamily: 'Poppins_600SemiBold', fontSize: 18 },
   doneBtn:      { marginTop: 8, paddingVertical: 14, paddingHorizontal: 40, borderRadius: 16 },
   doneTxt:      { color: '#fff', fontFamily: 'Poppins_700Bold', fontSize: 16 },
-  card:         { borderRadius: 20, padding: 28, alignItems: 'center', marginBottom: 20, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 12, shadowOffset: { width: 0, height: 4 } },
+  card:         { borderRadius: 20, padding: 28, alignItems: 'center', marginBottom: 20, boxShadow: '0px 4px 12px rgba(0,0,0,0.06)' },
   cardLabel:    { fontFamily: 'Poppins_400Regular', fontSize: 14, marginBottom: 4 },
   cardAmount:   { fontFamily: 'Poppins_700Bold', fontSize: 64, lineHeight: 72 },
   cardUnit:     { fontFamily: 'Poppins_600SemiBold', fontSize: 18 },
