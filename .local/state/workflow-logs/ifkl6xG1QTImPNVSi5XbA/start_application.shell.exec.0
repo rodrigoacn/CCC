@@ -1,0 +1,151 @@
+[Tue Jun 23 13:33:22 2026] PHP 8.2.23 Development Server (http://0.0.0.0:5000) started
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55070 Accepted
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55070 [302]: GET /
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55070 Closing
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55086 Accepted
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55086 [200]: GET /materias.php
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55086 Closing
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55102 Accepted
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55102 [200]: GET /styles.css
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55102 Closing
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55112 Accepted
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55122 Accepted
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55134 Accepted
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55138 Accepted
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55144 Accepted
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55156 Accepted
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55112 [200]: GET /mathematics.png
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55122 [200]: GET /biology.png
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55134 [200]: GET /chemistry.png
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55138 [200]: GET /physics.png
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55144 [200]: GET /history.png
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55156 [200]: GET /geography.png
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55112 Closing
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55134 Closing
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55138 Closing
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55122 Closing
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55144 Closing
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55156 Closing
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55172 Accepted
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55172 [200]: GET /presentacion/odp_ajax.js
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55172 Closing
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55178 Accepted
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55178 [200]: GET /presentacion/js/scripts.js
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55178 Closing
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55192 Accepted
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55192 [200]: GET /literature.png
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55200 Accepted
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55210 Accepted
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55212 Accepted
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55200 [200]: GET /foreign_languages.png
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55210 [200]: GET /art.png
+[Tue Jun 23 13:33:24 2026] 127.0.0.1:55212 [200]: GET /technology.png
+[Tue Jun 23 13:33:25 2026] 127.0.0.1:55220 Accepted
+[Tue Jun 23 13:33:25 2026] 127.0.0.1:55220 [200]: GET /physical_education.png
+[Tue Jun 23 13:33:25 2026] 127.0.0.1:55192 Closing
+[Tue Jun 23 13:33:25 2026] 127.0.0.1:55200 Closing
+[Tue Jun 23 13:33:25 2026] 127.0.0.1:55212 Closing
+[Tue Jun 23 13:33:25 2026] 127.0.0.1:55220 Closing
+[Tue Jun 23 13:33:25 2026] 127.0.0.1:55210 Closing
+[Tue Jun 23 13:33:25 2026] 127.0.0.1:55236 Accepted
+[Tue Jun 23 13:33:25 2026] 127.0.0.1:55236 [200]: GET /favico.svg
+[Tue Jun 23 13:33:25 2026] 127.0.0.1:55236 Closing
+[Tue Jun 23 13:33:35 2026] 127.0.0.1:60114 Accepted
+[Tue Jun 23 13:33:35 2026] 127.0.0.1:60114 [200]: POST /login.php
+[Tue Jun 23 13:33:35 2026] 127.0.0.1:60114 Closing
+[Tue Jun 23 13:39:05 2026] 127.0.0.1:43464 Accepted
+[Tue Jun 23 13:39:05 2026] 127.0.0.1:43464 [302]: POST /login.php
+[Tue Jun 23 13:39:05 2026] 127.0.0.1:43464 Closing
+[Tue Jun 23 13:39:14 2026] 127.0.0.1:33940 Accepted
+[Tue Jun 23 13:39:15 2026] 127.0.0.1:33940 [200]: GET /dashboard_profesor.php - Uncaught PDOException: SQLSTATE[42703]: Undefined column: 7 ERROR:  column ps.activo does not exist
+LINE 5:      WHERE cp.instructorId = $1 AND ps.activo = 1
+                                            ^
+HINT:  Perhaps you meant to reference the column "s.activa". in /home/runner/workspace/db.php:35
+Stack trace:
+#0 /home/runner/workspace/db.php(35): PDOStatement->execute(Array)
+#1 /home/runner/workspace/dashboard_profesor.php(56): dbOne('SELECT COUNT(*)...', Array)
+#2 {main}
+  thrown in /home/runner/workspace/db.php on line 35
+[Tue Jun 23 13:39:15 2026] 127.0.0.1:33940 Closing
+[Tue Jun 23 13:39:19 2026] 127.0.0.1:42548 Accepted
+[Tue Jun 23 13:39:19 2026] 127.0.0.1:42548 [200]: GET /login.php
+[Tue Jun 23 13:39:19 2026] 127.0.0.1:42548 Closing
+[Tue Jun 23 13:39:19 2026] 127.0.0.1:42562 Accepted
+[Tue Jun 23 13:39:19 2026] 127.0.0.1:42568 Accepted
+[Tue Jun 23 13:39:19 2026] 127.0.0.1:42572 Accepted
+[Tue Jun 23 13:39:19 2026] 127.0.0.1:42562 [200]: GET /styles.css
+[Tue Jun 23 13:39:19 2026] 127.0.0.1:42562 Closing
+[Tue Jun 23 13:39:19 2026] 127.0.0.1:42568 [200]: GET /presentacion/odp_ajax.js
+[Tue Jun 23 13:39:19 2026] 127.0.0.1:42568 Closing
+[Tue Jun 23 13:39:19 2026] 127.0.0.1:42572 [200]: GET /presentacion/js/scripts.js
+[Tue Jun 23 13:39:19 2026] 127.0.0.1:42572 Closing
+[Tue Jun 23 13:39:19 2026] 127.0.0.1:42584 Accepted
+[Tue Jun 23 13:39:19 2026] 127.0.0.1:42584 [200]: GET /favico.svg
+[Tue Jun 23 13:39:19 2026] 127.0.0.1:42584 Closing
+[Tue Jun 23 13:39:33 2026] 127.0.0.1:54978 Accepted
+[Tue Jun 23 13:39:33 2026] 127.0.0.1:54978 [200]: GET /materias.php
+[Tue Jun 23 13:39:33 2026] 127.0.0.1:54978 Closing
+[Tue Jun 23 13:39:35 2026] 127.0.0.1:54992 Accepted
+[Tue Jun 23 13:39:35 2026] 127.0.0.1:54992 [200]: GET /profesores.php - Uncaught PDOException: SQLSTATE[42803]: Grouping error: 7 ERROR:  column "u.usuarioid" must appear in the GROUP BY clause or be used in an aggregate function
+LINE 3:             u.usuarioId AS profId, u.nombre AS prof_nombre, ...
+                    ^ in /home/runner/workspace/db.php:45
+Stack trace:
+#0 /home/runner/workspace/db.php(45): PDOStatement->execute(Array)
+#1 /home/runner/workspace/profesores.php(23): dbAll('SELECT cp.clase...', Array)
+#2 {main}
+  thrown in /home/runner/workspace/db.php on line 45
+[Tue Jun 23 13:39:35 2026] 127.0.0.1:54992 Closing
+[Tue Jun 23 13:40:56 2026] 127.0.0.1:60158 Accepted
+[Tue Jun 23 13:40:56 2026] 127.0.0.1:60158 [200]: GET /dashboard_profesor.php
+[Tue Jun 23 13:40:56 2026] 127.0.0.1:60158 Closing
+[Tue Jun 23 13:40:58 2026] 127.0.0.1:60166 Accepted
+[Tue Jun 23 13:40:58 2026] 127.0.0.1:60166 [200]: GET /profesores.php
+[Tue Jun 23 13:40:58 2026] 127.0.0.1:60166 Closing
+[Tue Jun 23 13:41:05 2026] 127.0.0.1:60180 Accepted
+[Tue Jun 23 13:41:05 2026] 127.0.0.1:60180 [200]: GET /materias.php
+[Tue Jun 23 13:41:05 2026] 127.0.0.1:60180 Closing
+[Tue Jun 23 13:41:05 2026] 127.0.0.1:60186 Accepted
+[Tue Jun 23 13:41:05 2026] 127.0.0.1:60202 Accepted
+[Tue Jun 23 13:41:05 2026] 127.0.0.1:60208 Accepted
+[Tue Jun 23 13:41:05 2026] 127.0.0.1:60186 [200]: GET /styles.css
+[Tue Jun 23 13:41:05 2026] 127.0.0.1:60186 Closing
+[Tue Jun 23 13:41:05 2026] 127.0.0.1:60216 Accepted
+[Tue Jun 23 13:41:05 2026] 127.0.0.1:60230 Accepted
+[Tue Jun 23 13:41:05 2026] 127.0.0.1:60234 Accepted
+[Tue Jun 23 13:41:05 2026] 127.0.0.1:60202 [200]: GET /mathematics.png
+[Tue Jun 23 13:41:05 2026] 127.0.0.1:60236 Accepted
+[Tue Jun 23 13:41:05 2026] 127.0.0.1:60216 [200]: GET /chemistry.png
+[Tue Jun 23 13:41:05 2026] 127.0.0.1:60208 [200]: GET /biology.png
+[Tue Jun 23 13:41:05 2026] 127.0.0.1:60230 [200]: GET /physics.png
+[Tue Jun 23 13:41:05 2026] 127.0.0.1:60234 [200]: GET /history.png
+[Tue Jun 23 13:41:05 2026] 127.0.0.1:60236 [200]: GET /presentacion/odp_ajax.js
+[Tue Jun 23 13:41:06 2026] 127.0.0.1:60236 Closing
+[Tue Jun 23 13:41:06 2026] 127.0.0.1:47678 Accepted
+[Tue Jun 23 13:41:06 2026] 127.0.0.1:47678 [200]: GET /technology.png
+[Tue Jun 23 13:41:06 2026] 127.0.0.1:60202 Closing
+[Tue Jun 23 13:41:06 2026] 127.0.0.1:60216 Closing
+[Tue Jun 23 13:41:06 2026] 127.0.0.1:60230 Closing
+[Tue Jun 23 13:41:06 2026] 127.0.0.1:60208 Closing
+[Tue Jun 23 13:41:06 2026] 127.0.0.1:60234 Closing
+[Tue Jun 23 13:41:06 2026] 127.0.0.1:47678 Closing
+[Tue Jun 23 13:41:06 2026] 127.0.0.1:47692 Accepted
+[Tue Jun 23 13:41:06 2026] 127.0.0.1:47692 [200]: GET /art.png
+[Tue Jun 23 13:41:06 2026] 127.0.0.1:47696 Accepted
+[Tue Jun 23 13:41:06 2026] 127.0.0.1:47712 Accepted
+[Tue Jun 23 13:41:06 2026] 127.0.0.1:47696 [200]: GET /physical_education.png
+[Tue Jun 23 13:41:06 2026] 127.0.0.1:47720 Accepted
+[Tue Jun 23 13:41:06 2026] 127.0.0.1:47712 [200]: GET /literature.png
+[Tue Jun 23 13:41:06 2026] 127.0.0.1:47726 Accepted
+[Tue Jun 23 13:41:06 2026] 127.0.0.1:47720 [200]: GET /foreign_languages.png
+[Tue Jun 23 13:41:06 2026] 127.0.0.1:47736 Accepted
+[Tue Jun 23 13:41:06 2026] 127.0.0.1:47726 [200]: GET /geography.png
+[Tue Jun 23 13:41:06 2026] 127.0.0.1:47736 [200]: GET /presentacion/js/scripts.js
+[Tue Jun 23 13:41:06 2026] 127.0.0.1:47736 Closing
+[Tue Jun 23 13:41:06 2026] 127.0.0.1:47692 Closing
+[Tue Jun 23 13:41:06 2026] 127.0.0.1:47696 Closing
+[Tue Jun 23 13:41:06 2026] 127.0.0.1:47712 Closing
+[Tue Jun 23 13:41:06 2026] 127.0.0.1:47720 Closing
+[Tue Jun 23 13:41:06 2026] 127.0.0.1:47726 Closing
+[Tue Jun 23 13:41:06 2026] 127.0.0.1:47740 Accepted
+[Tue Jun 23 13:41:06 2026] 127.0.0.1:47740 [200]: GET /favico.svg
+[Tue Jun 23 13:41:06 2026] 127.0.0.1:47740 Closing

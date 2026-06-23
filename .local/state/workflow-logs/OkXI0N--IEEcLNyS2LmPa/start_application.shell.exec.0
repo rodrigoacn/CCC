@@ -1,0 +1,815 @@
+[Tue Jun 23 21:12:44 2026] PHP 8.2.23 Development Server (http://0.0.0.0:5000) started
+[Tue Jun 23 21:13:00 2026] 127.0.0.1:44890 Accepted
+[Tue Jun 23 21:13:00 2026] 127.0.0.1:44890 [302]: GET /
+[Tue Jun 23 21:13:00 2026] 127.0.0.1:44890 Closing
+[Tue Jun 23 21:13:00 2026] 127.0.0.1:44900 Accepted
+[Tue Jun 23 21:13:01 2026] 127.0.0.1:44900 [200]: GET /login.php
+[Tue Jun 23 21:13:01 2026] 127.0.0.1:44900 Closing
+[Tue Jun 23 21:13:01 2026] 127.0.0.1:44902 Accepted
+[Tue Jun 23 21:13:01 2026] 127.0.0.1:44916 Accepted
+[Tue Jun 23 21:13:01 2026] 127.0.0.1:44930 Accepted
+[Tue Jun 23 21:13:01 2026] 127.0.0.1:44902 [200]: GET /styles.css
+[Tue Jun 23 21:13:01 2026] 127.0.0.1:44916 [200]: GET /presentacion/odp_ajax.js
+[Tue Jun 23 21:13:01 2026] 127.0.0.1:44930 [200]: GET /presentacion/js/scripts.js
+[Tue Jun 23 21:13:01 2026] 127.0.0.1:44902 Closing
+[Tue Jun 23 21:13:01 2026] 127.0.0.1:44916 Closing
+[Tue Jun 23 21:13:01 2026] 127.0.0.1:44930 Closing
+[Tue Jun 23 21:13:01 2026] 127.0.0.1:44944 Accepted
+[Tue Jun 23 21:13:01 2026] 127.0.0.1:44944 [200]: GET /favico.svg
+[Tue Jun 23 21:13:01 2026] 127.0.0.1:44944 Closing
+[Tue Jun 23 21:14:16 2026] 127.0.0.1:49652 Accepted
+[Tue Jun 23 21:14:16 2026] 127.0.0.1:49652 [302]: GET /materias.php
+[Tue Jun 23 21:14:16 2026] 127.0.0.1:49652 Closing
+[Tue Jun 23 21:14:16 2026] 127.0.0.1:49668 Accepted
+[Tue Jun 23 21:14:16 2026] 127.0.0.1:49668 [200]: GET /login.php
+[Tue Jun 23 21:14:16 2026] 127.0.0.1:49668 Closing
+[Tue Jun 23 21:14:16 2026] 127.0.0.1:49672 Accepted
+[Tue Jun 23 21:14:16 2026] 127.0.0.1:49676 Accepted
+[Tue Jun 23 21:14:16 2026] 127.0.0.1:49684 Accepted
+[Tue Jun 23 21:14:16 2026] 127.0.0.1:49672 [200]: GET /styles.css
+[Tue Jun 23 21:14:16 2026] 127.0.0.1:49672 Closing
+[Tue Jun 23 21:14:16 2026] 127.0.0.1:49676 [200]: GET /presentacion/odp_ajax.js
+[Tue Jun 23 21:14:16 2026] 127.0.0.1:49676 Closing
+[Tue Jun 23 21:14:16 2026] 127.0.0.1:49684 [200]: GET /presentacion/js/scripts.js
+[Tue Jun 23 21:14:16 2026] 127.0.0.1:49684 Closing
+[Tue Jun 23 21:14:16 2026] 127.0.0.1:49688 Accepted
+[Tue Jun 23 21:14:16 2026] 127.0.0.1:49688 [200]: GET /favico.svg
+[Tue Jun 23 21:14:16 2026] 127.0.0.1:49688 Closing
+[Tue Jun 23 21:15:04 2026] 127.0.0.1:54466 Accepted
+[Tue Jun 23 21:15:04 2026] 127.0.0.1:54466 [302]: GET /
+[Tue Jun 23 21:15:04 2026] 127.0.0.1:54466 Closing
+[Tue Jun 23 21:15:04 2026] 127.0.0.1:54468 Accepted
+[Tue Jun 23 21:15:04 2026] 127.0.0.1:54468 [200]: GET /login.php
+[Tue Jun 23 21:15:04 2026] 127.0.0.1:54468 Closing
+[Tue Jun 23 21:15:04 2026] 127.0.0.1:54480 Accepted
+[Tue Jun 23 21:15:04 2026] 127.0.0.1:54480 [200]: GET /styles.css
+[Tue Jun 23 21:15:04 2026] 127.0.0.1:54480 Closing
+[Tue Jun 23 21:15:04 2026] 127.0.0.1:54492 Accepted
+[Tue Jun 23 21:15:04 2026] 127.0.0.1:54492 [200]: GET /presentacion/odp_ajax.js
+[Tue Jun 23 21:15:04 2026] 127.0.0.1:54492 Closing
+[Tue Jun 23 21:15:04 2026] 127.0.0.1:54502 Accepted
+[Tue Jun 23 21:15:04 2026] 127.0.0.1:54502 [200]: GET /presentacion/js/scripts.js
+[Tue Jun 23 21:15:04 2026] 127.0.0.1:54502 Closing
+[Tue Jun 23 21:15:05 2026] 127.0.0.1:54504 Accepted
+[Tue Jun 23 21:15:05 2026] 127.0.0.1:54504 [200]: GET /favico.svg
+[Tue Jun 23 21:15:05 2026] 127.0.0.1:54504 Closing
+[Tue Jun 23 21:16:47 2026] 127.0.0.1:50316 Accepted
+[Tue Jun 23 21:16:47 2026] 127.0.0.1:50316 [302]: GET /
+[Tue Jun 23 21:16:47 2026] 127.0.0.1:50316 Closing
+[Tue Jun 23 21:16:48 2026] 127.0.0.1:50326 Accepted
+[Tue Jun 23 21:16:48 2026] 127.0.0.1:50326 [200]: GET /login.php
+[Tue Jun 23 21:16:48 2026] 127.0.0.1:50326 Closing
+[Tue Jun 23 21:16:48 2026] 127.0.0.1:50328 Accepted
+[Tue Jun 23 21:16:48 2026] 127.0.0.1:50328 [200]: GET /styles.css
+[Tue Jun 23 21:16:48 2026] 127.0.0.1:50328 Closing
+[Tue Jun 23 21:16:48 2026] 127.0.0.1:50334 Accepted
+[Tue Jun 23 21:16:48 2026] 127.0.0.1:50334 [200]: GET /presentacion/odp_ajax.js
+[Tue Jun 23 21:16:48 2026] 127.0.0.1:50334 Closing
+[Tue Jun 23 21:16:48 2026] 127.0.0.1:50342 Accepted
+[Tue Jun 23 21:16:48 2026] 127.0.0.1:50342 [200]: GET /presentacion/js/scripts.js
+[Tue Jun 23 21:16:48 2026] 127.0.0.1:50342 Closing
+[Tue Jun 23 21:18:05 2026] 127.0.0.1:33888 Accepted
+[Tue Jun 23 21:18:05 2026] 127.0.0.1:33888 [200]: POST /login.php
+[Tue Jun 23 21:18:05 2026] 127.0.0.1:33888 Closing
+[Tue Jun 23 21:18:05 2026] 127.0.0.1:33896 Accepted
+[Tue Jun 23 21:18:05 2026] 127.0.0.1:33896 [200]: GET /styles.css
+[Tue Jun 23 21:18:05 2026] 127.0.0.1:33896 Closing
+[Tue Jun 23 21:18:05 2026] 127.0.0.1:33910 Accepted
+[Tue Jun 23 21:18:05 2026] 127.0.0.1:33910 [200]: GET /presentacion/odp_ajax.js
+[Tue Jun 23 21:18:05 2026] 127.0.0.1:33910 Closing
+[Tue Jun 23 21:18:05 2026] 127.0.0.1:33916 Accepted
+[Tue Jun 23 21:18:05 2026] 127.0.0.1:33916 [200]: GET /presentacion/js/scripts.js
+[Tue Jun 23 21:18:05 2026] 127.0.0.1:33916 Closing
+[Tue Jun 23 21:18:21 2026] 127.0.0.1:51502 Accepted
+[Tue Jun 23 21:18:21 2026] 127.0.0.1:51502 [200]: POST /login.php
+[Tue Jun 23 21:18:21 2026] 127.0.0.1:51502 Closing
+[Tue Jun 23 21:18:21 2026] 127.0.0.1:51514 Accepted
+[Tue Jun 23 21:18:21 2026] 127.0.0.1:51524 Accepted
+[Tue Jun 23 21:18:21 2026] 127.0.0.1:51514 [200]: GET /presentacion/js/scripts.js
+[Tue Jun 23 21:18:21 2026] 127.0.0.1:51532 Accepted
+[Tue Jun 23 21:18:21 2026] 127.0.0.1:51524 [200]: GET /presentacion/odp_ajax.js
+[Tue Jun 23 21:18:21 2026] 127.0.0.1:51532 [200]: GET /styles.css
+[Tue Jun 23 21:18:21 2026] 127.0.0.1:51514 Closing
+[Tue Jun 23 21:18:21 2026] 127.0.0.1:51524 Closing
+[Tue Jun 23 21:18:21 2026] 127.0.0.1:51532 Closing
+[Tue Jun 23 21:18:35 2026] 127.0.0.1:52652 Accepted
+Unable to find system sendmail.
+[Tue Jun 23 21:18:35 2026] 127.0.0.1:52652 [200]: POST /login.php
+[Tue Jun 23 21:18:35 2026] 127.0.0.1:52652 Closing
+[Tue Jun 23 21:18:35 2026] 127.0.0.1:52654 Accepted
+[Tue Jun 23 21:18:35 2026] 127.0.0.1:52654 [200]: GET /styles.css
+[Tue Jun 23 21:18:35 2026] 127.0.0.1:52654 Closing
+[Tue Jun 23 21:18:35 2026] 127.0.0.1:52666 Accepted
+[Tue Jun 23 21:18:35 2026] 127.0.0.1:52666 [200]: GET /presentacion/odp_ajax.js
+[Tue Jun 23 21:18:35 2026] 127.0.0.1:52666 Closing
+[Tue Jun 23 21:18:35 2026] 127.0.0.1:52676 Accepted
+[Tue Jun 23 21:18:35 2026] 127.0.0.1:52676 [200]: GET /presentacion/js/scripts.js
+[Tue Jun 23 21:18:35 2026] 127.0.0.1:52676 Closing
+[Tue Jun 23 21:27:55 2026] 127.0.0.1:38104 Accepted
+[Tue Jun 23 21:27:55 2026] 127.0.0.1:38104 [200]: POST /api_mobile.php?action=register
+[Tue Jun 23 21:27:55 2026] 127.0.0.1:38104 Closing
+[Tue Jun 23 21:28:05 2026] 127.0.0.1:44538 Accepted
+[Tue Jun 23 21:28:05 2026] 127.0.0.1:44538 [200]: GET /api_mobile.php?action=countries - Uncaught PDOException: SQLSTATE[42703]: Undefined column: 7 ERROR:  column "id" does not exist
+LINE 1: SELECT id, nombre, codigo, moneda FROM paises ORDER BY nombr...
+               ^ in /home/runner/workspace/db.php:45
+Stack trace:
+#0 /home/runner/workspace/db.php(45): PDOStatement->execute(Array)
+#1 /home/runner/workspace/api_mobile.php(500): dbAll('SELECT id, nomb...')
+#2 /home/runner/workspace/api_mobile.php(91): handleCountries()
+#3 {main}
+  thrown in /home/runner/workspace/db.php on line 45
+[Tue Jun 23 21:28:05 2026] 127.0.0.1:44538 Closing
+[Tue Jun 23 21:28:06 2026] 127.0.0.1:44552 Accepted
+[Tue Jun 23 21:28:06 2026] 127.0.0.1:44552 [200]: GET /api_mobile.php?action=countries - Uncaught PDOException: SQLSTATE[42703]: Undefined column: 7 ERROR:  column "id" does not exist
+LINE 1: SELECT id, nombre, codigo, moneda FROM paises ORDER BY nombr...
+               ^ in /home/runner/workspace/db.php:45
+Stack trace:
+#0 /home/runner/workspace/db.php(45): PDOStatement->execute(Array)
+#1 /home/runner/workspace/api_mobile.php(500): dbAll('SELECT id, nomb...')
+#2 /home/runner/workspace/api_mobile.php(91): handleCountries()
+#3 {main}
+  thrown in /home/runner/workspace/db.php on line 45
+[Tue Jun 23 21:28:06 2026] 127.0.0.1:44552 Closing
+[Tue Jun 23 21:28:14 2026] 127.0.0.1:51298 Accepted
+[Tue Jun 23 21:28:14 2026] 127.0.0.1:51298 [200]: POST /api_mobile.php?action=register
+[Tue Jun 23 21:28:14 2026] 127.0.0.1:51298 Closing
+[Tue Jun 23 21:28:23 2026] 127.0.0.1:51304 Accepted
+[Tue Jun 23 21:28:23 2026] 127.0.0.1:51304 [200]: POST /api_mobile.php?action=login
+[Tue Jun 23 21:28:23 2026] 127.0.0.1:51304 Closing
+[Tue Jun 23 21:34:36 2026] 127.0.0.1:38372 Accepted
+[Tue Jun 23 21:34:36 2026] 127.0.0.1:38372 [200]: POST /login.php
+[Tue Jun 23 21:34:36 2026] 127.0.0.1:38372 Closing
+[Tue Jun 23 21:34:36 2026] 127.0.0.1:38384 Accepted
+[Tue Jun 23 21:34:36 2026] 127.0.0.1:38384 [200]: GET /styles.css
+[Tue Jun 23 21:34:36 2026] 127.0.0.1:38384 Closing
+[Tue Jun 23 21:34:37 2026] 127.0.0.1:38390 Accepted
+[Tue Jun 23 21:34:37 2026] 127.0.0.1:38390 [200]: GET /presentacion/odp_ajax.js
+[Tue Jun 23 21:34:37 2026] 127.0.0.1:38390 Closing
+[Tue Jun 23 21:34:37 2026] 127.0.0.1:38396 Accepted
+[Tue Jun 23 21:34:37 2026] 127.0.0.1:38396 [200]: GET /presentacion/js/scripts.js
+[Tue Jun 23 21:34:37 2026] 127.0.0.1:38396 Closing
+[Tue Jun 23 21:34:51 2026] 127.0.0.1:44104 Accepted
+[Tue Jun 23 21:34:52 2026] 127.0.0.1:44104 [200]: POST /login.php
+[Tue Jun 23 21:34:52 2026] 127.0.0.1:44104 Closing
+[Tue Jun 23 21:34:52 2026] 127.0.0.1:44112 Accepted
+[Tue Jun 23 21:34:52 2026] 127.0.0.1:44112 [200]: GET /styles.css
+[Tue Jun 23 21:34:52 2026] 127.0.0.1:44112 Closing
+[Tue Jun 23 21:34:52 2026] 127.0.0.1:44120 Accepted
+[Tue Jun 23 21:34:52 2026] 127.0.0.1:44120 [200]: GET /presentacion/odp_ajax.js
+[Tue Jun 23 21:34:52 2026] 127.0.0.1:44120 Closing
+[Tue Jun 23 21:34:52 2026] 127.0.0.1:44134 Accepted
+[Tue Jun 23 21:34:52 2026] 127.0.0.1:44134 [200]: GET /presentacion/js/scripts.js
+[Tue Jun 23 21:34:52 2026] 127.0.0.1:44134 Closing
+[Tue Jun 23 21:35:34 2026] 127.0.0.1:39688 Accepted
+[Tue Jun 23 21:35:34 2026] 127.0.0.1:39688 [302]: POST /login.php
+[Tue Jun 23 21:35:34 2026] 127.0.0.1:39688 Closing
+[Tue Jun 23 21:35:34 2026] 127.0.0.1:39692 Accepted
+[Tue Jun 23 21:35:35 2026] 127.0.0.1:39692 [200]: GET /materias.php
+[Tue Jun 23 21:35:35 2026] 127.0.0.1:39692 Closing
+[Tue Jun 23 21:35:35 2026] 127.0.0.1:39696 Accepted
+[Tue Jun 23 21:35:35 2026] 127.0.0.1:39696 [200]: GET /styles.css
+[Tue Jun 23 21:35:35 2026] 127.0.0.1:39696 Closing
+[Tue Jun 23 21:35:35 2026] 127.0.0.1:39704 Accepted
+[Tue Jun 23 21:35:35 2026] 127.0.0.1:39704 [200]: GET /mathematics.png
+[Tue Jun 23 21:35:35 2026] 127.0.0.1:39720 Accepted
+[Tue Jun 23 21:35:35 2026] 127.0.0.1:39728 Accepted
+[Tue Jun 23 21:35:35 2026] 127.0.0.1:39720 [200]: GET /biology.png
+[Tue Jun 23 21:35:35 2026] 127.0.0.1:39738 Accepted
+[Tue Jun 23 21:35:35 2026] 127.0.0.1:39728 [200]: GET /presentacion/odp_ajax.js
+[Tue Jun 23 21:35:35 2026] 127.0.0.1:39748 Accepted
+[Tue Jun 23 21:35:35 2026] 127.0.0.1:39738 [200]: GET /chemistry.png
+[Tue Jun 23 21:35:35 2026] 127.0.0.1:39748 [200]: GET /physics.png
+[Tue Jun 23 21:35:35 2026] 127.0.0.1:39728 Closing
+[Tue Jun 23 21:35:35 2026] 127.0.0.1:39758 Accepted
+[Tue Jun 23 21:35:35 2026] 127.0.0.1:39758 [200]: GET /foreign_languages.png
+[Tue Jun 23 21:35:35 2026] 127.0.0.1:39704 Closing
+[Tue Jun 23 21:35:35 2026] 127.0.0.1:39720 Closing
+[Tue Jun 23 21:35:35 2026] 127.0.0.1:39738 Closing
+[Tue Jun 23 21:35:35 2026] 127.0.0.1:39748 Closing
+[Tue Jun 23 21:35:35 2026] 127.0.0.1:39758 Closing
+[Tue Jun 23 21:35:35 2026] 127.0.0.1:39774 Accepted
+[Tue Jun 23 21:35:35 2026] 127.0.0.1:39774 [200]: GET /geography.png
+[Tue Jun 23 21:35:35 2026] 127.0.0.1:39774 Closing
+[Tue Jun 23 21:35:37 2026] 127.0.0.1:39788 Accepted
+[Tue Jun 23 21:35:37 2026] 127.0.0.1:39788 [200]: GET /literature.png
+[Tue Jun 23 21:35:37 2026] 127.0.0.1:39804 Accepted
+[Tue Jun 23 21:35:37 2026] 127.0.0.1:39804 [200]: GET /presentacion/js/scripts.js
+[Tue Jun 23 21:35:37 2026] 127.0.0.1:39804 Closing
+[Tue Jun 23 21:35:37 2026] 127.0.0.1:39788 Closing
+[Tue Jun 23 21:35:37 2026] 127.0.0.1:39814 Accepted
+[Tue Jun 23 21:35:37 2026] 127.0.0.1:39814 [200]: GET /history.png
+[Tue Jun 23 21:35:37 2026] 127.0.0.1:39830 Accepted
+[Tue Jun 23 21:35:37 2026] 127.0.0.1:39830 [200]: GET /art.png
+[Tue Jun 23 21:35:37 2026] 127.0.0.1:39814 Closing
+[Tue Jun 23 21:35:37 2026] 127.0.0.1:39830 Closing
+[Tue Jun 23 21:35:37 2026] 127.0.0.1:39832 Accepted
+[Tue Jun 23 21:35:37 2026] 127.0.0.1:39832 [200]: GET /technology.png
+[Tue Jun 23 21:35:37 2026] 127.0.0.1:39832 Closing
+[Tue Jun 23 21:35:38 2026] 127.0.0.1:39838 Accepted
+[Tue Jun 23 21:35:38 2026] 127.0.0.1:39838 [200]: GET /physical_education.png
+[Tue Jun 23 21:35:38 2026] 127.0.0.1:39838 Closing
+[Tue Jun 23 21:35:40 2026] 127.0.0.1:39844 Accepted
+[Tue Jun 23 21:35:40 2026] 127.0.0.1:39844 [200]: GET /matematicas.php - Uncaught PDOException: SQLSTATE[42703]: Undefined column: 7 ERROR:  column "tema" does not exist
+LINE 1: SELECT tema FROM progreso_usuario WHERE usuarioId = $1 AND m...
+               ^
+HINT:  Perhaps you meant to reference the column "progreso_usuario.temaid". in /home/runner/workspace/db.php:45
+Stack trace:
+#0 /home/runner/workspace/db.php(45): PDOStatement->execute(Array)
+#1 /home/runner/workspace/_subject_page.php(14): dbAll('SELECT tema FRO...', Array)
+#2 /home/runner/workspace/matematicas.php(49): require('/home/runner/wo...')
+#3 {main}
+  thrown in /home/runner/workspace/db.php on line 45
+[Tue Jun 23 21:35:40 2026] 127.0.0.1:39844 Closing
+[Tue Jun 23 21:35:40 2026] 127.0.0.1:39850 Accepted
+[Tue Jun 23 21:35:40 2026] 127.0.0.1:39850 [200]: GET /styles.css
+[Tue Jun 23 21:35:40 2026] 127.0.0.1:39850 Closing
+[Tue Jun 23 21:39:00 2026] 127.0.0.1:46420 Accepted
+[Tue Jun 23 21:39:00 2026] 127.0.0.1:46420 [302]: GET /matematicas.php
+[Tue Jun 23 21:39:00 2026] 127.0.0.1:46420 Closing
+[Tue Jun 23 21:39:00 2026] 127.0.0.1:46434 Accepted
+[Tue Jun 23 21:39:00 2026] 127.0.0.1:46434 [200]: GET /login.php
+[Tue Jun 23 21:39:00 2026] 127.0.0.1:46434 Closing
+[Tue Jun 23 21:39:00 2026] 127.0.0.1:46440 Accepted
+[Tue Jun 23 21:39:00 2026] 127.0.0.1:46446 Accepted
+[Tue Jun 23 21:39:00 2026] 127.0.0.1:46456 Accepted
+[Tue Jun 23 21:39:00 2026] 127.0.0.1:46440 [200]: GET /styles.css
+[Tue Jun 23 21:39:00 2026] 127.0.0.1:46446 [200]: GET /presentacion/odp_ajax.js
+[Tue Jun 23 21:39:00 2026] 127.0.0.1:46456 [200]: GET /presentacion/js/scripts.js
+[Tue Jun 23 21:39:00 2026] 127.0.0.1:46440 Closing
+[Tue Jun 23 21:39:00 2026] 127.0.0.1:46446 Closing
+[Tue Jun 23 21:39:00 2026] 127.0.0.1:46456 Closing
+[Tue Jun 23 21:39:00 2026] 127.0.0.1:46472 Accepted
+[Tue Jun 23 21:39:00 2026] 127.0.0.1:46472 [200]: GET /favico.svg
+[Tue Jun 23 21:39:00 2026] 127.0.0.1:46472 Closing
+[Tue Jun 23 21:39:30 2026] 127.0.0.1:49704 Accepted
+[Tue Jun 23 21:39:30 2026] 127.0.0.1:49704 [302]: GET /
+[Tue Jun 23 21:39:30 2026] 127.0.0.1:49704 Closing
+[Tue Jun 23 21:39:30 2026] 127.0.0.1:49718 Accepted
+[Tue Jun 23 21:39:30 2026] 127.0.0.1:49718 [200]: GET /materias.php
+[Tue Jun 23 21:39:30 2026] 127.0.0.1:49718 Closing
+[Tue Jun 23 21:39:30 2026] 127.0.0.1:49730 Accepted
+[Tue Jun 23 21:39:30 2026] 127.0.0.1:49730 [200]: GET /styles.css
+[Tue Jun 23 21:39:30 2026] 127.0.0.1:49730 Closing
+[Tue Jun 23 21:39:30 2026] 127.0.0.1:49746 Accepted
+[Tue Jun 23 21:39:30 2026] 127.0.0.1:49758 Accepted
+[Tue Jun 23 21:39:30 2026] 127.0.0.1:49746 [200]: GET /mathematics.png
+[Tue Jun 23 21:39:30 2026] 127.0.0.1:49758 [200]: GET /biology.png
+[Tue Jun 23 21:39:30 2026] 127.0.0.1:49762 Accepted
+[Tue Jun 23 21:39:31 2026] 127.0.0.1:49770 Accepted
+[Tue Jun 23 21:39:31 2026] 127.0.0.1:49762 [200]: GET /chemistry.png
+[Tue Jun 23 21:39:31 2026] 127.0.0.1:49780 Accepted
+[Tue Jun 23 21:39:31 2026] 127.0.0.1:49770 [200]: GET /presentacion/odp_ajax.js
+[Tue Jun 23 21:39:31 2026] 127.0.0.1:49784 Accepted
+[Tue Jun 23 21:39:31 2026] 127.0.0.1:49780 [200]: GET /physics.png
+[Tue Jun 23 21:39:31 2026] 127.0.0.1:49784 [200]: GET /history.png
+[Tue Jun 23 21:39:31 2026] 127.0.0.1:49770 Closing
+[Tue Jun 23 21:39:31 2026] 127.0.0.1:49796 Accepted
+[Tue Jun 23 21:39:31 2026] 127.0.0.1:49796 [200]: GET /foreign_languages.png
+[Tue Jun 23 21:39:31 2026] 127.0.0.1:49746 Closing
+[Tue Jun 23 21:39:31 2026] 127.0.0.1:49758 Closing
+[Tue Jun 23 21:39:31 2026] 127.0.0.1:49762 Closing
+[Tue Jun 23 21:39:31 2026] 127.0.0.1:49780 Closing
+[Tue Jun 23 21:39:31 2026] 127.0.0.1:49784 Closing
+[Tue Jun 23 21:39:31 2026] 127.0.0.1:49796 Closing
+[Tue Jun 23 21:39:32 2026] 127.0.0.1:49804 Accepted
+[Tue Jun 23 21:39:32 2026] 127.0.0.1:49804 [200]: GET /geography.png
+[Tue Jun 23 21:39:32 2026] 127.0.0.1:49804 Closing
+[Tue Jun 23 21:39:32 2026] 127.0.0.1:49812 Accepted
+[Tue Jun 23 21:39:32 2026] 127.0.0.1:49812 [200]: GET /literature.png
+[Tue Jun 23 21:39:32 2026] 127.0.0.1:49812 Closing
+[Tue Jun 23 21:39:32 2026] 127.0.0.1:49820 Accepted
+[Tue Jun 23 21:39:32 2026] 127.0.0.1:49820 [200]: GET /presentacion/js/scripts.js
+[Tue Jun 23 21:39:32 2026] 127.0.0.1:49820 Closing
+[Tue Jun 23 21:39:32 2026] 127.0.0.1:49824 Accepted
+[Tue Jun 23 21:39:32 2026] 127.0.0.1:49824 [200]: GET /art.png
+[Tue Jun 23 21:39:32 2026] 127.0.0.1:49824 Closing
+[Tue Jun 23 21:39:33 2026] 127.0.0.1:49840 Accepted
+[Tue Jun 23 21:39:33 2026] 127.0.0.1:49840 [200]: GET /technology.png
+[Tue Jun 23 21:39:33 2026] 127.0.0.1:49840 Closing
+[Tue Jun 23 21:39:33 2026] 127.0.0.1:49844 Accepted
+[Tue Jun 23 21:39:33 2026] 127.0.0.1:49844 [200]: GET /physical_education.png
+[Tue Jun 23 21:39:33 2026] 127.0.0.1:49844 Closing
+[Tue Jun 23 21:39:37 2026] 127.0.0.1:54830 Accepted
+[Tue Jun 23 21:39:37 2026] 127.0.0.1:54830 [200]: GET /matematicas.php
+[Tue Jun 23 21:39:37 2026] 127.0.0.1:54830 Closing
+[Tue Jun 23 21:39:37 2026] 127.0.0.1:54842 Accepted
+[Tue Jun 23 21:39:37 2026] 127.0.0.1:54842 [200]: GET /styles.css
+[Tue Jun 23 21:39:37 2026] 127.0.0.1:54842 Closing
+[Tue Jun 23 21:39:37 2026] 127.0.0.1:54852 Accepted
+[Tue Jun 23 21:39:37 2026] 127.0.0.1:54852 [200]: GET /mathematics.png
+[Tue Jun 23 21:39:37 2026] 127.0.0.1:54852 Closing
+[Tue Jun 23 21:39:37 2026] 127.0.0.1:54862 Accepted
+[Tue Jun 23 21:39:37 2026] 127.0.0.1:54864 Accepted
+[Tue Jun 23 21:39:37 2026] 127.0.0.1:54862 [200]: GET /presentacion/js/scripts.js
+[Tue Jun 23 21:39:37 2026] 127.0.0.1:54862 Closing
+[Tue Jun 23 21:39:37 2026] 127.0.0.1:54864 [200]: GET /presentacion/odp_ajax.js
+[Tue Jun 23 21:39:37 2026] 127.0.0.1:54864 Closing
+[Tue Jun 23 21:39:47 2026] 127.0.0.1:39256 Accepted
+[Tue Jun 23 21:39:47 2026] 127.0.0.1:39256 [200]: POST /matematicas.php
+[Tue Jun 23 21:39:47 2026] 127.0.0.1:39256 Closing
+[Tue Jun 23 21:39:47 2026] 127.0.0.1:39258 Accepted
+[Tue Jun 23 21:39:47 2026] 127.0.0.1:39258 [200]: GET /styles.css
+[Tue Jun 23 21:39:47 2026] 127.0.0.1:39258 Closing
+[Tue Jun 23 21:40:58 2026] 127.0.0.1:46050 Accepted
+[Tue Jun 23 21:40:58 2026] 127.0.0.1:46050 [302]: GET /matematicas.php
+[Tue Jun 23 21:40:58 2026] 127.0.0.1:46050 Closing
+[Tue Jun 23 21:40:58 2026] 127.0.0.1:46060 Accepted
+[Tue Jun 23 21:40:58 2026] 127.0.0.1:46060 [200]: GET /login.php
+[Tue Jun 23 21:40:58 2026] 127.0.0.1:46060 Closing
+[Tue Jun 23 21:40:58 2026] 127.0.0.1:46072 Accepted
+[Tue Jun 23 21:40:58 2026] 127.0.0.1:46080 Accepted
+[Tue Jun 23 21:40:58 2026] 127.0.0.1:46090 Accepted
+[Tue Jun 23 21:40:58 2026] 127.0.0.1:46072 [200]: GET /styles.css
+[Tue Jun 23 21:40:58 2026] 127.0.0.1:46072 Closing
+[Tue Jun 23 21:40:58 2026] 127.0.0.1:46080 [200]: GET /presentacion/odp_ajax.js
+[Tue Jun 23 21:40:58 2026] 127.0.0.1:46080 Closing
+[Tue Jun 23 21:40:58 2026] 127.0.0.1:46090 [200]: GET /presentacion/js/scripts.js
+[Tue Jun 23 21:40:58 2026] 127.0.0.1:46090 Closing
+[Tue Jun 23 21:40:58 2026] 127.0.0.1:46104 Accepted
+[Tue Jun 23 21:40:58 2026] 127.0.0.1:46104 [200]: GET /favico.svg
+[Tue Jun 23 21:40:58 2026] 127.0.0.1:46104 Closing
+[Tue Jun 23 21:41:41 2026] 127.0.0.1:45720 Accepted
+[Tue Jun 23 21:41:41 2026] 127.0.0.1:45720 [302]: GET /
+[Tue Jun 23 21:41:41 2026] 127.0.0.1:45720 Closing
+[Tue Jun 23 21:41:41 2026] 127.0.0.1:45728 Accepted
+[Tue Jun 23 21:41:41 2026] 127.0.0.1:45728 [200]: GET /materias.php
+[Tue Jun 23 21:41:41 2026] 127.0.0.1:45728 Closing
+[Tue Jun 23 21:41:41 2026] 127.0.0.1:45730 Accepted
+[Tue Jun 23 21:41:41 2026] 127.0.0.1:45742 Accepted
+[Tue Jun 23 21:41:41 2026] 127.0.0.1:45730 [200]: GET /styles.css
+[Tue Jun 23 21:41:41 2026] 127.0.0.1:45742 [200]: GET /biology.png
+[Tue Jun 23 21:41:41 2026] 127.0.0.1:45730 Closing
+[Tue Jun 23 21:41:41 2026] 127.0.0.1:45758 Accepted
+[Tue Jun 23 21:41:41 2026] 127.0.0.1:45758 [200]: GET /mathematics.png
+[Tue Jun 23 21:41:41 2026] 127.0.0.1:45742 Closing
+[Tue Jun 23 21:41:41 2026] 127.0.0.1:45758 Closing
+[Tue Jun 23 21:41:42 2026] 127.0.0.1:45768 Accepted
+[Tue Jun 23 21:41:42 2026] 127.0.0.1:45768 [200]: GET /physics.png
+[Tue Jun 23 21:41:42 2026] 127.0.0.1:45780 Accepted
+[Tue Jun 23 21:41:42 2026] 127.0.0.1:45780 [200]: GET /chemistry.png
+[Tue Jun 23 21:41:42 2026] 127.0.0.1:45768 Closing
+[Tue Jun 23 21:41:42 2026] 127.0.0.1:45782 Accepted
+[Tue Jun 23 21:41:42 2026] 127.0.0.1:45784 Accepted
+[Tue Jun 23 21:41:42 2026] 127.0.0.1:45782 [200]: GET /history.png
+[Tue Jun 23 21:41:42 2026] 127.0.0.1:45784 [200]: GET /presentacion/odp_ajax.js
+[Tue Jun 23 21:41:42 2026] 127.0.0.1:45784 Closing
+[Tue Jun 23 21:41:42 2026] 127.0.0.1:45780 Closing
+[Tue Jun 23 21:41:42 2026] 127.0.0.1:45782 Closing
+[Tue Jun 23 21:41:42 2026] 127.0.0.1:45790 Accepted
+[Tue Jun 23 21:41:42 2026] 127.0.0.1:45790 [200]: GET /presentacion/js/scripts.js
+[Tue Jun 23 21:41:42 2026] 127.0.0.1:45790 Closing
+[Tue Jun 23 21:41:42 2026] 127.0.0.1:45794 Accepted
+[Tue Jun 23 21:41:42 2026] 127.0.0.1:45794 [200]: GET /geography.png
+[Tue Jun 23 21:41:42 2026] 127.0.0.1:45794 Closing
+[Tue Jun 23 21:41:43 2026] 127.0.0.1:45802 Accepted
+[Tue Jun 23 21:41:43 2026] 127.0.0.1:45802 [200]: GET /literature.png
+[Tue Jun 23 21:41:43 2026] 127.0.0.1:45802 Closing
+[Tue Jun 23 21:41:43 2026] 127.0.0.1:45814 Accepted
+[Tue Jun 23 21:41:43 2026] 127.0.0.1:45814 [200]: GET /foreign_languages.png
+[Tue Jun 23 21:41:43 2026] 127.0.0.1:45814 Closing
+[Tue Jun 23 21:41:43 2026] 127.0.0.1:45830 Accepted
+[Tue Jun 23 21:41:43 2026] 127.0.0.1:45830 [200]: GET /art.png
+[Tue Jun 23 21:41:43 2026] 127.0.0.1:45830 Closing
+[Tue Jun 23 21:41:44 2026] 127.0.0.1:46598 Accepted
+[Tue Jun 23 21:41:44 2026] 127.0.0.1:46598 [200]: GET /technology.png
+[Tue Jun 23 21:41:44 2026] 127.0.0.1:46598 Closing
+[Tue Jun 23 21:41:44 2026] 127.0.0.1:46608 Accepted
+[Tue Jun 23 21:41:44 2026] 127.0.0.1:46608 [200]: GET /physical_education.png
+[Tue Jun 23 21:41:44 2026] 127.0.0.1:46608 Closing
+[Tue Jun 23 21:41:50 2026] 127.0.0.1:46618 Accepted
+[Tue Jun 23 21:41:50 2026] 127.0.0.1:46618 [200]: GET /matematicas.php
+[Tue Jun 23 21:41:50 2026] 127.0.0.1:46618 Closing
+[Tue Jun 23 21:41:50 2026] 127.0.0.1:46622 Accepted
+[Tue Jun 23 21:41:50 2026] 127.0.0.1:46622 [200]: GET /styles.css
+[Tue Jun 23 21:41:50 2026] 127.0.0.1:46622 Closing
+[Tue Jun 23 21:41:51 2026] 127.0.0.1:46638 Accepted
+[Tue Jun 23 21:41:51 2026] 127.0.0.1:46638 [200]: GET /mathematics.png
+[Tue Jun 23 21:41:51 2026] 127.0.0.1:46638 Closing
+[Tue Jun 23 21:41:51 2026] 127.0.0.1:46654 Accepted
+[Tue Jun 23 21:41:51 2026] 127.0.0.1:46658 Accepted
+[Tue Jun 23 21:41:51 2026] 127.0.0.1:46654 [200]: GET /presentacion/odp_ajax.js
+[Tue Jun 23 21:41:51 2026] 127.0.0.1:46658 [200]: GET /presentacion/js/scripts.js
+[Tue Jun 23 21:41:51 2026] 127.0.0.1:46654 Closing
+[Tue Jun 23 21:41:51 2026] 127.0.0.1:46658 Closing
+[Tue Jun 23 21:41:54 2026] 127.0.0.1:40246 Accepted
+[Tue Jun 23 21:41:54 2026] 127.0.0.1:40246 [302]: POST /matematicas.php
+[Tue Jun 23 21:41:54 2026] 127.0.0.1:40246 Closing
+[Tue Jun 23 21:41:54 2026] 127.0.0.1:40254 Accepted
+[Tue Jun 23 21:41:54 2026] 127.0.0.1:40254 [200]: GET /profesores.php?materia=1&temas=number-sets
+[Tue Jun 23 21:41:54 2026] 127.0.0.1:40254 Closing
+[Tue Jun 23 21:41:54 2026] 127.0.0.1:40266 Accepted
+[Tue Jun 23 21:41:54 2026] 127.0.0.1:40266 [200]: GET /styles.css
+[Tue Jun 23 21:41:54 2026] 127.0.0.1:40266 Closing
+[Tue Jun 23 21:41:54 2026] 127.0.0.1:40272 Accepted
+[Tue Jun 23 21:41:54 2026] 127.0.0.1:40272 [200]: GET /presentacion/odp_ajax.js
+[Tue Jun 23 21:41:54 2026] 127.0.0.1:40272 Closing
+[Tue Jun 23 21:41:54 2026] 127.0.0.1:40280 Accepted
+[Tue Jun 23 21:41:54 2026] 127.0.0.1:40280 [200]: GET /mathematics.png
+[Tue Jun 23 21:41:54 2026] 127.0.0.1:40280 Closing
+[Tue Jun 23 21:41:55 2026] 127.0.0.1:40288 Accepted
+[Tue Jun 23 21:41:55 2026] 127.0.0.1:40288 [200]: GET /presentacion/js/scripts.js
+[Tue Jun 23 21:41:55 2026] 127.0.0.1:40288 Closing
+[Tue Jun 23 21:42:24 2026] 127.0.0.1:58796 Accepted
+[Tue Jun 23 21:42:24 2026] 127.0.0.1:58796 [200]: GET /crear_clase.php
+[Tue Jun 23 21:42:24 2026] 127.0.0.1:58796 Closing
+[Tue Jun 23 21:42:24 2026] 127.0.0.1:58798 Accepted
+[Tue Jun 23 21:42:24 2026] 127.0.0.1:58802 Accepted
+[Tue Jun 23 21:42:24 2026] 127.0.0.1:58816 Accepted
+[Tue Jun 23 21:42:24 2026] 127.0.0.1:58798 [200]: GET /presentacion/odp_ajax.js
+[Tue Jun 23 21:42:24 2026] 127.0.0.1:58802 [200]: GET /presentacion/js/scripts.js
+[Tue Jun 23 21:42:24 2026] 127.0.0.1:58816 [200]: GET /styles.css
+[Tue Jun 23 21:42:24 2026] 127.0.0.1:58798 Closing
+[Tue Jun 23 21:42:24 2026] 127.0.0.1:58802 Closing
+[Tue Jun 23 21:42:24 2026] 127.0.0.1:58816 Closing
+[Tue Jun 23 21:42:24 2026] 127.0.0.1:58832 Accepted
+[Tue Jun 23 21:42:24 2026] 127.0.0.1:58832 [200]: GET /script.js
+[Tue Jun 23 21:42:24 2026] 127.0.0.1:58832 Closing
+[Tue Jun 23 21:42:44 2026] 127.0.0.1:54862 Accepted
+[Tue Jun 23 21:42:44 2026] 127.0.0.1:54862 [302]: GET /
+[Tue Jun 23 21:42:44 2026] 127.0.0.1:54862 Closing
+[Tue Jun 23 21:42:45 2026] 127.0.0.1:54870 Accepted
+[Tue Jun 23 21:42:45 2026] 127.0.0.1:54870 [200]: GET /materias.php
+[Tue Jun 23 21:42:45 2026] 127.0.0.1:54870 Closing
+[Tue Jun 23 21:42:45 2026] 127.0.0.1:54876 Accepted
+[Tue Jun 23 21:42:45 2026] 127.0.0.1:54876 [200]: GET /biology.png
+[Tue Jun 23 21:42:45 2026] 127.0.0.1:54888 Accepted
+[Tue Jun 23 21:42:45 2026] 127.0.0.1:54894 Accepted
+[Tue Jun 23 21:42:45 2026] 127.0.0.1:54888 [200]: GET /mathematics.png
+[Tue Jun 23 21:42:45 2026] 127.0.0.1:54894 [200]: GET /styles.css
+[Tue Jun 23 21:42:45 2026] 127.0.0.1:54894 Closing
+[Tue Jun 23 21:42:45 2026] 127.0.0.1:54876 Closing
+[Tue Jun 23 21:42:45 2026] 127.0.0.1:54888 Closing
+[Tue Jun 23 21:42:45 2026] 127.0.0.1:54898 Accepted
+[Tue Jun 23 21:42:45 2026] 127.0.0.1:54898 [200]: GET /history.png
+[Tue Jun 23 21:42:45 2026] 127.0.0.1:54910 Accepted
+[Tue Jun 23 21:42:45 2026] 127.0.0.1:54910 [200]: GET /chemistry.png
+[Tue Jun 23 21:42:45 2026] 127.0.0.1:54912 Accepted
+[Tue Jun 23 21:42:45 2026] 127.0.0.1:54912 [200]: GET /physics.png
+[Tue Jun 23 21:42:45 2026] 127.0.0.1:54918 Accepted
+[Tue Jun 23 21:42:45 2026] 127.0.0.1:54918 [200]: GET /presentacion/odp_ajax.js
+[Tue Jun 23 21:42:45 2026] 127.0.0.1:54918 Closing
+[Tue Jun 23 21:42:45 2026] 127.0.0.1:54898 Closing
+[Tue Jun 23 21:42:45 2026] 127.0.0.1:54910 Closing
+[Tue Jun 23 21:42:45 2026] 127.0.0.1:54912 Closing
+[Tue Jun 23 21:42:45 2026] 127.0.0.1:54920 Accepted
+[Tue Jun 23 21:42:45 2026] 127.0.0.1:54920 [200]: GET /presentacion/js/scripts.js
+[Tue Jun 23 21:42:45 2026] 127.0.0.1:54920 Closing
+[Tue Jun 23 21:42:45 2026] 127.0.0.1:54932 Accepted
+[Tue Jun 23 21:42:45 2026] 127.0.0.1:54932 [200]: GET /geography.png
+[Tue Jun 23 21:42:45 2026] 127.0.0.1:54932 Closing
+[Tue Jun 23 21:42:46 2026] 127.0.0.1:54946 Accepted
+[Tue Jun 23 21:42:46 2026] 127.0.0.1:54946 [200]: GET /literature.png
+[Tue Jun 23 21:42:46 2026] 127.0.0.1:54946 Closing
+[Tue Jun 23 21:42:47 2026] 127.0.0.1:54962 Accepted
+[Tue Jun 23 21:42:47 2026] 127.0.0.1:54962 [200]: GET /foreign_languages.png
+[Tue Jun 23 21:42:47 2026] 127.0.0.1:54966 Accepted
+[Tue Jun 23 21:42:47 2026] 127.0.0.1:54966 [200]: GET /art.png
+[Tue Jun 23 21:42:47 2026] 127.0.0.1:54962 Closing
+[Tue Jun 23 21:42:47 2026] 127.0.0.1:54966 Closing
+[Tue Jun 23 21:42:48 2026] 127.0.0.1:54976 Accepted
+[Tue Jun 23 21:42:48 2026] 127.0.0.1:54976 [200]: GET /technology.png
+[Tue Jun 23 21:42:48 2026] 127.0.0.1:54976 Closing
+[Tue Jun 23 21:42:49 2026] 127.0.0.1:54986 Accepted
+[Tue Jun 23 21:42:49 2026] 127.0.0.1:54986 [200]: GET /physical_education.png
+[Tue Jun 23 21:42:49 2026] 127.0.0.1:54986 Closing
+[Tue Jun 23 21:46:10 2026] 127.0.0.1:41404 Accepted
+[Tue Jun 23 21:46:10 2026] 127.0.0.1:41404 [302]: GET /
+[Tue Jun 23 21:46:10 2026] 127.0.0.1:41404 Closing
+[Tue Jun 23 21:46:10 2026] 127.0.0.1:41412 Accepted
+[Tue Jun 23 21:46:10 2026] 127.0.0.1:41412 [200]: GET /materias.php
+[Tue Jun 23 21:46:10 2026] 127.0.0.1:41412 Closing
+[Tue Jun 23 21:46:58 2026] 127.0.0.1:40110 Accepted
+[Tue Jun 23 21:46:58 2026] 127.0.0.1:40110 [200]: GET /api_mobile.php?action=countries - Uncaught PDOException: SQLSTATE[42703]: Undefined column: 7 ERROR:  column "id" does not exist
+LINE 1: SELECT id, nombre, codigo, moneda FROM paises ORDER BY nombr...
+               ^ in /home/runner/workspace/db.php:45
+Stack trace:
+#0 /home/runner/workspace/db.php(45): PDOStatement->execute(Array)
+#1 /home/runner/workspace/api_mobile.php(500): dbAll('SELECT id, nomb...')
+#2 /home/runner/workspace/api_mobile.php(91): handleCountries()
+#3 {main}
+  thrown in /home/runner/workspace/db.php on line 45
+[Tue Jun 23 21:46:58 2026] 127.0.0.1:40110 Closing
+[Tue Jun 23 21:56:28 2026] 127.0.0.1:59320 Accepted
+[Tue Jun 23 21:56:28 2026] 127.0.0.1:59320 [302]: GET /
+[Tue Jun 23 21:56:28 2026] 127.0.0.1:59320 Closing
+[Tue Jun 23 21:56:28 2026] 127.0.0.1:59322 Accepted
+[Tue Jun 23 21:56:28 2026] 127.0.0.1:59322 [200]: GET /materias.php
+[Tue Jun 23 21:56:28 2026] 127.0.0.1:59322 Closing
+[Tue Jun 23 21:56:28 2026] 127.0.0.1:59338 Accepted
+[Tue Jun 23 21:56:28 2026] 127.0.0.1:59338 [200]: GET /styles.css
+[Tue Jun 23 21:56:28 2026] 127.0.0.1:59338 Closing
+[Tue Jun 23 21:56:29 2026] 127.0.0.1:59342 Accepted
+[Tue Jun 23 21:56:29 2026] 127.0.0.1:59342 [200]: GET /mathematics.png
+[Tue Jun 23 21:56:29 2026] 127.0.0.1:59344 Accepted
+[Tue Jun 23 21:56:29 2026] 127.0.0.1:59344 [200]: GET /literature.png
+[Tue Jun 23 21:56:29 2026] 127.0.0.1:59360 Accepted
+[Tue Jun 23 21:56:29 2026] 127.0.0.1:59364 Accepted
+[Tue Jun 23 21:56:29 2026] 127.0.0.1:59360 [200]: GET /foreign_languages.png
+[Tue Jun 23 21:56:29 2026] 127.0.0.1:59364 [200]: GET /geography.png
+[Tue Jun 23 21:56:29 2026] 127.0.0.1:59342 Closing
+[Tue Jun 23 21:56:29 2026] 127.0.0.1:59344 Closing
+[Tue Jun 23 21:56:29 2026] 127.0.0.1:59360 Closing
+[Tue Jun 23 21:56:29 2026] 127.0.0.1:59364 Closing
+[Tue Jun 23 21:56:29 2026] 127.0.0.1:59368 Accepted
+[Tue Jun 23 21:56:29 2026] 127.0.0.1:59368 [200]: GET /chemistry.png
+[Tue Jun 23 21:56:29 2026] 127.0.0.1:59372 Accepted
+[Tue Jun 23 21:56:29 2026] 127.0.0.1:59372 [200]: GET /biology.png
+[Tue Jun 23 21:56:29 2026] 127.0.0.1:59368 Closing
+[Tue Jun 23 21:56:29 2026] 127.0.0.1:59372 Closing
+[Tue Jun 23 21:56:30 2026] 127.0.0.1:59374 Accepted
+[Tue Jun 23 21:56:30 2026] 127.0.0.1:59374 [200]: GET /physics.png
+[Tue Jun 23 21:56:30 2026] 127.0.0.1:59374 Closing
+[Tue Jun 23 21:56:30 2026] 127.0.0.1:59380 Accepted
+[Tue Jun 23 21:56:30 2026] 127.0.0.1:59380 [200]: GET /history.png
+[Tue Jun 23 21:56:30 2026] 127.0.0.1:59380 Closing
+[Tue Jun 23 21:56:31 2026] 127.0.0.1:59394 Accepted
+[Tue Jun 23 21:56:31 2026] 127.0.0.1:59394 [200]: GET /presentacion/odp_ajax.js
+[Tue Jun 23 21:56:31 2026] 127.0.0.1:59394 Closing
+[Tue Jun 23 21:56:31 2026] 127.0.0.1:59408 Accepted
+[Tue Jun 23 21:56:31 2026] 127.0.0.1:59408 [200]: GET /presentacion/js/scripts.js
+[Tue Jun 23 21:56:31 2026] 127.0.0.1:59408 Closing
+[Tue Jun 23 21:56:31 2026] 127.0.0.1:59422 Accepted
+[Tue Jun 23 21:56:31 2026] 127.0.0.1:59422 [200]: GET /art.png
+[Tue Jun 23 21:56:31 2026] 127.0.0.1:59424 Accepted
+[Tue Jun 23 21:56:31 2026] 127.0.0.1:59430 Accepted
+[Tue Jun 23 21:56:31 2026] 127.0.0.1:59424 [200]: GET /technology.png
+[Tue Jun 23 21:56:31 2026] 127.0.0.1:59430 [200]: GET /physical_education.png
+[Tue Jun 23 21:56:31 2026] 127.0.0.1:59424 Closing
+[Tue Jun 23 21:56:31 2026] 127.0.0.1:59422 Closing
+[Tue Jun 23 21:56:31 2026] 127.0.0.1:59430 Closing
+[Tue Jun 23 21:57:15 2026] 127.0.0.1:36308 Accepted
+[Tue Jun 23 21:57:15 2026] 127.0.0.1:36308 [200]: GET /api_mobile.php?action=countries
+[Tue Jun 23 21:57:15 2026] 127.0.0.1:36308 Closing
+[Tue Jun 23 21:59:47 2026] 127.0.0.1:56138 Accepted
+[Tue Jun 23 21:59:47 2026] 127.0.0.1:56138 [302]: GET /
+[Tue Jun 23 21:59:47 2026] 127.0.0.1:56138 Closing
+[Tue Jun 23 21:59:47 2026] 127.0.0.1:56142 Accepted
+[Tue Jun 23 21:59:47 2026] 127.0.0.1:56142 [200]: GET /materias.php
+[Tue Jun 23 21:59:47 2026] 127.0.0.1:56142 Closing
+[Tue Jun 23 21:59:47 2026] 127.0.0.1:56154 Accepted
+[Tue Jun 23 21:59:47 2026] 127.0.0.1:56154 [200]: GET /styles.css
+[Tue Jun 23 21:59:47 2026] 127.0.0.1:56154 Closing
+[Tue Jun 23 21:59:47 2026] 127.0.0.1:56166 Accepted
+[Tue Jun 23 21:59:47 2026] 127.0.0.1:56166 [200]: GET /biology.png
+[Tue Jun 23 21:59:47 2026] 127.0.0.1:56182 Accepted
+[Tue Jun 23 21:59:47 2026] 127.0.0.1:56182 [200]: GET /mathematics.png
+[Tue Jun 23 21:59:47 2026] 127.0.0.1:56166 Closing
+[Tue Jun 23 21:59:47 2026] 127.0.0.1:56182 Closing
+[Tue Jun 23 21:59:47 2026] 127.0.0.1:56184 Accepted
+[Tue Jun 23 21:59:47 2026] 127.0.0.1:56184 [200]: GET /history.png
+[Tue Jun 23 21:59:47 2026] 127.0.0.1:56196 Accepted
+[Tue Jun 23 21:59:47 2026] 127.0.0.1:56196 [200]: GET /chemistry.png
+[Tue Jun 23 21:59:47 2026] 127.0.0.1:56204 Accepted
+[Tue Jun 23 21:59:47 2026] 127.0.0.1:56204 [200]: GET /physics.png
+[Tue Jun 23 21:59:47 2026] 127.0.0.1:56208 Accepted
+[Tue Jun 23 21:59:47 2026] 127.0.0.1:56208 [200]: GET /presentacion/odp_ajax.js
+[Tue Jun 23 21:59:47 2026] 127.0.0.1:56208 Closing
+[Tue Jun 23 21:59:47 2026] 127.0.0.1:56184 Closing
+[Tue Jun 23 21:59:47 2026] 127.0.0.1:56196 Closing
+[Tue Jun 23 21:59:47 2026] 127.0.0.1:56204 Closing
+[Tue Jun 23 21:59:47 2026] 127.0.0.1:56220 Accepted
+[Tue Jun 23 21:59:47 2026] 127.0.0.1:56220 [200]: GET /presentacion/js/scripts.js
+[Tue Jun 23 21:59:47 2026] 127.0.0.1:56220 Closing
+[Tue Jun 23 21:59:47 2026] 127.0.0.1:56230 Accepted
+[Tue Jun 23 21:59:47 2026] 127.0.0.1:56230 [200]: GET /geography.png
+[Tue Jun 23 21:59:47 2026] 127.0.0.1:56230 Closing
+[Tue Jun 23 21:59:48 2026] 127.0.0.1:56234 Accepted
+[Tue Jun 23 21:59:48 2026] 127.0.0.1:56234 [200]: GET /literature.png
+[Tue Jun 23 21:59:48 2026] 127.0.0.1:56234 Closing
+[Tue Jun 23 21:59:49 2026] 127.0.0.1:56238 Accepted
+[Tue Jun 23 21:59:49 2026] 127.0.0.1:56238 [200]: GET /foreign_languages.png
+[Tue Jun 23 21:59:49 2026] 127.0.0.1:56238 Closing
+[Tue Jun 23 21:59:49 2026] 127.0.0.1:56246 Accepted
+[Tue Jun 23 21:59:49 2026] 127.0.0.1:56246 [200]: GET /art.png
+[Tue Jun 23 21:59:49 2026] 127.0.0.1:56246 Closing
+[Tue Jun 23 21:59:49 2026] 127.0.0.1:56260 Accepted
+[Tue Jun 23 21:59:49 2026] 127.0.0.1:56260 [200]: GET /technology.png
+[Tue Jun 23 21:59:49 2026] 127.0.0.1:56260 Closing
+[Tue Jun 23 21:59:49 2026] 127.0.0.1:56276 Accepted
+[Tue Jun 23 21:59:49 2026] 127.0.0.1:56276 [200]: GET /physical_education.png
+[Tue Jun 23 21:59:49 2026] 127.0.0.1:56276 Closing
+[Tue Jun 23 22:00:19 2026] 127.0.0.1:35340 Accepted
+[Tue Jun 23 22:00:19 2026] 127.0.0.1:35340 [200]: GET /matematicas.php
+[Tue Jun 23 22:00:19 2026] 127.0.0.1:35340 Closing
+[Tue Jun 23 22:00:19 2026] 127.0.0.1:35356 Accepted
+[Tue Jun 23 22:00:19 2026] 127.0.0.1:35358 Accepted
+[Tue Jun 23 22:00:19 2026] 127.0.0.1:35356 [200]: GET /mathematics.png
+[Tue Jun 23 22:00:19 2026] 127.0.0.1:35358 [200]: GET /styles.css
+[Tue Jun 23 22:00:19 2026] 127.0.0.1:35358 Closing
+[Tue Jun 23 22:00:19 2026] 127.0.0.1:35356 Closing
+[Tue Jun 23 22:00:19 2026] 127.0.0.1:35362 Accepted
+[Tue Jun 23 22:00:19 2026] 127.0.0.1:35362 [200]: GET /presentacion/odp_ajax.js
+[Tue Jun 23 22:00:19 2026] 127.0.0.1:35362 Closing
+[Tue Jun 23 22:00:19 2026] 127.0.0.1:35372 Accepted
+[Tue Jun 23 22:00:19 2026] 127.0.0.1:35372 [200]: GET /presentacion/js/scripts.js
+[Tue Jun 23 22:00:19 2026] 127.0.0.1:35372 Closing
+[Tue Jun 23 22:00:22 2026] 127.0.0.1:35384 Accepted
+[Tue Jun 23 22:00:22 2026] 127.0.0.1:35384 [302]: POST /matematicas.php
+[Tue Jun 23 22:00:22 2026] 127.0.0.1:35384 Closing
+[Tue Jun 23 22:00:23 2026] 127.0.0.1:35396 Accepted
+[Tue Jun 23 22:00:23 2026] 127.0.0.1:35396 [200]: GET /profesores.php?materia=1&temas=number-sets
+[Tue Jun 23 22:00:23 2026] 127.0.0.1:35396 Closing
+[Tue Jun 23 22:00:24 2026] 127.0.0.1:47284 Accepted
+[Tue Jun 23 22:00:24 2026] 127.0.0.1:47284 [200]: GET /styles.css
+[Tue Jun 23 22:00:24 2026] 127.0.0.1:47284 Closing
+[Tue Jun 23 22:00:24 2026] 127.0.0.1:47298 Accepted
+[Tue Jun 23 22:00:24 2026] 127.0.0.1:47298 [200]: GET /mathematics.png
+[Tue Jun 23 22:00:24 2026] 127.0.0.1:47298 Closing
+[Tue Jun 23 22:00:24 2026] 127.0.0.1:47312 Accepted
+[Tue Jun 23 22:00:24 2026] 127.0.0.1:47312 [200]: GET /presentacion/js/scripts.js
+[Tue Jun 23 22:00:24 2026] 127.0.0.1:47312 Closing
+[Tue Jun 23 22:00:24 2026] 127.0.0.1:47322 Accepted
+[Tue Jun 23 22:00:24 2026] 127.0.0.1:47322 [200]: GET /presentacion/odp_ajax.js
+[Tue Jun 23 22:00:24 2026] 127.0.0.1:47322 Closing
+[Tue Jun 23 22:00:25 2026] 127.0.0.1:47332 Accepted
+[Tue Jun 23 22:00:25 2026] 127.0.0.1:47332 [200]: GET /mathematics.png
+[Tue Jun 23 22:00:25 2026] 127.0.0.1:47332 Closing
+[Tue Jun 23 22:00:29 2026] 127.0.0.1:47346 Accepted
+[Tue Jun 23 22:00:29 2026] 127.0.0.1:47346 [200]: GET /crear_clase.php
+[Tue Jun 23 22:00:29 2026] 127.0.0.1:47346 Closing
+[Tue Jun 23 22:00:31 2026] 127.0.0.1:47356 Accepted
+[Tue Jun 23 22:00:31 2026] 127.0.0.1:47356 [200]: GET /script.js
+[Tue Jun 23 22:00:31 2026] 127.0.0.1:47368 Accepted
+[Tue Jun 23 22:00:31 2026] 127.0.0.1:47356 Closing
+[Tue Jun 23 22:00:31 2026] 127.0.0.1:47368 [200]: GET /presentacion/odp_ajax.js
+[Tue Jun 23 22:00:31 2026] 127.0.0.1:47368 Closing
+[Tue Jun 23 22:00:31 2026] 127.0.0.1:47374 Accepted
+[Tue Jun 23 22:00:31 2026] 127.0.0.1:47374 [200]: GET /styles.css
+[Tue Jun 23 22:00:31 2026] 127.0.0.1:47374 Closing
+[Tue Jun 23 22:00:31 2026] 127.0.0.1:47384 Accepted
+[Tue Jun 23 22:00:31 2026] 127.0.0.1:47384 [200]: GET /presentacion/js/scripts.js
+[Tue Jun 23 22:00:31 2026] 127.0.0.1:47384 Closing
+[Tue Jun 23 22:02:20 2026] 127.0.0.1:44856 Accepted
+[Tue Jun 23 22:02:20 2026] 127.0.0.1:44856 [302]: GET /
+[Tue Jun 23 22:02:20 2026] 127.0.0.1:44856 Closing
+[Tue Jun 23 22:02:20 2026] 127.0.0.1:44866 Accepted
+[Tue Jun 23 22:02:20 2026] 127.0.0.1:44866 [200]: GET /materias.php
+[Tue Jun 23 22:02:20 2026] 127.0.0.1:44866 Closing
+[Tue Jun 23 22:02:20 2026] 127.0.0.1:44880 Accepted
+[Tue Jun 23 22:02:20 2026] 127.0.0.1:44884 Accepted
+[Tue Jun 23 22:02:20 2026] 127.0.0.1:44880 [200]: GET /mathematics.png
+[Tue Jun 23 22:02:20 2026] 127.0.0.1:44884 [200]: GET /styles.css
+[Tue Jun 23 22:02:20 2026] 127.0.0.1:44884 Closing
+[Tue Jun 23 22:02:20 2026] 127.0.0.1:44888 Accepted
+[Tue Jun 23 22:02:20 2026] 127.0.0.1:44888 [200]: GET /biology.png
+[Tue Jun 23 22:02:20 2026] 127.0.0.1:44880 Closing
+[Tue Jun 23 22:02:20 2026] 127.0.0.1:44888 Closing
+[Tue Jun 23 22:02:21 2026] 127.0.0.1:44904 Accepted
+[Tue Jun 23 22:02:21 2026] 127.0.0.1:44904 [200]: GET /history.png
+[Tue Jun 23 22:02:21 2026] 127.0.0.1:44912 Accepted
+[Tue Jun 23 22:02:21 2026] 127.0.0.1:44912 [200]: GET /chemistry.png
+[Tue Jun 23 22:02:21 2026] 127.0.0.1:44914 Accepted
+[Tue Jun 23 22:02:21 2026] 127.0.0.1:44914 [200]: GET /physics.png
+[Tue Jun 23 22:02:21 2026] 127.0.0.1:44904 Closing
+[Tue Jun 23 22:02:21 2026] 127.0.0.1:44912 Closing
+[Tue Jun 23 22:02:21 2026] 127.0.0.1:44914 Closing
+[Tue Jun 23 22:02:21 2026] 127.0.0.1:44926 Accepted
+[Tue Jun 23 22:02:21 2026] 127.0.0.1:44926 [200]: GET /presentacion/odp_ajax.js
+[Tue Jun 23 22:02:21 2026] 127.0.0.1:44926 Closing
+[Tue Jun 23 22:02:21 2026] 127.0.0.1:44940 Accepted
+[Tue Jun 23 22:02:21 2026] 127.0.0.1:44940 [200]: GET /presentacion/js/scripts.js
+[Tue Jun 23 22:02:21 2026] 127.0.0.1:44940 Closing
+[Tue Jun 23 22:02:21 2026] 127.0.0.1:44948 Accepted
+[Tue Jun 23 22:02:21 2026] 127.0.0.1:44948 [200]: GET /geography.png
+[Tue Jun 23 22:02:21 2026] 127.0.0.1:44948 Closing
+[Tue Jun 23 22:02:22 2026] 127.0.0.1:44954 Accepted
+[Tue Jun 23 22:02:22 2026] 127.0.0.1:44954 [200]: GET /literature.png
+[Tue Jun 23 22:02:22 2026] 127.0.0.1:44954 Closing
+[Tue Jun 23 22:02:23 2026] 127.0.0.1:44958 Accepted
+[Tue Jun 23 22:02:23 2026] 127.0.0.1:44958 [200]: GET /foreign_languages.png
+[Tue Jun 23 22:02:23 2026] 127.0.0.1:44958 Closing
+[Tue Jun 23 22:02:23 2026] 127.0.0.1:44966 Accepted
+[Tue Jun 23 22:02:23 2026] 127.0.0.1:44966 [200]: GET /art.png
+[Tue Jun 23 22:02:23 2026] 127.0.0.1:44966 Closing
+[Tue Jun 23 22:02:23 2026] 127.0.0.1:44972 Accepted
+[Tue Jun 23 22:02:23 2026] 127.0.0.1:44972 [200]: GET /technology.png
+[Tue Jun 23 22:02:23 2026] 127.0.0.1:44972 Closing
+[Tue Jun 23 22:02:24 2026] 127.0.0.1:55926 Accepted
+[Tue Jun 23 22:02:24 2026] 127.0.0.1:55926 [200]: GET /physical_education.png
+[Tue Jun 23 22:02:24 2026] 127.0.0.1:55926 Closing
+[Tue Jun 23 22:02:37 2026] 127.0.0.1:41704 Accepted
+[Tue Jun 23 22:02:37 2026] 127.0.0.1:41704 [200]: GET /matematicas.php
+[Tue Jun 23 22:02:37 2026] 127.0.0.1:41704 Closing
+[Tue Jun 23 22:02:37 2026] 127.0.0.1:41716 Accepted
+[Tue Jun 23 22:02:37 2026] 127.0.0.1:41716 [200]: GET /mathematics.png
+[Tue Jun 23 22:02:37 2026] 127.0.0.1:41730 Accepted
+[Tue Jun 23 22:02:37 2026] 127.0.0.1:41730 [200]: GET /styles.css
+[Tue Jun 23 22:02:37 2026] 127.0.0.1:41730 Closing
+[Tue Jun 23 22:02:37 2026] 127.0.0.1:41716 Closing
+[Tue Jun 23 22:02:37 2026] 127.0.0.1:41744 Accepted
+[Tue Jun 23 22:02:37 2026] 127.0.0.1:41744 [200]: GET /presentacion/odp_ajax.js
+[Tue Jun 23 22:02:37 2026] 127.0.0.1:41744 Closing
+[Tue Jun 23 22:02:37 2026] 127.0.0.1:41752 Accepted
+[Tue Jun 23 22:02:37 2026] 127.0.0.1:41752 [200]: GET /presentacion/js/scripts.js
+[Tue Jun 23 22:02:37 2026] 127.0.0.1:41752 Closing
+[Tue Jun 23 22:02:40 2026] 127.0.0.1:41760 Accepted
+[Tue Jun 23 22:02:40 2026] 127.0.0.1:41760 [302]: POST /matematicas.php
+[Tue Jun 23 22:02:40 2026] 127.0.0.1:41760 Closing
+[Tue Jun 23 22:02:40 2026] 127.0.0.1:41772 Accepted
+[Tue Jun 23 22:02:40 2026] 127.0.0.1:41772 [200]: GET /profesores.php?materia=1&temas=number-sets
+[Tue Jun 23 22:02:40 2026] 127.0.0.1:41772 Closing
+[Tue Jun 23 22:02:40 2026] 127.0.0.1:41784 Accepted
+[Tue Jun 23 22:02:40 2026] 127.0.0.1:41784 [200]: GET /styles.css
+[Tue Jun 23 22:02:40 2026] 127.0.0.1:41784 Closing
+[Tue Jun 23 22:02:40 2026] 127.0.0.1:41790 Accepted
+[Tue Jun 23 22:02:40 2026] 127.0.0.1:41790 [200]: GET /presentacion/odp_ajax.js
+[Tue Jun 23 22:02:40 2026] 127.0.0.1:41790 Closing
+[Tue Jun 23 22:02:40 2026] 127.0.0.1:41804 Accepted
+[Tue Jun 23 22:02:40 2026] 127.0.0.1:41804 [200]: GET /mathematics.png
+[Tue Jun 23 22:02:40 2026] 127.0.0.1:41804 Closing
+[Tue Jun 23 22:02:40 2026] 127.0.0.1:41810 Accepted
+[Tue Jun 23 22:02:40 2026] 127.0.0.1:41810 [200]: GET /presentacion/js/scripts.js
+[Tue Jun 23 22:02:40 2026] 127.0.0.1:41810 Closing
+[Tue Jun 23 22:02:44 2026] 127.0.0.1:50110 Accepted
+[Tue Jun 23 22:02:44 2026] 127.0.0.1:50110 [200]: GET /crear_clase.php
+[Tue Jun 23 22:02:44 2026] 127.0.0.1:50110 Closing
+[Tue Jun 23 22:02:44 2026] 127.0.0.1:50112 Accepted
+[Tue Jun 23 22:02:44 2026] 127.0.0.1:50112 [200]: GET /script.js
+[Tue Jun 23 22:02:44 2026] 127.0.0.1:50116 Accepted
+[Tue Jun 23 22:02:44 2026] 127.0.0.1:50112 Closing
+[Tue Jun 23 22:02:44 2026] 127.0.0.1:50116 [200]: GET /presentacion/odp_ajax.js
+[Tue Jun 23 22:02:44 2026] 127.0.0.1:50116 Closing
+[Tue Jun 23 22:02:44 2026] 127.0.0.1:50128 Accepted
+[Tue Jun 23 22:02:44 2026] 127.0.0.1:50128 [200]: GET /presentacion/js/scripts.js
+[Tue Jun 23 22:02:44 2026] 127.0.0.1:50128 Closing
+[Tue Jun 23 22:02:44 2026] 127.0.0.1:50142 Accepted
+[Tue Jun 23 22:02:44 2026] 127.0.0.1:50142 [200]: GET /styles.css
+[Tue Jun 23 22:02:44 2026] 127.0.0.1:50142 Closing
+[Tue Jun 23 22:06:34 2026] 127.0.0.1:42470 Accepted
+[Tue Jun 23 22:06:34 2026] 127.0.0.1:42470 [302]: GET /
+[Tue Jun 23 22:06:34 2026] 127.0.0.1:42470 Closing
+[Tue Jun 23 22:06:34 2026] 127.0.0.1:42474 Accepted
+[Tue Jun 23 22:06:34 2026] 127.0.0.1:42474 [200]: GET /materias.php
+[Tue Jun 23 22:06:34 2026] 127.0.0.1:42474 Closing
+[Tue Jun 23 22:06:34 2026] 127.0.0.1:42490 Accepted
+[Tue Jun 23 22:06:34 2026] 127.0.0.1:42490 [200]: GET /styles.css
+[Tue Jun 23 22:06:34 2026] 127.0.0.1:42504 Accepted
+[Tue Jun 23 22:06:34 2026] 127.0.0.1:42490 Closing
+[Tue Jun 23 22:06:34 2026] 127.0.0.1:42512 Accepted
+[Tue Jun 23 22:06:34 2026] 127.0.0.1:42504 [200]: GET /biology.png
+[Tue Jun 23 22:06:34 2026] 127.0.0.1:42512 [200]: GET /mathematics.png
+[Tue Jun 23 22:06:34 2026] 127.0.0.1:42516 Accepted
+[Tue Jun 23 22:06:35 2026] 127.0.0.1:42526 Accepted
+[Tue Jun 23 22:06:35 2026] 127.0.0.1:42516 [200]: GET /history.png
+[Tue Jun 23 22:06:35 2026] 127.0.0.1:42530 Accepted
+[Tue Jun 23 22:06:35 2026] 127.0.0.1:42526 [200]: GET /chemistry.png
+[Tue Jun 23 22:06:35 2026] 127.0.0.1:42532 Accepted
+[Tue Jun 23 22:06:35 2026] 127.0.0.1:42530 [200]: GET /physics.png
+[Tue Jun 23 22:06:35 2026] 127.0.0.1:42532 [200]: GET /presentacion/odp_ajax.js
+[Tue Jun 23 22:06:35 2026] 127.0.0.1:42532 Closing
+[Tue Jun 23 22:06:35 2026] 127.0.0.1:42512 Closing
+[Tue Jun 23 22:06:35 2026] 127.0.0.1:42504 Closing
+[Tue Jun 23 22:06:35 2026] 127.0.0.1:42526 Closing
+[Tue Jun 23 22:06:35 2026] 127.0.0.1:42530 Closing
+[Tue Jun 23 22:06:35 2026] 127.0.0.1:42516 Closing
+[Tue Jun 23 22:06:35 2026] 127.0.0.1:42542 Accepted
+[Tue Jun 23 22:06:35 2026] 127.0.0.1:42542 [200]: GET /literature.png
+[Tue Jun 23 22:06:35 2026] 127.0.0.1:42542 Closing
+[Tue Jun 23 22:06:36 2026] 127.0.0.1:42550 Accepted
+[Tue Jun 23 22:06:36 2026] 127.0.0.1:42550 [200]: GET /geography.png
+[Tue Jun 23 22:06:36 2026] 127.0.0.1:42550 Closing
+[Tue Jun 23 22:06:37 2026] 127.0.0.1:42556 Accepted
+[Tue Jun 23 22:06:37 2026] 127.0.0.1:42556 [200]: GET /foreign_languages.png
+[Tue Jun 23 22:06:37 2026] 127.0.0.1:42556 Closing
+[Tue Jun 23 22:06:37 2026] 127.0.0.1:42558 Accepted
+[Tue Jun 23 22:06:37 2026] 127.0.0.1:42558 [200]: GET /presentacion/js/scripts.js
+[Tue Jun 23 22:06:37 2026] 127.0.0.1:42558 Closing
+[Tue Jun 23 22:06:37 2026] 127.0.0.1:42564 Accepted
+[Tue Jun 23 22:06:37 2026] 127.0.0.1:42564 [200]: GET /art.png
+[Tue Jun 23 22:06:37 2026] 127.0.0.1:42564 Closing
+[Tue Jun 23 22:06:37 2026] 127.0.0.1:42580 Accepted
+[Tue Jun 23 22:06:37 2026] 127.0.0.1:42580 [200]: GET /technology.png
+[Tue Jun 23 22:06:37 2026] 127.0.0.1:42580 Closing
+[Tue Jun 23 22:06:38 2026] 127.0.0.1:42592 Accepted
+[Tue Jun 23 22:06:38 2026] 127.0.0.1:42592 [200]: GET /physical_education.png
+[Tue Jun 23 22:06:38 2026] 127.0.0.1:42592 Closing
+[Tue Jun 23 22:11:19 2026] 127.0.0.1:32988 Accepted
+[Tue Jun 23 22:11:19 2026] 127.0.0.1:32988 [302]: GET /
+[Tue Jun 23 22:11:19 2026] 127.0.0.1:32988 Closing
+[Tue Jun 23 22:11:19 2026] 127.0.0.1:32996 Accepted
+[Tue Jun 23 22:11:20 2026] 127.0.0.1:32996 [200]: GET /login.php
+[Tue Jun 23 22:11:20 2026] 127.0.0.1:32996 Closing
+[Tue Jun 23 22:11:20 2026] 127.0.0.1:33012 Accepted
+[Tue Jun 23 22:11:20 2026] 127.0.0.1:33012 [200]: GET /styles.css
+[Tue Jun 23 22:11:20 2026] 127.0.0.1:33012 Closing
+[Tue Jun 23 22:11:20 2026] 127.0.0.1:33024 Accepted
+[Tue Jun 23 22:11:20 2026] 127.0.0.1:33024 [200]: GET /presentacion/odp_ajax.js
+[Tue Jun 23 22:11:20 2026] 127.0.0.1:33024 Closing
+[Tue Jun 23 22:11:20 2026] 127.0.0.1:33038 Accepted
+[Tue Jun 23 22:11:20 2026] 127.0.0.1:33038 [200]: GET /presentacion/js/scripts.js
+[Tue Jun 23 22:11:20 2026] 127.0.0.1:33038 Closing
+[Tue Jun 23 22:18:01 2026] 127.0.0.1:37212 Accepted
+[Tue Jun 23 22:18:01 2026] 127.0.0.1:37212 [302]: GET /
+[Tue Jun 23 22:18:01 2026] 127.0.0.1:37212 Closing
+[Tue Jun 23 22:18:01 2026] 127.0.0.1:37214 Accepted
+[Tue Jun 23 22:18:01 2026] 127.0.0.1:37214 [200]: GET /login.php
+[Tue Jun 23 22:18:01 2026] 127.0.0.1:37214 Closing
+[Tue Jun 23 22:18:01 2026] 127.0.0.1:37226 Accepted
+[Tue Jun 23 22:18:01 2026] 127.0.0.1:37226 [200]: GET /styles.css
+[Tue Jun 23 22:18:01 2026] 127.0.0.1:37226 Closing
+[Tue Jun 23 22:18:02 2026] 127.0.0.1:37242 Accepted
+[Tue Jun 23 22:18:02 2026] 127.0.0.1:37242 [200]: GET /presentacion/js/scripts.js
+[Tue Jun 23 22:18:02 2026] 127.0.0.1:37242 Closing
+[Tue Jun 23 22:18:02 2026] 127.0.0.1:37244 Accepted
+[Tue Jun 23 22:18:02 2026] 127.0.0.1:37244 [200]: GET /presentacion/odp_ajax.js
+[Tue Jun 23 22:18:02 2026] 127.0.0.1:37244 Closing

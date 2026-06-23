@@ -1,0 +1,25 @@
+[Tue Jun 23 15:06:58 2026] PHP 8.2.23 Development Server (http://0.0.0.0:5000) started
+[Tue Jun 23 15:11:33 2026] 127.0.0.1:45164 Accepted
+[Tue Jun 23 15:11:33 2026] 127.0.0.1:45164 [200]: GET /forgot_password.php
+[Tue Jun 23 15:11:33 2026] 127.0.0.1:45164 Closing
+[Tue Jun 23 15:11:33 2026] 127.0.0.1:45172 Accepted
+[Tue Jun 23 15:11:33 2026] 127.0.0.1:45172 [200]: GET /reset_password.php?token=badtoken
+[Tue Jun 23 15:11:33 2026] 127.0.0.1:45172 Closing
+[Tue Jun 23 15:11:33 2026] 127.0.0.1:45174 Accepted
+[Tue Jun 23 15:11:33 2026] 127.0.0.1:45174 [200]: GET /login.php
+[Tue Jun 23 15:11:33 2026] 127.0.0.1:45174 Closing
+[Tue Jun 23 15:11:39 2026] 127.0.0.1:45188 Accepted
+[Tue Jun 23 15:11:39 2026] 127.0.0.1:45188 [200]: GET /login.php
+[Tue Jun 23 15:11:39 2026] 127.0.0.1:45188 Closing
+[Tue Jun 23 15:11:39 2026] 127.0.0.1:45200 Accepted
+[Tue Jun 23 15:11:39 2026] 127.0.0.1:45206 Accepted
+[Tue Jun 23 15:11:39 2026] 127.0.0.1:45212 Accepted
+[Tue Jun 23 15:11:39 2026] 127.0.0.1:45200 [200]: GET /styles.css
+[Tue Jun 23 15:11:39 2026] 127.0.0.1:45206 [200]: GET /presentacion/odp_ajax.js
+[Tue Jun 23 15:11:39 2026] 127.0.0.1:45212 [200]: GET /presentacion/js/scripts.js
+[Tue Jun 23 15:11:39 2026] 127.0.0.1:45200 Closing
+[Tue Jun 23 15:11:39 2026] 127.0.0.1:45206 Closing
+[Tue Jun 23 15:11:39 2026] 127.0.0.1:45212 Closing
+[Tue Jun 23 15:11:39 2026] 127.0.0.1:45226 Accepted
+[Tue Jun 23 15:11:39 2026] 127.0.0.1:45226 [200]: GET /favico.svg
+[Tue Jun 23 15:11:39 2026] 127.0.0.1:45226 Closing

@@ -1,0 +1,157 @@
+[Tue Jun 23 15:31:31 2026] PHP 8.2.23 Development Server (http://0.0.0.0:5000) started
+[Tue Jun 23 15:31:54 2026] 127.0.0.1:41874 Accepted
+[Tue Jun 23 15:31:54 2026] 127.0.0.1:41874 [200]: GET /materias.php
+[Tue Jun 23 15:31:54 2026] 127.0.0.1:41874 Closing
+[Tue Jun 23 15:31:54 2026] 127.0.0.1:41888 Accepted
+[Tue Jun 23 15:31:54 2026] 127.0.0.1:41888 [200]: GET /amigos.php
+[Tue Jun 23 15:31:54 2026] 127.0.0.1:41888 Closing
+[Tue Jun 23 15:31:54 2026] 127.0.0.1:41900 Accepted
+[Tue Jun 23 15:31:54 2026] 127.0.0.1:41900 [200]: GET /calificar.php
+[Tue Jun 23 15:31:54 2026] 127.0.0.1:41900 Closing
+[Tue Jun 23 15:31:54 2026] 127.0.0.1:41904 Accepted
+[Tue Jun 23 15:31:54 2026] 127.0.0.1:41904 [200]: GET /profesores.php
+[Tue Jun 23 15:31:54 2026] 127.0.0.1:41904 Closing
+[Tue Jun 23 15:31:54 2026] 127.0.0.1:41910 Accepted
+[Tue Jun 23 15:31:54 2026] 127.0.0.1:41910 [200]: GET /perfil.php
+[Tue Jun 23 15:31:54 2026] 127.0.0.1:41910 Closing
+[Tue Jun 23 15:31:54 2026] 127.0.0.1:41922 Accepted
+[Tue Jun 23 15:31:54 2026] 127.0.0.1:41922 [200]: GET /checkout.php
+[Tue Jun 23 15:31:54 2026] 127.0.0.1:41922 Closing
+[Tue Jun 23 15:31:54 2026] 127.0.0.1:41932 Accepted
+[Tue Jun 23 15:31:54 2026] 127.0.0.1:41932 [200]: GET /buscar.php
+[Tue Jun 23 15:31:54 2026] 127.0.0.1:41932 Closing
+[Tue Jun 23 15:31:54 2026] 127.0.0.1:41934 Accepted
+[Tue Jun 23 15:31:54 2026] 127.0.0.1:41934 [200]: GET /sala.php
+[Tue Jun 23 15:31:54 2026] 127.0.0.1:41934 Closing
+[Tue Jun 23 15:31:54 2026] 127.0.0.1:41938 Accepted
+[Tue Jun 23 15:31:54 2026] 127.0.0.1:41938 [200]: GET /pago.php
+[Tue Jun 23 15:31:54 2026] 127.0.0.1:41938 Closing
+[Tue Jun 23 15:31:54 2026] 127.0.0.1:41946 Accepted
+[Tue Jun 23 15:31:54 2026] 127.0.0.1:41946 [200]: GET /api_sala.php
+[Tue Jun 23 15:31:54 2026] 127.0.0.1:41946 Closing
+[Tue Jun 23 15:31:54 2026] 127.0.0.1:41954 Accepted
+[Tue Jun 23 15:31:54 2026] 127.0.0.1:41954 [200]: GET /crear_clase.php
+[Tue Jun 23 15:31:54 2026] 127.0.0.1:41954 Closing
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:41970 Accepted
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:41970 [200]: GET /oferta_clase.php
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:41970 Closing
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:41978 Accepted
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:41978 [302]: GET /dashboard_profesor.php
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:41978 Closing
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:41980 Accepted
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:41980 [200]: GET /matematicas.php
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:41980 Closing
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:41994 Accepted
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:41994 [200]: GET /historia.php
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:41994 Closing
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:42004 Accepted
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:42004 [200]: GET /literatura.php
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:42004 Closing
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:42018 Accepted
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:42018 [200]: GET /quimica.php
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:42018 Closing
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:42022 Accepted
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:42022 [200]: GET /biologia.php
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:42022 Closing
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:42032 Accepted
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:42032 [200]: GET /fisica.php
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:42032 Closing
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:42046 Accepted
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:42046 [200]: GET /geografia.php
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:42046 Closing
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:42058 Accepted
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:42058 [200]: GET /arte.php
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:42058 Closing
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:42064 Accepted
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:42064 [200]: GET /educacion_fisica.php
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:42064 Closing
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:42066 Accepted
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:42066 [200]: GET /idiomas.php
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:42066 Closing
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:42072 Accepted
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:42072 [200]: GET /tecnologia.php
+[Tue Jun 23 15:31:55 2026] 127.0.0.1:42072 Closing
+[Tue Jun 23 15:32:05 2026] 127.0.0.1:54690 Accepted
+[Tue Jun 23 15:32:05 2026] 127.0.0.1:54690 [200]: GET /buscar.php
+[Tue Jun 23 15:32:05 2026] 127.0.0.1:54690 Closing
+[Tue Jun 23 15:32:05 2026] 127.0.0.1:54698 Accepted
+[Tue Jun 23 15:32:05 2026] 127.0.0.1:54698 [200]: GET /sala.php
+[Tue Jun 23 15:32:05 2026] 127.0.0.1:54698 Closing
+[Tue Jun 23 15:32:05 2026] 127.0.0.1:54708 Accepted
+[Tue Jun 23 15:32:05 2026] 127.0.0.1:54708 [200]: GET /pago.php
+[Tue Jun 23 15:32:05 2026] 127.0.0.1:54708 Closing
+[Tue Jun 23 15:32:06 2026] 127.0.0.1:54714 Accepted
+[Tue Jun 23 15:32:06 2026] 127.0.0.1:54714 [200]: GET /crear_clase.php
+[Tue Jun 23 15:32:06 2026] 127.0.0.1:54714 Closing
+[Tue Jun 23 15:32:06 2026] 127.0.0.1:54730 Accepted
+[Tue Jun 23 15:32:06 2026] 127.0.0.1:54730 [200]: GET /oferta_clase.php
+[Tue Jun 23 15:32:06 2026] 127.0.0.1:54730 Closing
+[Tue Jun 23 15:32:06 2026] 127.0.0.1:54736 Accepted
+[Tue Jun 23 15:32:06 2026] 127.0.0.1:54736 [200]: GET /amigos.php
+[Tue Jun 23 15:32:06 2026] 127.0.0.1:54736 Closing
+[Tue Jun 23 15:32:06 2026] 127.0.0.1:54744 Accepted
+[Tue Jun 23 15:32:06 2026] 127.0.0.1:54744 [200]: GET /calificar.php
+[Tue Jun 23 15:32:06 2026] 127.0.0.1:54744 Closing
+[Tue Jun 23 15:32:06 2026] 127.0.0.1:54754 Accepted
+[Tue Jun 23 15:32:06 2026] 127.0.0.1:54754 [200]: GET /perfil.php
+[Tue Jun 23 15:32:06 2026] 127.0.0.1:54754 Closing
+[Tue Jun 23 15:32:06 2026] 127.0.0.1:54768 Accepted
+[Tue Jun 23 15:32:06 2026] 127.0.0.1:54768 [200]: GET /checkout.php
+[Tue Jun 23 15:32:06 2026] 127.0.0.1:54768 Closing
+[Tue Jun 23 15:32:07 2026] 127.0.0.1:54770 Accepted
+[Tue Jun 23 15:32:07 2026] 127.0.0.1:54770 [200]: GET /matematicas.php
+[Tue Jun 23 15:32:07 2026] 127.0.0.1:54770 Closing
+[Tue Jun 23 15:32:07 2026] 127.0.0.1:54784 Accepted
+[Tue Jun 23 15:32:07 2026] 127.0.0.1:54784 [200]: GET /fisica.php
+[Tue Jun 23 15:32:07 2026] 127.0.0.1:54784 Closing
+[Tue Jun 23 15:32:07 2026] 127.0.0.1:54796 Accepted
+[Tue Jun 23 15:32:07 2026] 127.0.0.1:54796 [200]: GET /geografia.php
+[Tue Jun 23 15:32:07 2026] 127.0.0.1:54796 Closing
+[Tue Jun 23 15:32:07 2026] 127.0.0.1:54804 Accepted
+[Tue Jun 23 15:32:07 2026] 127.0.0.1:54804 [200]: GET /tecnologia.php
+[Tue Jun 23 15:32:07 2026] 127.0.0.1:54804 Closing
+[Tue Jun 23 15:32:07 2026] 127.0.0.1:54820 Accepted
+[Tue Jun 23 15:32:07 2026] 127.0.0.1:54820 [200]: GET /idiomas.php
+[Tue Jun 23 15:32:07 2026] 127.0.0.1:54820 Closing
+[Tue Jun 23 15:32:07 2026] 127.0.0.1:54830 Accepted
+[Tue Jun 23 15:32:07 2026] 127.0.0.1:54830 [200]: GET /arte.php
+[Tue Jun 23 15:32:07 2026] 127.0.0.1:54830 Closing
+[Tue Jun 23 15:32:07 2026] 127.0.0.1:54832 Accepted
+[Tue Jun 23 15:32:07 2026] 127.0.0.1:54832 [200]: GET /educacion_fisica.php
+[Tue Jun 23 15:32:07 2026] 127.0.0.1:54832 Closing
+[Tue Jun 23 15:32:13 2026] 127.0.0.1:60734 Accepted
+[Tue Jun 23 15:32:13 2026] 127.0.0.1:60734 [200]: GET /sala.php
+[Tue Jun 23 15:32:13 2026] 127.0.0.1:60734 Closing
+[Tue Jun 23 15:32:13 2026] 127.0.0.1:60738 Accepted
+[Tue Jun 23 15:32:13 2026] 127.0.0.1:60738 [200]: GET /pago.php
+[Tue Jun 23 15:32:13 2026] 127.0.0.1:60738 Closing
+[Tue Jun 23 15:32:14 2026] 127.0.0.1:60744 Accepted
+[Tue Jun 23 15:32:14 2026] 127.0.0.1:60744 [200]: GET /crear_clase.php
+[Tue Jun 23 15:32:14 2026] 127.0.0.1:60744 Closing
+[Tue Jun 23 15:32:14 2026] 127.0.0.1:60760 Accepted
+[Tue Jun 23 15:32:14 2026] 127.0.0.1:60760 [200]: GET /oferta_clase.php
+[Tue Jun 23 15:32:14 2026] 127.0.0.1:60760 Closing
+[Tue Jun 23 15:32:20 2026] 127.0.0.1:39392 Accepted
+[Tue Jun 23 15:32:20 2026] 127.0.0.1:39392 [200]: GET /sala.php
+[Tue Jun 23 15:32:20 2026] 127.0.0.1:39392 Closing
+[Tue Jun 23 15:32:21 2026] 127.0.0.1:39396 Accepted
+[Tue Jun 23 15:32:21 2026] 127.0.0.1:39396 [200]: GET /crear_clase.php
+[Tue Jun 23 15:32:21 2026] 127.0.0.1:39396 Closing
+[Tue Jun 23 15:32:21 2026] 127.0.0.1:39408 Accepted
+[Tue Jun 23 15:32:21 2026] 127.0.0.1:39408 [200]: GET /oferta_clase.php
+[Tue Jun 23 15:32:21 2026] 127.0.0.1:39408 Closing
+[Tue Jun 23 15:32:21 2026] 127.0.0.1:39424 Accepted
+[Tue Jun 23 15:32:21 2026] 127.0.0.1:39424 [200]: GET /pago.php
+[Tue Jun 23 15:32:21 2026] 127.0.0.1:39424 Closing
+[Tue Jun 23 15:32:53 2026] 127.0.0.1:41532 Accepted
+[Tue Jun 23 15:32:53 2026] 127.0.0.1:41532 [302]: GET /sala.php
+[Tue Jun 23 15:32:53 2026] 127.0.0.1:41532 Closing
+[Tue Jun 23 15:32:53 2026] 127.0.0.1:41538 Accepted
+[Tue Jun 23 15:32:53 2026] 127.0.0.1:41538 [302]: GET /pago.php
+[Tue Jun 23 15:32:53 2026] 127.0.0.1:41538 Closing
+[Tue Jun 23 15:32:53 2026] 127.0.0.1:41550 Accepted
+[Tue Jun 23 15:32:53 2026] 127.0.0.1:41550 [302]: GET /crear_clase.php
+[Tue Jun 23 15:32:53 2026] 127.0.0.1:41550 Closing
+[Tue Jun 23 15:32:54 2026] 127.0.0.1:41556 Accepted
+[Tue Jun 23 15:32:54 2026] 127.0.0.1:41556 [302]: GET /oferta_clase.php
+[Tue Jun 23 15:32:54 2026] 127.0.0.1:41556 Closing

@@ -1,0 +1,53 @@
+[1G[0K⠙[1G[0K[90mStarting project at /home/runner/workspace/webapps/classexpress-mobile[39m
+[80D[2K[2mStarting Metro Bundler[22m
+[80D[2K[1mTypeScript[22m: The [36mtsconfig.json#include[39m property has been updated
+[33mThe following packages should be updated for best compatibility with the installed [1mexpo[22m version:[39m
+[33m  [1m@react-native-async-storage/async-storage[22m[36m@[39m[33m[31m2.2.0[39m[33m - expected version: [32m2.1.2[39m[33m[39m
+[33m  [1mexpo-router[22m[36m@[39m[33m[31m4.0.22[39m[33m - expected version: [32m~5.1.11[39m[33m[39m
+[33m  [1mexpo-splash-screen[22m[36m@[39m[33m[31m0.29.24[39m[33m - expected version: [32m~0.30.10[39m[33m[39m
+[33m  [1mreact[22m[36m@[39m[33m[31m18.3.1[39m[33m - expected version: [32m19.0.0[39m[33m[39m
+[33m  [1mreact-dom[22m[36m@[39m[33m[31m19.2.7[39m[33m - expected version: [32m19.0.0[39m[33m[39m
+[33m  [1mreact-native[22m[36m@[39m[33m[31m0.76.9[39m[33m - expected version: [32m0.79.6[39m[33m[39m
+[33m  [1mreact-native-gesture-handler[22m[36m@[39m[33m[31m2.32.0[39m[33m - expected version: [32m~2.24.0[39m[33m[39m
+[33m  [1mreact-native-reanimated[22m[36m@[39m[33m[31m3.19.5[39m[33m - expected version: [32m~3.17.4[39m[33m[39m
+[33m  [1mreact-native-safe-area-context[22m[36m@[39m[33m[31m4.14.1[39m[33m - expected version: [32m5.4.0[39m[33m[39m
+[33m  [1mreact-native-screens[22m[36m@[39m[33m[31m4.25.2[39m[33m - expected version: [32m~4.11.1[39m[33m[39m
+[33m  [1mreact-native-web[22m[36m@[39m[33m[31m0.21.2[39m[33m - expected version: [32m^0.20.0[39m[33m[39m
+[33m  [1m@types/react[22m[36m@[39m[33m[31m18.3.31[39m[33m - expected version: [32m~19.0.10[39m[33m[39m
+[33m  [1mtypescript[22m[36m@[39m[33m[31m5.9.3[39m[33m - expected version: [32m~5.8.3[39m[33m[39m
+[33mYour project may not work correctly until you install the expected versions of the packages.[39m
+[80D[2K▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+█ ▄▄▄▄▄ █ ██▀▀ ▀▄██ ▄▄▄▄▄ █
+█ █   █ █  ▀█ ▀█▄▄█ █   █ █
+█ █▄▄▄█ █▀  █▄▀▀▄██ █▄▄▄█ █
+█▄▄▄▄▄▄▄█▄█ ▀▄█▄█ █▄▄▄▄▄▄▄█
+█▄ ██ ▄▄▀██▄█▄▀▄ ▄██ ▀▄▄ ▄█
+█▀▀▀▄  ▄██ ▄█▀██ ▀▀  ▄  ▀██
+█ ▀█▀▄ ▄▄ ▀▀▄▀▄ ▀▄▀▄▀▀▄ ▀██
+███▄█▀█▄▀ ▀█ ▄ ▄▄▄ ██▄ ▀███
+█▄▄██▄▄▄█▀ ██▄ ▀▄ ▄▄▄ ▀ ▄▄█
+█ ▄▄▄▄▄ █▀ ▀█▀█▀▀ █▄█ ▀▀▀██
+█ █   █ █▄  ▄▀▄▄█▄▄ ▄▄▀   █
+█ █▄▄▄█ █▀▀█ ▄ ▄▄▄▄ ▀█▀▀ ██
+█▄▄▄▄▄▄▄█▄▄▄█▄▄█████▄▄▄▄▄▄█
+
+[80D[2K› Metro waiting on [4mexp://127.0.0.1:8080[24m
+[80D[2K› Scan the QR code above with Expo Go (Android) or the Camera app (iOS)
+[80D[2K
+[80D[2K› Web is waiting on [4mhttp://localhost:8080[24m
+[80D[2K
+[80D[2K› Using [36mExpo Go[39m
+[80D[2K› Press [1ms[22m [2m│[22m switch to development build
+
+› Press [1ma[22m [2m│[22m open Android
+› Press [1mw[22m [2m│[22m open web
+
+› Press [1mj[22m [2m│[22m open debugger
+› Press [1mr[22m [2m│[22m reload app
+› Press [1mm[22m [2m│[22m toggle menu
+› [1mshift+m[22m [2m│[22m more tools
+› Press [1mo[22m [2m│[22m open project code in your editor
+
+[80D[2K› Press [1m?[22m [2m│[22m show all commands
+[80D[2K
+[80D[2KLogs for your project will appear below.[2m Press Ctrl+C to exit.[22m
