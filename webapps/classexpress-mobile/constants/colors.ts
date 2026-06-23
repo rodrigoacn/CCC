@@ -1,0 +1,43 @@
+const palette = {
+  light: {
+    primary: '#5B6EF5',
+    primaryLight: '#EEF0FE',
+    accent: '#FF6B35',
+    background: '#F4F5FA',
+    surface: '#FFFFFF',
+    card: '#FFFFFF',
+    foreground: '#1A1A2E',
+    subtext: '#6B6B8A',
+    border: '#E0E0EF',
+    success: '#10B981',
+    danger: '#EF4444',
+    warning: '#F59E0B',
+    muted: '#EDEDF5',
+    mutedForeground: '#9999BB',
+    tabBar: '#FFFFFF',
+    tabBarInactive: '#AAAACC',
+    radius: 14,
+  },
+  dark: {
+    primary: '#7B8EFF',
+    primaryLight: '#1E2050',
+    accent: '#FF7F4F',
+    background: '#1A1A1A',
+    surface: '#242424',
+    card: '#2A2A2A',
+    foreground: '#EEEEEE',
+    subtext: '#AAAAAA',
+    border: '#383838',
+    success: '#34D399',
+    danger: '#F87171',
+    warning: '#FBBF24',
+    muted: '#2A2A2A',
+    mutedForeground: '#777777',
+    tabBar: '#1A1A1A',
+    tabBarInactive: '#666666',
+    radius: 14,
+  },
+};
+
+export type ColorScheme = typeof palette.light;
+export default palette;

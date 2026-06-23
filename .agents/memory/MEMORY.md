@@ -1,3 +1,5 @@
 - [ClassExpress DB & payment flow](classexpress-flow.md) — login.php must NOT redeclare getDB(); use require_once 'db.php' only
 - [PostgreSQL migration](postgres-migration.md) — app migrated from MySQL to Replit's built-in PostgreSQL; db.php uses PG env vars; lowercase key normalization required.
 - [PostgreSQL GROUP BY strictness](postgres-groupby.md) — PG requires all non-aggregated SELECT columns in GROUP BY; MySQL allowed partial GROUP BY.
+- [Expo 53 correct package set](expo-53-packages.md) — expo 53 requires expo-router ~5.1.11, react 19.0.0, react-native 0.79.6; using 4.x router or 18.x react causes bundling failures.
+- [Expo install in PHP subfolder](expo-install-quirks.md) — use --legacy-peer-deps and semver ranges (not pinned); expo-linking/asset/constants must be added explicitly; react-dom+react-native-web needed for web mode.
