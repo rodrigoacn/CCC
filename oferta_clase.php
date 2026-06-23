@@ -1,4 +1,5 @@
 <?php
+ob_start();
 require 'menu.php';
 require 'db.php';
 
