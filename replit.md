@@ -1,12 +1,14 @@
 # ClassExpress
 
-An educational management web application built with PHP, Bootstrap 5, and jQuery. Students find teachers for online classes; teachers post class offers. On disconnect, students are charged in their LATAM local currency.
+An educational management web application built with PHP 8.2, Bootstrap 5, and jQuery. Students find teachers for online classes; teachers post class offers. On disconnect, students are charged in their LATAM local currency via a credits system.
 
 ## Stack
 
-- **Backend:** PHP 8.2 (built-in dev server)
-- **Frontend:** Bootstrap 5.3.3, jQuery 3.7.1 (via CDN)
-- **Database:** MySQL via PDO (optional — app runs in session-only mode if DB is unavailable)
+- **Backend:** PHP 8.2 (built-in dev server on port 5000)
+- **Frontend:** Bootstrap 5.3.3, jQuery 3.7.1, Bootstrap Icons (via CDN)
+- **Database:** PostgreSQL via PDO (Replit's built-in DB — `PGHOST/PGPORT/PGDATABASE/PGUSER/PGPASSWORD`)
+- **Video:** WebRTC peer-to-peer (`RTCPeerConnection` + Google STUN, DB-based signaling)
+- **Email:** PHP `mail()` with multipart HTML/plain-text templates
 
 ## Project Structure
 
@@ -30,37 +32,69 @@ An educational management web application built with PHP, Bootstrap 5, and jQuer
 | `profesores.php` | Teacher/instructor gallery |
 | `perfil.php` | User profile |
 | `checkout.php` | Cart / settings form |
-| `aula_virtual.php` | Virtual classroom (webcam + chat) |
-| `oferta_clase.php` | Teacher: quick class offer (price range, no title) |
+| `oferta_clase.php` | Teacher: quick class offer |
 | `crear_clase.php` | Teacher: full class creation form |
 | `buscar.php` | Student ↔ teacher matching / search |
-| `sala.php` | Live classroom with WebRTC camera & payment trigger |
-| `pago.php` | Payment confirmation in student's LATAM local currency |
-| `api_sala.php` | JSON API: join/leave/chat/messages/pay |
-| `login.php` | Sign in / Sign up (with email verification & country) |
+| `sala.php` | Live classroom — real WebRTC video + chat + credits check |
+| `pago.php` | Payment confirmation (LATAM local currency, deducts credits, sends receipt email) |
+| `creditos.php` | Credits wallet — balance, top-up, payment history |
+| `api_sala.php` | JSON API: join / leave / chat / messages / WebRTC signals |
+| `login.php` | Sign in / Sign up (email verification, country selection) |
 | `verify.php` | Email verification token handler |
-| `menu.php` | Shared navbar + DB connection (included by all pages) |
-| `db.php` | PDO singleton + helpers: `getDB()`, `dbOne()`, `dbAll()`, `dbExec()` |
-| `script.js` | jQuery interactivity (progress tracking, webcam mock, chat) |
+| `forgot_password.php` | Password reset — email entry form |
+| `reset_password.php` | Password reset — new password form (1-hour token) |
+| `dashboard_profesor.php` | Teacher dashboard: earnings, active classes, recent sessions |
+| `menu.php` | Shared navbar + Bootstrap Icons CDN |
+| `db.php` | PostgreSQL PDO singleton + helpers: `getDB()`, `dbOne()`, `dbAll()`, `dbExec()` |
+| `email_helper.php` | HTML email templates: verify, reset password, session receipt |
 | `styles.css` | Custom styles extending Bootstrap |
 
-## Running Locally
-
-The app is served via PHP's built-in server on port 5000:
+## Running
 
 ```bash
 php -S 0.0.0.0:5000 -t /home/runner/workspace/
 ```
 
-Visit `materias.php` (or just `/`) as the entry point.
+Visit `/` (redirects to `materias.php`) as the entry point.
 
 ## Database
 
-The app tries to connect to a MySQL database named `ce` on localhost. If the DB is unavailable, it falls back to PHP sessions for state. Schema files: `database.sql`, `alter.sql`, `seed.sql`.
+PostgreSQL provided by Replit. All result keys are normalized to lowercase via `array_change_key_case(CASE_LOWER)` in `dbOne()`/`dbAll()`. Session keys (`$_SESSION['usuarioId']` etc.) remain camelCase.
 
-## Payment Flow
+Schema / seed files: `database.sql`, `alter.sql`, `seed.sql`.
 
-Teacher → `crear_clase.php` → `buscar.php` → student joins `sala.php` → on leave → `pago.php` (amount shown in student's local LATAM currency, e.g. CLP, ARS, MXN).
+**Key tables:** `usuarios`, `paises`, `materias`, `clases_programadas`, `sesiones_clase`, `salas`, `participantes_sala`, `mensajes_chat`, `pagos`, `webrtc_signals`
+
+## Full User Flow
+
+```
+Student                                Teacher
+  │                                       │
+  ├── login.php (sign up → email verify)  ├── login.php
+  ├── materias.php → subject page         ├── crear_clase.php / oferta_clase.php
+  ├── profesores.php (browse teachers)    ├── dashboard_profesor.php
+  ├── buscar.php (find a class)           │
+  ├── sala.php → WebRTC video join        ├── sala.php → "Start Hosting"
+  ├── [session ends → leave]             │
+  └── pago.php (credits deducted,        └── dashboard shows new session
+       receipt email sent)
+```
+
+## Credits System
+
+- 1 credit = $1 USD
+- Students need credits ≥ class price to join
+- Credits deducted on payment confirmation
+- Top-up at `creditos.php` (demo mode — real Stripe can be added)
+- New users receive 100 credits on creation
+
+## Auth Seed Users
+
+| Email | Password | Role |
+|---|---|---|
+| `alexander@classexpress.app` | `demo1234` | instructor |
+| `rodrigo@classexpress.app` | `demo1234` | director |
+| `charles@classexpress.app` | `demo1234` | student |
 
 ## User Preferences
 
