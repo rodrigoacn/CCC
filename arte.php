@@ -1,323 +1,42 @@
-<?php require 'menu.php'; ?>
+<?php
+require 'menu.php';
+require 'db.php';
 
-  <button class="btn btn-dark position-fixed bottom-0 end-0 mb-3 me-3" type="button">Buscar Clase</button>
-  <div class="container mt-10">
-    <div class="jumbotron">
-          <input type="text" id="input-busqueda" class="form-control bg-dark text-white border-secondary mb-4" placeholder="Search">
-          <h1 class="display-3">Art and Music</h1>
-          <div class="form-check">
-              <h2>Themes</h2>
-              <div class="container" style="width: 100%;">
-                <table class="table table-dark caption-top big-caption">
-                  <caption>Assessed Skills</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">Choose</th>
-                      <th scope="col">Theme</th>
-                      <th scope="col">Description</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Analyze</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Examine elements of visual language and contexts across diverse artistic expressions.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Interpret</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Assign grounded meanings to artworks based on their context or materiality.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Evaluate</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Form critical judgments regarding the impact, aesthetics, and purpose of a cultural manifestation.</label></td>
-                    </tr>
-                  </tbody>
-                </table>
-                <table class="table table-dark caption-top big-caption">
-                  <caption>Elements of Visual Language and Technical Procedures</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">Choose</th>
-                      <th scope="col">Theme</th>
-                      <th scope="col">Description</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Line</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Expressive role, contour, and directionality.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Shape and Volume</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Figurative, abstract, geometric, or organic.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Texture</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Visual and tactile.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Space and Perspective</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Depth, overlapping, and framing</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Color Theory</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Saturation, contrast, and color harmonies.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Lighting</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Direct light, diffused light, and chiaroscuro values.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Mediums and Techniques</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Printmaking, sculpture, painting, photography, and digital media.</label></td>
-                    </tr>
-                  </tbody>
-                </table>
-                <table class="table table-dark caption-top big-caption">
-                  <caption>Art History and Artistic Movements</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">Choose</th>
-                      <th scope="col">Theme</th>
-                      <th scope="col">Description</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Classical and Modern Western Art</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Renaissance, Baroque, 20th-century Avant-garde, and Impressionism</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Visual ruptures</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Cubism, Surrealism, and Abstract Expressionism.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Recent movements</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Pop Art, Minimalism, Conceptual Art, and Performance Art.</label></td>
-                    </tr>
-                  </tbody>
-                </table>
-                <table class="table table-dark caption-top big-caption">
-                  <caption>Visual Culture and Urban Environment</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">Choose</th>
-                      <th scope="col">Theme</th>
-                      <th scope="col">Description</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Public Art</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Urban muralism, graffiti, and temporary or permanent interventions.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Graphic Narrative</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Comics, illustration, and advertising language.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Design and Architecture</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Functionality and symbolism in everyday objects.</label></td>
-                    </tr>
-                  </tbody>
-                </table>
-                <table class="table table-dark caption-top big-caption">
-                  <caption>Aesthetic Appreciation, Criticism, and Context</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">Choose</th>
-                      <th scope="col">Theme</th>
-                      <th scope="col">Description</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Context of Production</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Political, economic, and gender factors influencing the artist.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Global Themes</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Ecology, migration, collective memory, and globalization in art.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">The Role of the Spectator</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Exhibition institutions (museums, galleries) versus alternative spaces.</label></td>
-                    </tr>
-                  </tbody>
-                </table>
-                <h1 class="display-3">Music</h1>
-                <table class="table table-dark caption-top big-caption">
-                  <caption>Elements of Musical Language and Theory</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">Choose</th>
-                      <th scope="col">Theme</th>
-                      <th scope="col">Description</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Properties of Sound</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Pitch (frequency), duration (time), intensity (dynamics), and timbre (sound source).</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Musical Reading and Writing</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Rhythmic values and their rests (whole note to sixteenth note), syncopation, and offbeats.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Meter and time signatures</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Simple (2/4, 3/4, 4/4) and compound (6/8, 9/8).</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Traditional clefs</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">note reading on the staff</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Harmony and Melody</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Musical intervals (major, minor, perfect).</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Scales</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Major, natural minor, and pentatonic.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Key signatures and basic chords</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">major, minor, and diminished</label></td>
-                    </tr>
-                  </tbody>
-                </table>
-                <table class="table table-dark caption-top big-caption">
-                  <caption>History of Western Music and Universal Styles</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">Choose</th>
-                      <th scope="col">Theme</th>
-                      <th scope="col">Description</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Written Tradition Music (Classical)</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Essential characteristics of the Baroque, Classical, Romantic, and 20th-century Avant-garde periods.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Basic musical forms</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Sonata, symphony, concerto, and opera.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">20th and 21st Century Popular Music</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Origins and evolution of Jazz, Blues, Rock, Pop, and Urban Music.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">20th and 21st Century Popular Music</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Impact of the cultural industry and mass media.</label></td>
-                    </tr>
-                  </tbody>
-                </table>
-                <table class="table table-dark caption-top big-caption">
-                  <caption>Musical Roots of the World and Oral Tradition</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">Choose</th>
-                      <th scope="col">Theme</th>
-                      <th scope="col">Description</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Traditional Root Music</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Global Latin American rhythms: Cumbia, tango, salsa, and Cuban son.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Traditional Root Music</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Non-Western musical systems (Eastern pentatonic scales or African polyrhythms).</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Music and Society</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">The role of protest music and social movements of the second half of the 20th century.</label></td>
-                    </tr>
-                  </tbody>
-                </table>
-                <table class="table table-dark caption-top big-caption">
-                  <caption>Mediums of Expression, Organology, and Technology</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">Choose</th>
-                      <th scope="col">Theme</th>
-                      <th scope="col">Description</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Organology (Instrument Classification)</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Sachs-Hornbostel system: Chordophones, aerophones, membranophones, idiophones, and electrophones.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Musical Ensembles</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Types of ensembles: Symphony orchestra, big band, rock band, chamber ensembles, and choirs.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Music and Technology</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Basic recording concepts: Microphones, Digital Audio Workstations (DAW), and audio formats.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Music for audiovisual media</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">The role of the soundtrack in film, television, and video games.</label></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-          </div>
-      </div>
-  </div>
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['temas'])) {
+    $temas = array_slice((array)$_POST['temas'], 0, 5);
+    $qs = http_build_query(['materia' => 9, 'temas' => implode(',', $temas)]);
+    header("Location: profesores.php?$qs");
+    exit;
+}
 
-  <footer class="mastfoot mt-auto">
-    <div class="inner float-end">
-      <p>ClassExpress done <a href="https://getbootstrap.com/">Bootstrap</a>, by <a href="https://www.facebook.com/rodrigo.alejandro.1848816?locale=es_LA">@RodrigoConejeros</a>.</p>
-    </div>
-  </footer>
+$materiaId    = 9;
+$subjectName  = 'Art and Music';
+$subjectImage = 'art.png';
 
+$secciones = [
+    'Assessed Skills' => [
+        ['slug' => 'analyze-art',  'title' => 'Analyze',   'desc' => 'Examine elements of visual language and contexts across diverse artistic expressions.'],
+        ['slug' => 'interpret-art','title' => 'Interpret', 'desc' => 'Assign grounded meanings to artworks based on their context or materiality.'],
+        ['slug' => 'evaluate-art', 'title' => 'Evaluate',  'desc' => 'Form critical judgments on the impact, aesthetics, and purpose of a cultural manifestation.'],
+    ],
+    'Elements of Visual Language and Technical Procedures' => [
+        ['slug' => 'line',              'title' => 'Line',                 'desc' => 'Expressive role, contour, directionality, and types of lines in composition.'],
+        ['slug' => 'shape-volume',      'title' => 'Shape and Volume',     'desc' => 'Figurative, abstract, geometric, and organic forms.'],
+        ['slug' => 'color-theory',      'title' => 'Color Theory',         'desc' => 'Saturation, contrast, color harmonies, and color psychology.'],
+        ['slug' => 'space-perspective', 'title' => 'Space and Perspective','desc' => 'Depth, overlapping, framing, and the vanishing point in perspective drawing.'],
+        ['slug' => 'texture-light',     'title' => 'Texture and Lighting', 'desc' => 'Visual vs. tactile texture; direct/diffused light and chiaroscuro.'],
+        ['slug' => 'mediums-techniques','title' => 'Mediums and Techniques','desc' => 'Printmaking, sculpture, painting, photography, and digital media.'],
+    ],
+    'Art History and Artistic Movements' => [
+        ['slug' => 'classical-modern',    'title' => 'Classical and Modern Western Art', 'desc' => 'Renaissance, Baroque, Impressionism, and 20th-century avant-gardes.'],
+        ['slug' => 'visual-ruptures',     'title' => 'Visual Ruptures',                 'desc' => 'Cubism, Surrealism, and Abstract Expressionism.'],
+        ['slug' => 'recent-movements',    'title' => 'Recent Movements',                'desc' => 'Pop Art, Minimalism, Conceptual Art, and Performance Art.'],
+        ['slug' => 'latin-american-art',  'title' => 'Latin American Art',              'desc' => 'Muralism, magical realism in visual arts, and contemporary LATAM artists.'],
+    ],
+    'Music' => [
+        ['slug' => 'music-elements', 'title' => 'Elements of Music', 'desc' => 'Rhythm, melody, harmony, dynamics, and timbre — how music is structured.'],
+        ['slug' => 'music-history',  'title' => 'Music History',     'desc' => 'Western classical periods through jazz, rock, and contemporary genres.'],
+    ],
+];
 
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-	<script
-  	src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-	<script type="text/javascript" src="./presentacion/odp_ajax.js"></script>
-	<script type="text/javascript" src="./presentacion/js/scripts.js"></script>
-  <script type="text/javascript" src="./script.js"></script>
-</body>
+require '_subject_page.php';

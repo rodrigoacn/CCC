@@ -1,162 +1,38 @@
-<?php require 'menu.php'; ?>
+<?php
+require 'menu.php';
+require 'db.php';
 
-  <button class="btn btn-dark position-fixed bottom-0 end-0 mb-3 me-3" type="button">Buscar Clase</button>
-  <div class="container mt-10">
-    <div class="jumbotron">
-          <input type="text" id="input-busqueda" class="form-control bg-dark text-white border-secondary mb-4" placeholder="Search">
-          <h1 class="display-3">Foreign Languages</h1>
-          <div class="form-check">
-              <h2>Themes</h2>
-              <div class="container" style="width: 100%;">
-                <table class="table table-dark caption-top big-caption">
-                  <caption>Theoretical Linguistics and the Language System</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">Choose</th>
-                      <th scope="col">Theme</th>
-                      <th scope="col">Description</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Phonetics and Phonology</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Places and manners of articulation (where and how sounds are physically produced).</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Phonetics and Phonology</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Intonation, word stress, rhythm, and syllable reduction patterns.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Morphosyntax (Operational Grammar)</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Parts of speech: Nouns, verbs, adjectives, determiners, and connectors.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Morphosyntax (Operational Grammar)</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Sentence structure: Basic word order (Subject-Verb-Object vs. variations).</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Morphosyntax (Operational Grammar)</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Tenses and moods: Managing past, present, future, and hypothetical actions or desires.</label></td>
-                    </tr>
-                  </tbody>
-                </table>
-                <table class="table table-dark caption-top big-caption">
-                  <caption>Comprehension and Receptive Mechanisms</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">Choose</th>
-                      <th scope="col">Theme</th>
-                      <th scope="col">Description</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Reading techniques</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Skimming (reading quickly for the global idea) and Scanning (searching for specific data).</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Inference</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Deducing the meaning of unfamiliar words using contextual clues.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Listening Comprehension</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Identification of registers (formal, informal, technical) alongside dialects or regional accents.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Listening Comprehension</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Auditory discrimination of minimal pairs (words that sound almost identical but have different meanings).</label></td>
-                    </tr>
-                  </tbody>
-                </table>
-                <table class="table table-dark caption-top big-caption">
-                  <caption>Production and Expressive Mechanisms</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">Choose</th>
-                      <th scope="col">Theme</th>
-                      <th scope="col">Description</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Written Expression (Writing)</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Cohesion and Coherence: Correct use of logical connectors, punctuation, and paragraph organization.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Written Expression (Writing)</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Text typologies: Drafting formal emails, argumentative essays, reviews, and descriptive texts.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Oral Expression and Interaction (Speaking)</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Fluency vs. Accuracy: Balancing smooth delivery with grammatical correctness.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Oral Expression and Interaction (Speaking)</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Compensation strategies: Use of circumlocution (describing a word you forgot by using other words) and body language.</label></td>
-                    </tr>
-                  </tbody>
-                </table>
-                <table class="table table-dark caption-top big-caption">
-                  <caption>Sociolinguistic Competence, Pragmatics, and Culture</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">Choose</th>
-                      <th scope="col">Theme</th>
-                      <th scope="col">Description</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Speech acts</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">How to ask for a favor, complain, apologize, or invite appropriately depending on the context.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Figurative language</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Understanding idioms, regional slang, proverbs, and cultural metaphors.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Sociolinguistics</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Linguistic variation based on age, gender, social class, and the geography of native speakers.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Sociolinguistics</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Politeness norms and cultural taboos within the target language.</label></td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-          </div>    
-    </div>
-  </div>
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['temas'])) {
+    $temas = array_slice((array)$_POST['temas'], 0, 5);
+    $qs = http_build_query(['materia' => 8, 'temas' => implode(',', $temas)]);
+    header("Location: profesores.php?$qs");
+    exit;
+}
 
-  <footer class="mastfoot mt-auto">
-    <div class="inner float-end">
-      <p>ClassExpress done <a href="https://getbootstrap.com/">Bootstrap</a>, by <a href="https://www.facebook.com/rodrigo.alejandro.1848816?locale=es_LA">@RodrigoConejeros</a>.</p>
-    </div>
-  </footer>
+$materiaId    = 8;
+$subjectName  = 'Foreign Languages';
+$subjectImage = 'foreign_languages.png';
 
+$secciones = [
+    'Theoretical Linguistics and the Language System' => [
+        ['slug' => 'phonetics',    'title' => 'Phonetics and Phonology',   'desc' => 'Places and manners of articulation; stress, rhythm, and intonation patterns.'],
+        ['slug' => 'morphosyntax', 'title' => 'Morphosyntax — Grammar',    'desc' => 'Parts of speech, sentence structure (SVO), tenses, and moods.'],
+        ['slug' => 'vocabulary',   'title' => 'Vocabulary and Lexicology', 'desc' => 'Word families, collocations, false cognates, and register.'],
+    ],
+    'Comprehension and Receptive Mechanisms' => [
+        ['slug' => 'reading-techniques',    'title' => 'Reading Techniques',       'desc' => 'Skimming (global idea) and scanning (locating specific data).'],
+        ['slug' => 'inference',             'title' => 'Inference',                'desc' => 'Deducing unfamiliar word meanings using contextual clues.'],
+        ['slug' => 'listening-comprehension','title' => 'Listening Comprehension',  'desc' => 'Identifying registers, dialects, and auditory discrimination of minimal pairs.'],
+    ],
+    'Production and Expressive Mechanisms' => [
+        ['slug' => 'written-expression', 'title' => 'Written Expression', 'desc' => 'Cohesion/coherence, logical connectors, and text typologies (emails, essays, reviews).'],
+        ['slug' => 'oral-expression',    'title' => 'Oral Expression',    'desc' => 'Fluency vs. accuracy; compensation strategies and conversational interaction.'],
+    ],
+    'Sociolinguistics and Culture' => [
+        ['slug' => 'sociolinguistics',       'title' => 'Sociolinguistics',       'desc' => 'Language variation: dialects, sociolects, registers, and code-switching.'],
+        ['slug' => 'intercultural-competence','title' => 'Intercultural Competence','desc' => 'Cultural values behind language; non-verbal communication norms across cultures.'],
+        ['slug' => 'pragmatics',             'title' => 'Pragmatics',             'desc' => 'Speech acts, politeness strategies, and conversational implicature.'],
+    ],
+];
 
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-	<script
-  	src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-	<script type="text/javascript" src="./presentacion/odp_ajax.js"></script>
-	<script type="text/javascript" src="./presentacion/js/scripts.js"></script>
-  <script type="text/javascript" src="./script.js"></script>
-</body>
+require '_subject_page.php';

@@ -1,284 +1,42 @@
-<?php require 'menu.php'; ?>
+<?php
+require 'menu.php';
+require 'db.php';
 
-  <button class="btn btn-dark position-fixed bottom-0 end-0 mb-3 me-3" type="button">Buscar Clase</button>
-  <div class="container mt-10">
-    <div class="jumbotron">
-          <input type="text" id="input-busqueda" class="form-control bg-dark text-white border-secondary mb-4" placeholder="Search">
-          <h1 class="display-3">Chemistry</h1>
-          <div class="form-check">
-              <h2>Themes</h2>
-              <div class="container" style="width: 100%;">
-                <table class="table table-dark caption-top big-caption">
-                  <caption>Atomic Structure and Properties of Matter</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">Choose</th>
-                      <th scope="col">Theme</th>
-                      <th scope="col">Description</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Classification of Matter</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Pure substances (elements and compounds) and mixtures (homogeneous and heterogeneous). Physical methods for separating mixtures (filtration, distillation, decantation, etc.).</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Atomic Theory</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Evolution of atomic models and description of fundamental subatomic particles (electrons, protons, and neutrons).</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Electron Configuration</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Build-up principles, orbital diagrams, valence electrons, and associated quantum numbers.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Periodic Table</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Organization of elements into groups and periods. Periodic properties (atomic radius, ionization energy, electron affinity, and electronegativity) and reactivity trends.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Chemical Bonding</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Formation and characteristics of ionic, covalent, and metallic bonds. Intermolecular forces (molecular geometry, polarity, and hydrogen bonding).</label></td>
-                    </tr>
-                  </tbody>
-                </table>
-                <table class="table table-dark caption-top big-caption">
-                  <caption>Solution Chemistry and Stoichiometry</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">Choose</th>
-                      <th scope="col">Theme</th>
-                      <th scope="col">Description</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Aqueous Solutions</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Concept of solubility, factors affecting it (temperature, pressure), and the effects of dilution.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Concentration Units</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Physical expressions (% m/m, % m/v, % v/v) and chemical expressions (Molarity) applied to everyday scenarios.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Stoichiometric Laws</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">The concept of the mole, molar mass, Avogadro's number, and molar volume.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Chemical Formulas</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Experimental determination of empirical and molecular formulas based on percent composition analysis.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Stoichiometric Reactions</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Balancing chemical equations by inspection, identifying the limiting reactant and excess reactant, and calculating the percent yield of a reaction.</label></td>
-                    </tr>
-                  </tbody>
-                </table>
-                <table class="table table-dark caption-top big-caption">
-                  <caption>Chemical Reactions, Energy, and Equilibrium</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">Choose</th>
-                      <th scope="col">Theme</th>
-                      <th scope="col">Description</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Types of Reactions</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Identification of combustion, precipitation, synthesis, and decomposition processes.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Thermochemistry</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Endothermic and exothermic energy processes, the concept of enthalpy (\(\Delta H\)), activation energy, and potential energy diagrams.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Chemical Kinetics</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Factors that modify reaction rates (temperature, reactant concentration, state of subdivision, and catalysts).</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Chemical Equilibrium</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">The concept of reversibility, the law of mass action, equilibrium constants (\(K_{c}\) and \(K_{p}\)), and the application of Le Chatelier's Principle under system disturbances.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Acids and Bases</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Theoretical concepts according to Arrhenius and Brønsted-Lowry definitions. Scale and calculation of \(\text{pH}\) and \(\text{pOH}\) in strong acid and strong base solutions.</label></td>
-                    </tr>
-                  </tbody>
-                </table>
-                <table class="table table-dark caption-top big-caption">
-                  <caption>Organic Chemistry</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">Choose</th>
-                      <th scope="col">Theme</th>
-                      <th scope="col">Description</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">The Carbon Atom</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Hybridization models (\(sp^3, sp^2, sp\)), molecular geometry of carbon, tetravalency, and concatenation capability.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Carbon Chains</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Representation of organic molecules (expanded, condensed, and skeletal/line-angle formulas).</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Functional Groups</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Recognition, basic IUPAC nomenclature, and properties of hydrocarbons (alkanes, alkenes, alkynes, aromatics) and oxygenated/nitrogenated compounds (alcohols, ethers, aldehydes, ketones, carboxylic acids, esters, amines, and amides).</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Isomerism</label></td>
-                      <td><label class="form-check-label" for="flexCheckChecked">Differentiation of structural isomers (chain, position, and functional group) and geometric stereoisomers (cis-trans).</label></td>
-                    </tr>
-                  </tbody>
-                </table>
-                <table class="table table-dark caption-top big-caption">
-                  <caption>Atomic Structure, Periodic Table, and Chemical Bonding</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">Choose</th>
-                      <th scope="col">Theme</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Quantum numbers (\(n, l, m, s\)), electron configuration (Aufbau, Hund, and Pauli principles), and valence electrons.</label></td>
-                    </tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Trends in the periodic table: Atomic radius, ionization energy, electron affinity, and electronegativity.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Ionic, covalent (polar/nonpolar), and metallic bonding.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Lewis structures, formal charge, and Valence Shell Electron Pair Repulsion (VSEPR) Theory to predict molecular geometry.</label></td>
-                    </tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Intermolecular forces: Hydrogen bonding, Van der Waals forces, and dipole-dipole interactions (critical for drug solubility).</label></td>
-                    </tr>
-                  </tbody>
-                </table>
-                <table class="table table-dark caption-top big-caption">
-                  <caption>Stoichiometry, Solutions, and Chemical Units</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">Choose</th>
-                      <th scope="col">Theme</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Balancing chemical equations and stoichiometric relationships (mole-to-mole, mass-to-mass).</label></td>
-                    </tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Concepts of limiting reactant, excess reactant, theoretical yield, and percent yield of a reaction.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Physical units: % m/m, % m/v, % v/v, and Parts Per Million (ppm).</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">University-level chemical units: Molarity (M), Molality (m), and Mole Fraction (\(\chi \)).</label></td>
-                    </tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Dilution processes (\(C_1V_1 = C_2V_2\)) and preparation of solutions in a laboratory environment.</label></td>
-                    </tr>
-                  </tbody>
-                </table>
-                <table class="table table-dark caption-top big-caption">
-                  <caption>Chemical Reactivity, Equilibrium, and Acid-Base Chemistry</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">Choose</th>
-                      <th scope="col">Theme</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Endothermic and exothermic processes, the concept of Enthalpy (\(\Delta H\)), and Hess's Law.</label></td>
-                    </tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Concept of dynamic equilibrium and the Equilibrium Constant (\(K_{c}\) and \(K_{p}\)).</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Definitions of Arrhenius, Brønsted-Lowry, and Lewis.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">pH and pOH scales; calculation of pH in strong/weak acids and bases (\(K_{a}\) and \(K_{b}\)).</label></td>
-                    </tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Basic concepts of buffer solutions, essential for biological fluids and pharmaceutical preparations.</label></td>
-                    </tr>
-                  </tbody>
-                </table>
-                <table class="table table-dark caption-top big-caption">
-                  <caption>Introduction to Organic Chemistry and Biomolecules</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">Choose</th>
-                      <th scope="col">Theme</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Carbon hybridization (\(sp^3, sp^2, sp\)), geometry, and types of bonds (\(\sigma \) and \(\pi \)).</label></td>
-                    </tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">IUPAC nomenclature and identification of: Hydrocarbons, alcohols, ethers, aldehydes, ketones, carboxylic acids, esters, amines, and amides.</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Structural isomerism (chain, position, functional) and basic concepts of stereoisomerism (chirality and asymmetric carbons, crucial for drug effectiveness).</label></td>
-                    </tr>
-                    <tr>
-                      <th scope="row"><input class="form-check-input" type="checkbox" value="" id="flexCheckChecked" style="margin-left: 1.5em;"></th>
-                      <td><label class="form-check-label" for="flexCheckChecked">Basic structure of carbohydrates, lipids, proteins (amino acids), and nucleic acids.</label></td>
-                  </tbody>
-                </table>
-              </div>
-          </div>
-      </div>
-  </div>
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['temas'])) {
+    $temas = array_slice((array)$_POST['temas'], 0, 5);
+    $qs = http_build_query(['materia' => 3, 'temas' => implode(',', $temas)]);
+    header("Location: profesores.php?$qs");
+    exit;
+}
 
-  <footer class="mastfoot mt-auto">
-    <div class="inner float-end">
-      <p>ClassExpress done <a href="https://getbootstrap.com/">Bootstrap</a>, by <a href="https://www.facebook.com/rodrigo.alejandro.1848816?locale=es_LA">@RodrigoConejeros</a>.</p>
-    </div>
-  </footer>
+$materiaId    = 3;
+$subjectName  = 'Chemistry';
+$subjectImage = 'chemistry.png';
 
+$secciones = [
+    'Atomic Structure and Properties of Matter' => [
+        ['slug' => 'classification-matter', 'title' => 'Classification of Matter', 'desc' => 'Pure substances vs. mixtures; separation methods (filtration, distillation).'],
+        ['slug' => 'atomic-theory',         'title' => 'Atomic Theory',            'desc' => 'Evolution of atomic models and fundamental subatomic particles.'],
+        ['slug' => 'electron-configuration','title' => 'Electron Configuration',   'desc' => 'Build-up principles, orbital diagrams, valence electrons, and quantum numbers.'],
+        ['slug' => 'periodic-table',        'title' => 'Periodic Table',           'desc' => 'Groups, periods, and periodic properties (radius, ionization energy, electronegativity).'],
+        ['slug' => 'chemical-bonding',      'title' => 'Chemical Bonding',         'desc' => 'Ionic, covalent, and metallic bonds; intermolecular forces and polarity.'],
+    ],
+    'Solution Chemistry and Stoichiometry' => [
+        ['slug' => 'aqueous-solutions', 'title' => 'Aqueous Solutions', 'desc' => 'Solubility, concentration units (molarity, molality), and dilution effects.'],
+        ['slug' => 'stoichiometry',     'title' => 'Stoichiometry',     'desc' => 'Mole concept, molar mass, balancing equations, and limiting reagent.'],
+        ['slug' => 'acid-base',         'title' => 'Acid-Base Chemistry','desc' => 'pH, strong/weak acids and bases, neutralization, and buffer solutions.'],
+        ['slug' => 'redox-reactions',   'title' => 'Oxidation-Reduction','desc' => 'Oxidation states, balancing redox equations, and electrochemistry basics.'],
+    ],
+    'Organic Chemistry' => [
+        ['slug' => 'hydrocarbons',         'title' => 'Hydrocarbons',            'desc' => 'Alkanes, alkenes, alkynes, and aromatic compounds; IUPAC nomenclature.'],
+        ['slug' => 'functional-groups',    'title' => 'Functional Groups',       'desc' => 'Alcohols, aldehydes, ketones, carboxylic acids, and esters.'],
+        ['slug' => 'polymers-biomolecules','title' => 'Polymers and Biomolecules','desc' => 'Natural and synthetic polymers; connection to biological macromolecules.'],
+    ],
+    'Thermochemistry and Reaction Kinetics' => [
+        ['slug' => 'thermochemistry',      'title' => 'Thermochemistry',         'desc' => 'Enthalpy, endothermic/exothermic reactions, and Hess\'s law.'],
+        ['slug' => 'reaction-kinetics',    'title' => 'Reaction Kinetics',       'desc' => 'Reaction rates, activation energy, catalysts, and collision theory.'],
+        ['slug' => 'chemical-equilibrium', 'title' => 'Chemical Equilibrium',    'desc' => 'Le Chatelier\'s principle and the equilibrium constant (Keq).'],
+    ],
+];
 
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-	<script
-  	src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-	<script type="text/javascript" src="./presentacion/odp_ajax.js"></script>
-	<script type="text/javascript" src="./presentacion/js/scripts.js"></script>
-  <script type="text/javascript" src="./script.js"></script>
-</body>
+require '_subject_page.php';
