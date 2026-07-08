@@ -100,6 +100,57 @@
 </div>
   </div>
 
+  <!-- Modal Eliminar Cuenta -->
+  <div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content bg-dark border-danger">
+        <div class="modal-header border-danger">
+          <h5 class="modal-title text-danger" id="deleteAccountLabel">
+            <i class="bi bi-exclamation-triangle me-2"></i>Eliminar Cuenta
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="alert alert-danger mb-3">
+            <strong>⚠️ Advertencia:</strong> Esta acción es permanente. Se eliminarán todos tus datos de forma irreversible.
+          </div>
+          <form id="deleteAccountForm" method="POST" action="delete_account.php">
+            <div class="mb-3">
+              <label for="deletePassword" class="form-label text-light">Ingresa tu contraseña para confirmar:</label>
+              <input type="password" class="form-control bg-secondary border-secondary text-light" id="deletePassword" name="password" placeholder="Tu contraseña" required>
+            </div>
+            <div class="mb-3">
+              <label for="deleteConfirm" class="form-label text-light">Confirma tu contraseña:</label>
+              <input type="password" class="form-control bg-secondary border-secondary text-light" id="deleteConfirm" name="confirm" placeholder="Confirma tu contraseña" required>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer border-danger">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" form="deleteAccountForm" class="btn btn-danger">Eliminar Cuenta Permanentemente</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-6">
+        <div class="card bg-dark border-danger">
+          <div class="card-header bg-dark border-danger">
+            <h6 class="text-danger mb-0"><i class="bi bi-exclamation-circle me-2"></i>Zona de Peligro</h6>
+          </div>
+          <div class="card-body">
+            <p class="text-secondary small mb-3">¿Quieres eliminar tu cuenta de forma permanente? Esta acción no se puede deshacer.</p>
+            <button type="button" class="btn btn-outline-danger w-100" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+              <i class="bi bi-trash me-2"></i>Eliminar Cuenta
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <footer class="mastfoot mt-auto">
     <div class="inner float-end">
       <p>ClassExpress done <a href="https://getbootstrap.com/">Bootstrap</a>, by <a href="https://www.facebook.com/rodrigo.alejandro.1848816?locale=es_LA">@RodrigoConejeros</a>.</p>

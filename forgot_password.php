@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
 
     if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error = 'Please enter a valid email address.';
+        $error = 'Por favor ingresa una dirección de correo válida.';
     } else {
         $row = dbOne("SELECT usuarioId, nombre, verificado FROM usuarios WHERE email = :email LIMIT 1", ['email' => $email]);
 
@@ -30,16 +30,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Always show the same message (don't reveal whether the email exists)
-        $success = "If that email is registered and verified, a reset link has been sent. Check your inbox and spam folder.";
+        $success = "Si ese correo está registrado y verificado, se ha enviado un enlace para restablecer la contraseña. Revisa tu bandeja de entrada y spam.";
     }
-}
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ClassExpress – Forgot Password</title>
+  <title>ClassExpress – Recuperar contraseña</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <style>
@@ -55,13 +54,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <a href="login.php" class="text-decoration-none">
           <h1 class="fw-bold text-light fs-4">ClassExpress</h1>
         </a>
-        <p class="text-secondary mb-0">Reset your password</p>
+        <p class="text-secondary mb-0">Recupera tu contraseña</p>
       </div>
 
       <?php if ($success): ?>
         <div class="alert alert-success py-2 small"><?= htmlspecialchars($success) ?></div>
         <div class="text-center mt-3">
-          <a href="login.php" class="btn btn-outline-secondary btn-sm">Back to Sign In</a>
+          <a href="login.php" class="btn btn-outline-secondary btn-sm">Volver a iniciar sesión</a>
         </div>
       <?php else: ?>
 
@@ -71,18 +70,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <form method="POST" action="forgot_password.php" novalidate>
           <div class="mb-4">
-            <label for="email" class="form-label text-light">Email address</label>
+            <label for="email" class="form-label text-light">Correo electrónico</label>
             <input type="email" class="form-control" id="email" name="email"
-                   placeholder="you@example.com"
+                   placeholder="correo@ejemplo.com"
                    value="<?= htmlspecialchars($_POST['email'] ?? '') ?>" required autofocus>
-            <div class="form-text text-secondary">We'll send you a link to reset your password.</div>
+            <div class="form-text text-secondary">Te enviaremos un enlace para restablecer tu contraseña.</div>
           </div>
-          <button type="submit" class="btn btn-secondary w-100 fw-semibold">Send Reset Link</button>
+          <button type="submit" class="btn btn-secondary w-100 fw-semibold">Enviar enlace</button>
         </form>
 
         <p class="text-secondary text-center mt-4 small mb-0">
-          Remembered it?
-          <a href="login.php" class="text-light">Sign in</a>
+          ¿Lo recordaste?
+          <a href="login.php" class="text-light">Inicia sesión</a>
         </p>
 
       <?php endif; ?>

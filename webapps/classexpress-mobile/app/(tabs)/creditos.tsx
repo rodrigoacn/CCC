@@ -11,17 +11,27 @@ import { useColors } from '@/hooks/useColors';
 import { apiCredits, apiTopup, Pago } from '@/lib/api';
 
 const PACKS = [10, 25, 50, 100, 200];
+const TOKEN_PACKS = [
+  { tokens: 100, price: 1.99, name: 'Básico' },
+  { tokens: 500, price: 7.99, name: 'Estándar' },
+  { tokens: 1000, price: 14.99, name: 'Premium' },
+  { tokens: 2500, price: 29.99, name: 'Profesional' },
+];
 
 export default function CreditosScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
   const [modal, setModal] = useState(false);
+  const [tokenModal, setTokenModal] = useState(false);
   const [custom, setCustom] = useState('');
 
   const { data, isLoading } = useQuery({ queryKey: ['credits'], queryFn: apiCredits });
   const balance = data?.balance ?? 0;
+  const tokens = data?.tokens ?? 0;
   const history = data?.history ?? [];
+  const numReferidos = data?.num_referidos ?? 0;
+  const minutosGratis = data?.minutos_gratis ?? 0;
 
   const { mutate: topup, isPending } = useMutation({
     mutationFn: (amount: number) => apiTopup(amount),
@@ -30,6 +40,17 @@ export default function CreditosScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setModal(false);
       Alert.alert('¡Listo!', 'Créditos añadidos con éxito.');
+    },
+    onError: (e: any) => Alert.alert('Error', e.message),
+  });
+
+  const { mutate: buyTokens, isPending: tokenPending } = useMutation({
+    mutationFn: (pkg: any) => apiTopup(pkg.tokens), // Reusing apiTopup for demo
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['credits'] });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setTokenModal(false);
+      Alert.alert('¡Listo!', 'MonedasCE compradas con éxito.');
     },
     onError: (e: any) => Alert.alert('Error', e.message),
   });
@@ -60,10 +81,23 @@ export default function CreditosScreen() {
           ? <ActivityIndicator color="#fff" />
           : <Text style={styles.balance}>{balance}</Text>}
         <Text style={styles.creditLabel}>créditos disponibles</Text>
-        <TouchableOpacity style={styles.addBtn} onPress={() => setModal(true)}>
-          <Feather name="plus" size={18} color={colors.primary} />
-          <Text style={[styles.addText, { color: colors.primary }]}>Recargar</Text>
-        </TouchableOpacity>
+        <View style={styles.btnRow}>
+          <TouchableOpacity style={styles.addBtn} onPress={() => setModal(true)}>
+            <Feather name="plus" size={18} color={colors.primary} />
+            <Text style={[styles.addText, { color: colors.primary }]}>Recargar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.tokenBtn, { backgroundColor: colors.success }]} onPress={() => setTokenModal(true)}>
+            <Feather name="shopping-bag" size={18} color="#fff" />
+            <Text style={[styles.addText, { color: '#fff' }]}>MonedasCE</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View style={[styles.tokenCard, { backgroundColor: colors.card, marginHorizontal: 20, marginTop: 20, padding: 16, borderRadius: 16 }]}>
+        <Text style={[styles.tokenLabel, { color: colors.subtext }]}>MonedasCE</Text>
+        <Text style={[styles.tokenBalance, { color: colors.foreground }]}>{tokens}</Text>
+        <Text style={[styles.tokenSub, { color: colors.subtext }]}>Minutos gratis: {minutosGratis}</Text>
+        <Text style={[styles.tokenSub, { color: colors.subtext }]}>Referidos: {numReferidos}/5</Text>
       </View>
 
       <Text style={[styles.sectionTitle, { color: colors.foreground, paddingHorizontal: 20, paddingTop: 20 }]}>
@@ -127,6 +161,30 @@ export default function CreditosScreen() {
           </View>
         </View>
       </Modal>
+
+      <Modal visible={tokenModal} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalCard, { backgroundColor: colors.card }]}>
+            <Text style={[styles.modalTitle, { color: colors.foreground }]}>Comprar MonedasCE</Text>
+            <Text style={[styles.modalSub, { color: colors.subtext }]}>Tokens para gastar en clases</Text>
+
+            <View style={styles.packRow}>
+              {TOKEN_PACKS.map((pkg, idx) => (
+                <TouchableOpacity key={idx} style={[styles.tokenPack, { backgroundColor: colors.success + '22' }]}
+                  onPress={() => buyTokens(pkg)} disabled={tokenPending}>
+                  <Text style={[styles.packNum, { color: colors.success }]}>{pkg.tokens}</Text>
+                  <Text style={[styles.packLabel, { color: colors.subtext }]}>tokens</Text>
+                  <Text style={[styles.packPrice, { color: colors.subtext }]}>${pkg.price}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <TouchableOpacity onPress={() => setTokenModal(false)} style={{ alignItems: 'center', marginTop: 16 }}>
+              <Text style={{ color: colors.subtext, fontFamily: 'Poppins_400Regular' }}>Cancelar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -136,8 +194,14 @@ const styles = StyleSheet.create({
   headerTitle: { color: 'rgba(255,255,255,0.8)', fontFamily: 'Poppins_500Medium', fontSize: 14, marginBottom: 8 },
   balance:     { color: '#fff', fontFamily: 'Poppins_700Bold', fontSize: 56, lineHeight: 64 },
   creditLabel: { color: 'rgba(255,255,255,0.7)', fontFamily: 'Poppins_400Regular', fontSize: 14, marginBottom: 20 },
-  addBtn:      { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#fff', paddingVertical: 12, paddingHorizontal: 24, borderRadius: 14, alignSelf: 'flex-start' },
+  btnRow:      { flexDirection: 'row', gap: 10 },
+  addBtn:      { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#fff', paddingVertical: 12, paddingHorizontal: 24, borderRadius: 14 },
+  tokenBtn:    { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 12, paddingHorizontal: 24, borderRadius: 14 },
   addText:     { fontFamily: 'Poppins_600SemiBold', fontSize: 15 },
+  tokenCard:   { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  tokenLabel:  { fontFamily: 'Poppins_400Regular', fontSize: 12 },
+  tokenBalance:{ fontFamily: 'Poppins_700Bold', fontSize: 24 },
+  tokenSub:    { fontFamily: 'Poppins_400Regular', fontSize: 11 },
   sectionTitle: { fontFamily: 'Poppins_700Bold', fontSize: 18, marginBottom: 4 },
   row:         { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, paddingHorizontal: 20, gap: 12, borderBottomWidth: 1 },
   rowIcon:     { width: 40, height: 40, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
@@ -150,8 +214,10 @@ const styles = StyleSheet.create({
   modalSub:    { fontFamily: 'Poppins_400Regular', fontSize: 13, marginBottom: 20 },
   packRow:     { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 16 },
   pack:        { width: 68, height: 68, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
+  tokenPack:   { width: 80, height: 80, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
   packNum:     { fontFamily: 'Poppins_700Bold', fontSize: 20 },
   packLabel:   { fontFamily: 'Poppins_400Regular', fontSize: 12 },
+  packPrice:   { fontFamily: 'Poppins_400Regular', fontSize: 10 },
   customRow:   { flexDirection: 'row', alignItems: 'center', borderRadius: 14, overflow: 'hidden' },
   customInput: { flex: 1, paddingHorizontal: 16, paddingVertical: 12, fontFamily: 'Poppins_400Regular', fontSize: 15 },
   customBtn:   { paddingHorizontal: 20, paddingVertical: 12 },

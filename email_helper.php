@@ -1,9 +1,52 @@
 <?php
 // ─────────────────────────────────────────────────────────────────────────────
-//  email_helper.php — HTML email sender (uses PHP mail())
+//  email_helper.php — HTML email sender (uses Mailgun API or logs for dev)
 // ─────────────────────────────────────────────────────────────────────────────
 
 function ceMailHtml(string $to, string $subject, string $htmlBody): bool {
+    $apiKey = getenv('MAILGUN_API_KEY') ?: '';
+    $domain = getenv('MAILGUN_DOMAIN') ?: 'sandbox.mailgun.org';
+    
+    // Development mode: log instead of sending
+    $devMode = getenv('EMAIL_DEV_MODE') === 'true';
+    
+    if ($devMode || !$apiKey) {
+        error_log("EMAIL DEV MODE - To: $to, Subject: $subject");
+        error_log("Email body (first 500 chars): " . substr(strip_tags($htmlBody), 0, 500));
+        return true; // Simulate success
+    }
+    
+    $plain = strip_tags(preg_replace('/<br\s*\/?>/i', "\n", $htmlBody));
+    $from = 'ClassExpress <noreply@classexpress.app>';
+    
+    $data = [
+        'from' => $from,
+        'to' => $to,
+        'subject' => $subject,
+        'text' => $plain,
+        'html' => $htmlBody,
+    ];
+    
+    $ch = curl_init("https://api.mailgun.net/v3/$domain/messages");
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Authorization: Basic ' . base64_encode('api:' . $apiKey),
+    ]);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+    
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $error = curl_error($ch);
+    curl_close($ch);
+    
+    error_log('Mailgun response: HTTP ' . $httpCode . ', Error: ' . $error . ', Response: ' . $response);
+    
+    return $httpCode === 200;
+}
+
+function ceMailPhp(string $to, string $subject, string $htmlBody): bool {
     $boundary = md5(uniqid());
     $plain    = strip_tags(preg_replace('/<br\s*\/?>/i', "\n", $htmlBody));
 
@@ -11,8 +54,11 @@ function ceMailHtml(string $to, string $subject, string $htmlBody): bool {
         'MIME-Version: 1.0',
         "Content-Type: multipart/alternative; boundary=\"{$boundary}\"",
         'From: ClassExpress <noreply@classexpress.app>',
+        'Reply-To: ClassExpress <noreply@classexpress.app>',
+        'Return-Path: <noreply@classexpress.app>',
         'X-Mailer: PHP/' . phpversion(),
-        'X-ClassExpress: 1',
+        'X-Priority: 1',
+        'Importance: High',
     ]);
 
     $body = "--{$boundary}\r\n"
@@ -23,13 +69,13 @@ function ceMailHtml(string $to, string $subject, string $htmlBody): bool {
           . $htmlBody . "\r\n\r\n"
           . "--{$boundary}--";
 
-    return mail($to, $subject, $body, $headers);
+    return @mail($to, $subject, $body, $headers, '-fnoreply@classexpress.app');
 }
 
 function ceMailLayout(string $preheader, string $content): string {
     return <<<HTML
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -61,8 +107,8 @@ function ceMailLayout(string $preheader, string $content): string {
     <div class="body">{$content}</div>
   </div>
   <div class="footer">
-    &copy; <?= date('Y') ?> ClassExpress &middot; LATAM Education Platform<br>
-    <small style="color:#444">If you didn't request this email, you can safely ignore it.</small>
+    &copy; <?= date('Y') ?> ClassExpress &middot; Plataforma educativa LATAM<br>
+    <small style="color:#444">Si no solicitaste este correo, puedes ignorarlo con seguridad.</small>
   </div>
 </div>
 </body>
@@ -72,30 +118,30 @@ HTML;
 
 function ceSendVerify(string $email, string $nombre, string $link): bool {
     $content = "
-<h2>Verify your email</h2>
-<p>Hello <strong style='color:#fff'>{$nombre}</strong>,</p>
-<p>Thanks for signing up to ClassExpress! Click below to activate your account and start learning.</p>
+<h2>Verifica tu correo</h2>
+<p>Hola <strong style='color:#fff'>{$nombre}</strong>,</p>
+<p>Gracias por registrarte en ClassExpress. Haz clic abajo para activar tu cuenta y comenzar a aprender.</p>
 <div style='text-align:center'>
-  <a href='{$link}' class='btn'>Verify Email Address</a>
+  <a href='{$link}' class='btn'>Verificar correo</a>
 </div>
-<p style='font-size:13px;color:#666'>Or copy this link: <a href='{$link}'>{$link}</a></p>
-<p style='font-size:13px;color:#555'>This link expires in 48 hours.</p>
+<p style='font-size:13px;color:#666'>O copia este enlace: <a href='{$link}'>{$link}</a></p>
+<p style='font-size:13px;color:#555'>Este enlace expira en 48 horas.</p>
 ";
-    return ceMailHtml($email, 'ClassExpress – Verify your email', ceMailLayout('Verify your ClassExpress account', $content));
+    return ceMailHtml($email, 'ClassExpress – Verifica tu correo', ceMailLayout('Verifica tu cuenta en ClassExpress', $content));
 }
 
 function ceSendReset(string $email, string $nombre, string $link): bool {
     $content = "
-<h2>Reset your password</h2>
-<p>Hello <strong style='color:#fff'>{$nombre}</strong>,</p>
-<p>We received a request to reset your ClassExpress password. Click the button below to set a new one.</p>
+<h2>Restablece tu contraseña</h2>
+<p>Hola <strong style='color:#fff'>{$nombre}</strong>,</p>
+<p>Recibimos una solicitud para restablecer tu contraseña de ClassExpress. Haz clic en el botón abajo para crear una nueva.</p>
 <div style='text-align:center'>
-  <a href='{$link}' class='btn'>Reset Password</a>
+  <a href='{$link}' class='btn'>Restablecer contraseña</a>
 </div>
-<p style='font-size:13px;color:#666'>Or copy this link: <a href='{$link}'>{$link}</a></p>
-<p style='font-size:13px;color:#555'>This link expires in <strong style='color:#aaa'>1 hour</strong>. If you didn't request a reset, you can ignore this email — your password won't change.</p>
+<p style='font-size:13px;color:#666'>O copia este enlace: <a href='{$link}'>{$link}</a></p>
+<p style='font-size:13px;color:#555'>Este enlace expira en <strong style='color:#aaa'>1 hora</strong>. Si no solicitaste esto, puedes ignorar este correo y tu contraseña no cambiará.</p>
 ";
-    return ceMailHtml($email, 'ClassExpress – Reset your password', ceMailLayout('Reset your password', $content));
+    return ceMailHtml($email, 'ClassExpress – Restablece tu contraseña', ceMailLayout('Restablece tu contraseña', $content));
 }
 
 function ceSendSessionReceipt(string $email, string $nombre, array $data): bool {
@@ -109,22 +155,22 @@ function ceSendSessionReceipt(string $email, string $nombre, array $data): bool 
     $date    = date('M j, Y – g:i A');
 
     $content = "
-<h2>Session Receipt</h2>
-<p>Hello <strong style='color:#fff'>{$nombre}</strong>, your session has been completed and payment recorded.</p>
+<h2>Recibo de sesión</h2>
+<p>Hola <strong style='color:#fff'>{$nombre}</strong>, tu sesión se completó y el pago fue registrado.</p>
 <div class='badge-row'>
   <div class='amount'>{$sim}{$amount} <span style='font-size:18px;color:#888'>{$mon}</span></div>
   <div class='label'>≈ \${$usd} USD</div>
 </div>
 <div style='margin:16px 0'>
-  <div class='row'><span class='k'>Class</span><span class='v'>{$clase}</span></div>
-  <div class='row'><span class='k'>Teacher</span><span class='v'>{$teacher}</span></div>
-  <div class='row'><span class='k'>Duration</span><span class='v'>{$dur} minutes</span></div>
-  <div class='row'><span class='k'>Date</span><span class='v'>{$date}</span></div>
+  <div class='row'><span class='k'>Clase</span><span class='v'>{$clase}</span></div>
+  <div class='row'><span class='k'>Profesor</span><span class='v'>{$teacher}</span></div>
+  <div class='row'><span class='k'>Duración</span><span class='v'>{$dur} minutos</span></div>
+  <div class='row'><span class='k'>Fecha</span><span class='v'>{$date}</span></div>
 </div>
-<p style='font-size:13px;color:#555'>Thank you for learning with ClassExpress!</p>
+<p style='font-size:13px;color:#555'>¡Gracias por aprender con ClassExpress!</p>
 <div style='text-align:center;margin-top:16px'>
-  <a href='https://classexpress.app/buscar.php' class='btn' style='font-size:13px;padding:10px 24px'>Find Another Class</a>
+  <a href='https://classexpress.app/buscar.php' class='btn' style='font-size:13px;padding:10px 24px'>Busca otra clase</a>
 </div>
 ";
-    return ceMailHtml($email, 'ClassExpress – Session Receipt', ceMailLayout('Your session receipt', $content));
+    return ceMailHtml($email, 'ClassExpress – Recibo de sesión', ceMailLayout('Tu recibo de sesión', $content));
 }

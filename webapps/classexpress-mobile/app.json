@@ -15,14 +15,25 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.classexpress.app"
+      "bundleIdentifier": "com.classexpress.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "ClassExpress necesita acceso a la cámara para videollamadas en clases.",
+        "NSMicrophoneUsageDescription": "ClassExpress necesita acceso al micrófono para videollamadas en clases."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#1A1A1A"
       },
-      "package": "com.classexpress.app"
+      "package": "com.classexpress.app",
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "MODIFY_AUDIO_SETTINGS",
+        "INTERNET",
+        "ACCESS_NETWORK_STATE"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -31,7 +42,14 @@
     },
     "plugins": [
       "expo-router",
-      "expo-font"
+      "expo-font",
+      [
+        "react-native-webrtc",
+        {
+          "cameraPermission": "ClassExpress necesita acceso a la cámara para videollamadas en clases.",
+          "microphonePermission": "ClassExpress necesita acceso al micrófono para videollamadas en clases."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

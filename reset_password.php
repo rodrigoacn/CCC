@@ -18,12 +18,12 @@ if ($token !== '') {
 
     if ($row && (int)$row['reset_token_expiry'] < time()) {
         $row = null; // Expired
-        $error = 'This reset link has expired. Please request a new one.';
+        $error = 'Este enlace de restablecimiento expiró. Solicita uno nuevo.';
     }
 }
 
 if ($token === '' || ($row === null && $error === '')) {
-    $error = 'Invalid or missing reset token. Please request a new reset link.';
+    $error = 'Token inválido o faltante. Solicita un nuevo enlace de restablecimiento.';
 }
 
 // Handle form submission
@@ -32,26 +32,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $row) {
     $confirm  = $_POST['confirm']  ?? '';
 
     if (strlen($password) < 6) {
-        $error = 'Password must be at least 6 characters.';
+        $error = 'La contraseña debe tener al menos 6 caracteres.';
     } elseif ($password !== $confirm) {
-        $error = 'Passwords do not match.';
+        $error = 'Las contraseñas no coinciden.';
     } else {
         $hash = password_hash($password, PASSWORD_DEFAULT);
         dbExec(
             "UPDATE usuarios SET password = :pwd, reset_token = '', reset_token_expiry = 0 WHERE usuarioId = :id",
             ['pwd' => $hash, 'id' => $row['usuarioid']]
         );
-        $success = 'Your password has been updated. You can now sign in.';
+        $success = 'Tu contraseña ha sido actualizada. Ahora puedes iniciar sesión.';
         $row = null; // Hide the form
     }
 }
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ClassExpress – Reset Password</title>
+  <title>ClassExpress – Restablecer contraseña</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <style>
@@ -67,19 +67,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $row) {
         <a href="login.php" class="text-decoration-none">
           <h1 class="fw-bold text-light fs-4">ClassExpress</h1>
         </a>
-        <p class="text-secondary mb-0">Set a new password</p>
+        <p class="text-secondary mb-0">Establece una nueva contraseña</p>
       </div>
 
       <?php if ($success): ?>
         <div class="alert alert-success py-2 small"><?= htmlspecialchars($success) ?></div>
         <div class="text-center mt-3">
-          <a href="login.php" class="btn btn-secondary">Sign In</a>
+          <a href="login.php" class="btn btn-secondary">Iniciar sesión</a>
         </div>
 
       <?php elseif ($error && !$row): ?>
         <div class="alert alert-danger py-2 small"><?= htmlspecialchars($error) ?></div>
         <div class="text-center mt-3">
-          <a href="forgot_password.php" class="btn btn-outline-secondary btn-sm">Request a new reset link</a>
+          <a href="forgot_password.php" class="btn btn-outline-secondary btn-sm">Solicitar un nuevo enlace</a>
         </div>
 
       <?php else: ?>
@@ -89,21 +89,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $row) {
         <?php endif; ?>
 
         <p class="text-secondary small">
-          Hi <strong class="text-light"><?= htmlspecialchars($row['nombre']) ?></strong>, choose a new password below.
-        </p>
+          Hola <strong class="text-light"><?= htmlspecialchars($row['nombre']) ?></strong>, elige una nueva contraseña a continuación.
 
         <form method="POST" action="reset_password.php?token=<?= urlencode($token) ?>" novalidate>
           <div class="mb-3">
-            <label for="password" class="form-label text-light">New password</label>
+            <label for="password" class="form-label text-light">Nueva contraseña</label>
             <input type="password" class="form-control" id="password" name="password"
-                   placeholder="At least 6 characters" required autofocus>
+                   placeholder="Mínimo 6 caracteres" required autofocus>
           </div>
           <div class="mb-4">
-            <label for="confirm" class="form-label text-light">Confirm new password</label>
+            <label for="confirm" class="form-label text-light">Confirmar nueva contraseña</label>
             <input type="password" class="form-control" id="confirm" name="confirm"
                    placeholder="••••••••" required>
           </div>
-          <button type="submit" class="btn btn-secondary w-100 fw-semibold">Update Password</button>
+          <button type="submit" class="btn btn-secondary w-100 fw-semibold">Actualizar contraseña</button>
         </form>
 
       <?php endif; ?>

@@ -3,8 +3,8 @@
 --  Database: ce
 -- ═══════════════════════════════════════════════════════════════════════════════
 
-CREATE DATABASE IF NOT EXISTS ce CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE ce;
+CREATE DATABASE IF NOT EXISTS classexpress_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE classexpress_test;
 
 -- ─────────────────────────────────────────────────────────────────────────────
 --  1. USERS

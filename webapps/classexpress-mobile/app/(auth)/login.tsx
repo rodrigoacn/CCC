@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/context/AuthContext';
-import { apiLogin, apiRegister, apiCountries, Pais } from '@/lib/api';
+import { apiLogin, apiRegister, apiCountries, apiResendVerification, Pais } from '@/lib/api';
 import { useQuery } from '@tanstack/react-query';
 import { Feather } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -24,6 +24,8 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [nombre, setNombre] = useState('');
+  const [username, setUsername] = useState('');
+  const [referidoPor, setReferidoPor] = useState('');
   const [rol, setRol] = useState<'estudiante' | 'instructor'>('estudiante');
   const [paisId, setPaisId] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
@@ -44,25 +46,61 @@ export default function LoginScreen() {
       const { token, user } = await apiLogin(email.trim(), password);
       await login(token, user);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      router.replace('/(tabs)');
+      if (user.pendingPaymentSessionId) {
+        router.replace(`/pago/${user.pendingPaymentSessionId}`);
+      } else {
+        router.replace('/(tabs)');
+      }
     } catch (e: any) {
-      Alert.alert('Error', e.message);
+      if (e.code === 'NOT_VERIFIED') {
+        Alert.alert(
+          'Cuenta no verificada',
+          e.message,
+          [
+            { text: 'Cancelar', style: 'cancel' },
+            {
+              text: 'Reenviar correo',
+              onPress: async () => {
+                try {
+                  await apiResendVerification(email.trim());
+                  router.push({ pathname: '/(auth)/verify-email', params: { email: email.trim() } });
+                } catch (err: any) {
+                  Alert.alert('Error', err.message);
+                }
+              },
+            },
+          ]
+        );
+      } else {
+        Alert.alert('Error', e.message);
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const handleRegister = async () => {
-    if (!nombre || !email || !password) { Alert.alert('Completa todos los campos'); return; }
+    if (!nombre || !email || !password || !username) { Alert.alert('Completa todos los campos'); return; }
     if (password.length < 6) { Alert.alert('Error', 'La contraseña debe tener al menos 6 caracteres'); return; }
     setLoading(true);
     try {
-      const { token, user } = await apiRegister({ nombre: nombre.trim(), email: email.trim(), password, pais_id: paisId, rol });
-      await login(token, user);
+      const result = await apiRegister({ 
+        nombre: nombre.trim(), 
+        email: email.trim(), 
+        password, 
+        username: username.trim(),
+        referido_por: referidoPor.trim(),
+        pais_id: paisId, 
+        rol 
+      });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      router.replace('/(tabs)');
+      router.replace({ pathname: '/(auth)/verify-email', params: { email: result.email || email.trim() } });
     } catch (e: any) {
-      Alert.alert('Error', e.message);
+      if (e.code === 'NOT_VERIFIED') {
+        router.replace({ pathname: '/(auth)/verify-email', params: { email: email.trim() } });
+      } else {
+        Alert.alert('Error', e.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -103,6 +141,26 @@ export default function LoginScreen() {
               placeholderTextColor={colors.mutedForeground}
               value={nombre}
               onChangeText={setNombre}
+            />
+
+            <Text style={s.label}>Nombre de usuario</Text>
+            <TextInput
+              style={s.input}
+              placeholder="@usuario"
+              placeholderTextColor={colors.mutedForeground}
+              value={username}
+              onChangeText={setUsername}
+              autoCapitalize="none"
+            />
+
+            <Text style={s.label}>Referido por (opcional)</Text>
+            <TextInput
+              style={s.input}
+              placeholder="@usuario que te refirió"
+              placeholderTextColor={colors.mutedForeground}
+              value={referidoPor}
+              onChangeText={setReferidoPor}
+              autoCapitalize="none"
             />
 
             <Text style={s.label}>Soy</Text>

@@ -314,8 +314,17 @@ $(document).ready(function() {
             });
 
             $('#btn-leave').on('click', function() {
-                if (confirm("Are you sure you want to leave the live class?")) {
-                    alert("You have left the classroom.");
+                // If sala page defines IS_TEACHER, let its handler run instead
+                if (typeof IS_TEACHER !== 'undefined') return;
+                var role = (window.CE_ROLE || 'estudiante').toString().toLowerCase();
+                var msg = role === 'estudiante' || role === 'student'
+                          ? '¿Salir de la clase y calificar?'
+                          : '¿Terminar la clase?';
+                if (!confirm(msg)) return;
+                if (role === 'estudiante' || role === 'student') {
+                    window.location.href = 'calificar.php';
+                } else {
+                    window.location.href = 'dashboard_profesor.php';
                 }
             });
         });

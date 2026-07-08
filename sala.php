@@ -114,6 +114,36 @@ $lastMsgId  = !empty($chat) ? (int)(end($chat)['mensajeid'] ?? 0) : 0;
               <i class="bi bi-clock me-1"></i><span id="timer">00:00</span>
             </span>
           </div>
+
+          <!-- Countdown badge (top-center, for students) -->
+          <div class="position-absolute top-0 start-50 translate-middle-x m-2 d-none" id="countdown-wrap">
+            <span class="badge bg-warning text-dark border border-warning">
+              <i class="bi bi-hourglass-split me-1"></i>
+              <span id="countdown">3:00</span> gratis
+            </span>
+          </div>
+
+          <!-- Billing status badge (bottom-left) -->
+          <div class="position-absolute bottom-0 start-0 m-2 d-none" id="billing-wrap">
+            <span class="badge bg-dark border border-secondary">
+              <i class="bi bi-cash me-1"></i>
+              <span id="billing-status">Cobrando...</span>
+            </span>
+          </div>
+
+          <!-- Spectators list (for teachers) -->
+          <?php if ($isTeacher): ?>
+          <div class="position-absolute top-0 start-0 m-2 d-none" id="spectators-wrap" style="max-width: 250px;">
+            <div class="card bg-dark border border-secondary p-2">
+              <h6 class="text-white small mb-2">
+                <i class="bi bi-people me-1"></i>Espectadores
+              </h6>
+              <div id="spectators-list">
+                <p class="text-secondary small">No hay espectadores pendientes</p>
+              </div>
+            </div>
+          </div>
+          <?php endif; ?>
         </div>
 
         <!-- Controls bar -->
@@ -136,6 +166,7 @@ $lastMsgId  = !empty($chat) ? (int)(end($chat)['mensajeid'] ?? 0) : 0;
               </button>
             <?php else: ?>
               <button id="btn-host" class="btn btn-primary px-4">Start Hosting</button>
+              <button id="btn-end-class" class="btn btn-warning px-4 d-none">Terminar Clase</button>
             <?php endif; ?>
             <button id="btn-mic"  class="btn btn-outline-secondary rounded-circle p-2 d-none" title="Toggle Mic">
               <i class="bi bi-mic-fill fs-5 px-1"></i>
@@ -203,6 +234,8 @@ $lastMsgId  = !empty($chat) ? (int)(end($chat)['mensajeid'] ?? 0) : 0;
   const MY_UID     = <?= $uid ?>;
   const IS_TEACHER = <?= $isTeacher ? 'true' : 'false' ?>;
   const PROF_UID   = <?= (int)$clase['instructorid'] ?>;
+  const FREE_MINUTES = 3;  // First 3 minutes are free
+  const SPECTATOR_MAX = 8;  // Max 8 minutes as spectator
 
   // ── State ─────────────────────────────────────────────────────────────────
   let sesionId      = null;
@@ -212,11 +245,16 @@ $lastMsgId  = !empty($chat) ? (int)(end($chat)['mensajeid'] ?? 0) : 0;
   let lastSigId     = 0;
   let chatPollId    = null;
   let sigPollId     = null;
+  let spectatorPollId = null;
   let timerStart    = null;
   let timerInterval = null;
+  let countdownInterval = null;
   let micOn         = true;
   let camOn         = true;
   let inCall        = false;
+  let isSpectator   = true;  // Start as spectator
+  let joinedAt      = null;
+  let spectators    = [];
 
   // ── ICE servers (public STUN — works for same-LAN and most NAT) ───────────
   const RTC_CONFIG = {
@@ -242,6 +280,7 @@ $lastMsgId  = !empty($chat) ? (int)(end($chat)['mensajeid'] ?? 0) : 0;
 
   function startTimer() {
     timerStart = Date.now();
+    joinedAt = Date.now();
     document.getElementById('timer-wrap').classList.remove('d-none');
     timerInterval = setInterval(() => {
       const s = Math.floor((Date.now() - timerStart) / 1000);
@@ -249,6 +288,102 @@ $lastMsgId  = !empty($chat) ? (int)(end($chat)['mensajeid'] ?? 0) : 0;
       const sc = (s % 60).toString().padStart(2,'0');
       document.getElementById('timer').textContent = m + ':' + sc;
     }, 1000);
+  }
+
+  function startCountdown() {
+    if (IS_TEACHER) return;  // Teachers don't need countdown
+    let secondsLeft = FREE_MINUTES * 60;
+    document.getElementById('countdown-wrap').classList.remove('d-none');
+    countdownInterval = setInterval(() => {
+      secondsLeft--;
+      const m = Math.floor(secondsLeft / 60);
+      const s = secondsLeft % 60;
+      document.getElementById('countdown').textContent = `${m}:${s.toString().padStart(2,'0')}`;
+      
+      if (secondsLeft <= 0) {
+        clearInterval(countdownInterval);
+        document.getElementById('countdown-wrap').classList.add('d-none');
+        document.getElementById('billing-wrap').classList.remove('d-none');
+        isSpectator = false;
+      }
+    }, 1000);
+  }
+
+  function updateBillingStatus() {
+    if (IS_TEACHER) return;
+    const elapsed = Math.floor((Date.now() - joinedAt) / 1000);
+    const minutesInSession = elapsed / 60;
+    
+    if (minutesInSession < FREE_MINUTES) {
+      document.getElementById('billing-status').textContent = 'Gratis - Primeros 3 minutos';
+      document.getElementById('billing-status').className = 'text-success';
+    } else {
+      document.getElementById('billing-status').textContent = 'Cobrando por tiempo...';
+      document.getElementById('billing-status').className = 'text-warning';
+    }
+  }
+
+  async function pollSpectators() {
+    if (!IS_TEACHER) return;
+    const res = await fetch(`api_sala.php?action=get_spectators&salaId=${SALA_ID}`);
+    const data = await res.json();
+    if (data.ok && data.spectators) {
+      spectators = data.spectators;
+      renderSpectators();
+    }
+  }
+
+  function renderSpectators() {
+    const container = document.getElementById('spectators-list');
+    if (!container) return;
+    
+    if (spectators.length === 0) {
+      container.innerHTML = '<p class="text-secondary small">No hay espectadores pendientes</p>';
+      return;
+    }
+    
+    container.innerHTML = spectators.map(s => `
+      <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-black rounded">
+        <div>
+          <span class="text-white small">${s.nombre}</span>
+          <span class="text-secondary small">(@${s.username})</span>
+        </div>
+        <div>
+          <button class="btn btn-success btn-sm me-1" onclick="approveSpectator(${s.espectadorid})">
+            <i class="bi bi-check"></i>
+          </button>
+          <button class="btn btn-danger btn-sm" onclick="rejectSpectator(${s.espectadorid})">
+            <i class="bi bi-x"></i>
+          </button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function approveSpectator(espectadorId) {
+    const res = await api({
+      action: 'approve_spectator',
+      espectadorId: espectadorId,
+      salaId: SALA_ID
+    });
+    if (res.ok) {
+      pollSpectators();
+    } else {
+      alert('Error: ' + res.error);
+    }
+  }
+
+  async function rejectSpectator(espectadorId) {
+    const res = await api({
+      action: 'reject_spectator',
+      espectadorId: espectadorId,
+      salaId: SALA_ID
+    });
+    if (res.ok) {
+      pollSpectators();
+    } else {
+      alert('Error: ' + res.error);
+    }
   }
 
   function appendChat(alias, msg) {
@@ -312,6 +447,7 @@ $lastMsgId  = !empty($chat) ? (int)(end($chat)['mensajeid'] ?? 0) : 0;
   // ── Teacher: start hosting ────────────────────────────────────────────────
   document.getElementById('btn-host')?.addEventListener('click', async () => {
     document.getElementById('btn-host').classList.add('d-none');
+    document.getElementById('btn-end-class').classList.remove('d-none');
     document.getElementById('btn-leave').classList.remove('d-none');
     document.getElementById('btn-mic').classList.remove('d-none');
     document.getElementById('btn-cam').classList.remove('d-none');
@@ -323,9 +459,11 @@ $lastMsgId  = !empty($chat) ? (int)(end($chat)['mensajeid'] ?? 0) : 0;
     await startLocalMedia();
     setRtcStatus('🟡', 'Waiting for student');
     startTimer();
+    document.getElementById('spectators-wrap')?.classList.remove('d-none');
     inCall = true;
     chatPollId = setInterval(pollChat, 3000);
     sigPollId  = setInterval(pollSignals, 1500);
+    spectatorPollId = setInterval(pollSpectators, 5000);  // Poll spectators every 5 seconds
   });
 
   // ── Student: join class ───────────────────────────────────────────────────
@@ -350,6 +488,9 @@ $lastMsgId  = !empty($chat) ? (int)(end($chat)['mensajeid'] ?? 0) : 0;
     buildPC();
     setRtcStatus('🟡', 'Connecting…');
     startTimer();
+    startCountdown();  // Start the 3-minute free countdown
+    document.getElementById('billing-wrap').classList.remove('d-none');
+    updateBillingStatus();
     inCall = true;
 
     // Student creates offer
@@ -359,16 +500,30 @@ $lastMsgId  = !empty($chat) ? (int)(end($chat)['mensajeid'] ?? 0) : 0;
 
     chatPollId = setInterval(pollChat, 3000);
     sigPollId  = setInterval(pollSignals, 1500);
+    
+    // Update billing status every 30 seconds
+    setInterval(updateBillingStatus, 30000);
   });
 
   // ── Leave / End ───────────────────────────────────────────────────────────
   document.getElementById('btn-leave').addEventListener('click', async () => {
-    const verb = IS_TEACHER ? 'End the class?' : 'Leave the class? You will be redirected to payment.';
+    const elapsedMinutes = joinedAt ? (Date.now() - joinedAt) / 60000 : 0;
+    let verb = IS_TEACHER ? 'End the class?' : 'Leave the class?';
+    
+    if (!IS_TEACHER) {
+      if (elapsedMinutes < FREE_MINUTES) {
+        verb = 'Leave the class? You are in the free period, no charge will be applied.';
+      } else {
+        verb = 'Leave the class? You will be charged for the time spent.';
+      }
+    }
+    
     if (!confirm(verb)) return;
 
     clearInterval(chatPollId);
     clearInterval(sigPollId);
     clearInterval(timerInterval);
+    clearInterval(countdownInterval);
 
     if (pc) { pc.close(); pc = null; }
     if (localStream) localStream.getTracks().forEach(t => t.stop());
@@ -378,11 +533,56 @@ $lastMsgId  = !empty($chat) ? (int)(end($chat)['mensajeid'] ?? 0) : 0;
     if (IS_TEACHER) {
       window.location.href = 'dashboard_profesor.php';
     } else {
-      const res = await api({action:'leave', sesionId:sesionId});
-      if (res.ok) window.location.href = res.redirect;
-      else alert('Error: ' + res.error);
+      // Pass elapsed time to determine if charge applies
+      const res = await api({
+        action:'leave', 
+        sesionId:sesionId,
+        elapsedMinutes: elapsedMinutes,
+        isSpectator: isSpectator
+      });
+      if (res.ok) {
+        if (elapsedMinutes < FREE_MINUTES || isSpectator) {
+          window.location.href = 'materias.php';  // No charge, go to subjects
+        } else {
+          window.location.href = res.redirect;  // Charge applied, go to payment
+        }
+      } else {
+        alert('Error: ' + res.error);
+      }
     }
   });
+
+  // ── End Class (Teacher only) ───────────────────────────────────────────────
+  const btnEndClass = document.getElementById('btn-end-class');
+  if (btnEndClass) {
+    btnEndClass.addEventListener('click', async () => {
+      if (!confirm('¿Estás seguro de terminar la clase?')) return;
+
+      clearInterval(chatPollId);
+      clearInterval(sigPollId);
+      clearInterval(timerInterval);
+      clearInterval(countdownInterval);
+
+      if (pc) { pc.close(); pc = null; }
+      if (localStream) localStream.getTracks().forEach(t => t.stop());
+
+      await api({action:'signal', salaId:SALA_ID, tipo:'bye', payload:'bye'});
+
+      // Call API to end class and get earnings
+      const res = await api({
+        action:'end_class',
+        claseId:CLASE_ID,
+        salaId:SALA_ID
+      });
+
+      if (res.ok) {
+        window.location.href = `resumen_clase.php?clase=${CLASE_ID}&tokens=${res.tokens_ganados}`;
+      } else {
+        alert('Error: ' + res.error);
+        window.location.href = 'dashboard_profesor.php';
+      }
+    });
+  }
 
   // ── Signal polling (WebRTC signaling) ─────────────────────────────────────
   async function pollSignals() {

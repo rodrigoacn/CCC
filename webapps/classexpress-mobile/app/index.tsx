@@ -15,6 +15,11 @@ export default function Index() {
     );
   }
 
-  if (user) return <Redirect href="/(tabs)" />;
+  if (user) {
+    if (user.pendingPaymentSessionId) {
+      return <Redirect href={`/pago/${user.pendingPaymentSessionId}`} />;
+    }
+    return <Redirect href="/(tabs)" />;
+  }
   return <Redirect href="/(auth)/login" />;
 }

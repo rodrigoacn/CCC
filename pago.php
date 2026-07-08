@@ -117,9 +117,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$already_paid) {
             <span class="fs-4 fw-bold text-white"><?= $simbolo . $fmt_local ?> <?= $mon_local ?></span><br>
             <small class="text-secondary">≈ $<?= number_format($precio_usd, 2) ?> USD</small>
           </div>
-          <a href="buscar.php" class="btn btn-secondary mt-3">Find Another Class</a>
-          <a href="materias.php" class="btn btn-dark border-secondary mt-3 ms-2">Back to Subjects</a>
+          <a href="materias.php" class="btn btn-secondary mt-3">Ir a materias</a>
+          <a href="buscar.php" class="btn btn-dark border-secondary mt-3 ms-2">Buscar otra clase</a>
         </div>
+        <script>
+          setTimeout(function(){ window.location.href = 'materias.php'; }, 4000);
+        </script>
 
         <?php elseif ($already_paid): ?>
         <!-- ── ALREADY PAID ────────────────────────────────────────────── -->

@@ -1,20 +1,27 @@
+import { useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Feather } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/context/AuthContext';
-import { apiPayment } from '@/lib/api';
+import { apiPayment, apiRoomStatus } from '@/lib/api';
 
 export default function PagoScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { id, precio } = useLocalSearchParams<{ id: string; precio: string }>();
+  const { id } = useLocalSearchParams<{ id: string }>();
   const { user, refreshUser } = useAuth();
   const qc = useQueryClient();
+
+  const { data: roomData, isLoading: roomLoading, isError: roomError } = useQuery({
+    queryKey: ['room_status', id],
+    queryFn: () => apiRoomStatus(id!),
+    enabled: !!id,
+  });
 
   const { mutate: pay, isPending, isSuccess, data: result } = useMutation({
     mutationFn: () => apiPayment(Number(id)),
@@ -26,7 +33,16 @@ export default function PagoScreen() {
     onError: (e: any) => Alert.alert('Error en el pago', e.message),
   });
 
-  const precioNum = Number(precio ?? 0);
+  useEffect(() => {
+    if (isSuccess && result) {
+      const timer = setTimeout(() => {
+        router.replace(user?.rol === 'instructor' ? '/profesor/dashboard' : '/(tabs)');
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [isSuccess, result, router, user]);
+
+  const precioNum = Number(roomData?.sala?.precio ?? 0);
   const botPad = Platform.OS === 'web' ? 34 : insets.bottom;
 
   if (isSuccess && result) {
@@ -40,7 +56,7 @@ export default function PagoScreen() {
         <Text style={[styles.balanceTxt, { color: colors.primary }]}>
           Saldo restante: {result.creditos_restantes} créditos
         </Text>
-        <TouchableOpacity style={[styles.doneBtn, { backgroundColor: colors.primary }]} onPress={() => router.replace('/(tabs)')}>
+        <TouchableOpacity style={[styles.doneBtn, { backgroundColor: colors.primary }]} onPress={() => router.replace(user?.rol === 'instructor' ? '/profesor/dashboard' : '/(tabs)')}>
           <Text style={styles.doneTxt}>Volver al inicio</Text>
         </TouchableOpacity>
       </View>

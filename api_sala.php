@@ -36,7 +36,20 @@ if ($action === 'join') {
     );
     if (!$clase) { echo json_encode(['ok'=>false,'error'=>'Class not found or inactive']); exit; }
 
-    // Check student count
+    // Check if already in spectator queue
+    $psalaId = (int)($clase['salaid'] ?? 0);
+    if ($psalaId) {
+        $existing_spectator = dbOne(
+            "SELECT espectadorId, estado FROM espectadores WHERE salaId = :s AND usuarioId = :u AND estado = 'pendiente'",
+            ['s' => $psalaId, 'u' => $uid]
+        );
+        if ($existing_spectator) {
+            echo json_encode(['ok'=>false,'error'=>'Already in spectator queue, waiting for teacher approval']);
+            exit;
+        }
+    }
+
+    // Check student count (only for approved participants)
     $joined = dbOne(
         "SELECT COUNT(*) AS cnt FROM sesiones_clase WHERE claseId = :id AND fin IS NULL",
         ['id' => $claseId]
@@ -71,11 +84,12 @@ if ($action === 'join') {
     } else {
         $sesionId = dbExec(
             "INSERT INTO sesiones_clase
-                (claseId, estudianteId, salaId, inicio, precio_usd, monto_local, moneda_local, simbolo_local)
-             VALUES (:c, :u, :s, NOW(), :pu, :ml, :mon, :sim)",
+                (claseId, estudianteId, instructorId, salaId, inicio, precio_usd, monto_local, moneda_local, simbolo_local, espectador)
+             VALUES (:c, :u, :i, :s, NOW(), :pu, :ml, :mon, :sim, 1)",
             [
                 'c'  => $claseId,
                 'u'  => $uid,
+                'i'  => $clase['instructorid'],
                 's'  => $clase['salaid'] ?? null,
                 'pu' => $precio_usd,
                 'ml' => $monto_local,
@@ -85,8 +99,15 @@ if ($action === 'join') {
         );
     }
 
+    // Add to spectator queue
+    if ($psalaId) {
+        dbExec(
+            "INSERT INTO espectadores (salaId, usuarioId, estado) VALUES (:s, :u, 'pendiente')",
+            ['s' => $psalaId, 'u' => $uid]
+        );
+    }
+
     // Record participant state
-    $psalaId = (int)($clase['salaid'] ?? 0);
     if ($psalaId) {
         dbExec(
             "INSERT INTO participantes_sala (salaId, usuarioId, camara_activa, microfono_activo)
@@ -104,6 +125,7 @@ if ($action === 'join') {
         'moneda_local' => $moneda_local,
         'simbolo'      => $simbolo,
         'clase_titulo' => $clase['titulo'],
+        'espectador'   => true,
     ]);
     exit;
 }
@@ -133,8 +155,18 @@ if ($action === 'leave') {
     $fin          = new DateTime();
     $duracion_min = max(1, (int)round(($fin->getTimestamp() - $inicio->getTimestamp()) / 60));
 
-    // Price: flat per-session (not per-minute) from clase precio_base
-    $precio_usd  = (float)$sesion['precio_base'];
+    // Price calculation: divide among active students after spectator period
+    // Get count of active (non-spectator) students in this class
+    $active_students = dbOne(
+        "SELECT COUNT(*) AS cnt FROM sesiones_clase 
+         WHERE claseId = :c AND fin IS NULL AND espectador = 0",
+        ['c' => $sesion['claseid']]
+    )['cnt'] ?? 1;
+    
+    // Calculate price per student based on class price divided by active students
+    $precio_base_usd = (float)$sesion['precio_base'];
+    $precio_usd = round($precio_base_usd / max(1, $active_students), 2);
+    
     $tasa        = (float)($sesion['tasa_usd'] ?? 1);
     $monto_local = round($precio_usd * $tasa, 2);
     $mon_local   = $sesion['mon_local'] ?? 'USD';
@@ -157,7 +189,8 @@ if ($action === 'leave') {
         'moneda_local' => $mon_local,
         'simbolo'      => $sim_local,
         'prof_nombre'  => $sesion['prof_nombre'],
-        'redirect'     => 'pago.php?sesion=' . $sesionId,
+        // First show rating screen, then payment flow will continue from there
+        'redirect'     => 'calificar.php?sesion=' . $sesionId,
     ]);
     exit;
 }
@@ -177,12 +210,29 @@ if ($action === 'pay') {
     );
     if (!$sesion) { echo json_encode(['ok'=>false,'error'=>'Session not found or already paid']); exit; }
 
+    // Get professor info to check referrals
+    $profesor = dbOne(
+        "SELECT usuarioId, num_referidos FROM usuarios WHERE usuarioId = :id",
+        ['id' => $sesion['instructorid']]
+    );
+
+    // Calculate commission: 15% base for Rodrigo, reduced by 1% per referral (max 5% reduction)
+    $comision_rodrigo = 0;
+    $num_referidos = (int)($profesor['num_referidos'] ?? 0);
+    
+    // Rodrigo's user ID is 1 (from seed data)
+    if ($sesion['instructorid'] != 1) {
+        $comision_base = 0.15; // 15% base commission
+        $reduccion = min($num_referidos, 5) * 0.01; // 1% reduction per referral, max 5%
+        $comision_rodrigo = round($sesion['precio_usd'] * ($comision_base - $reduccion), 2);
+    }
+
     $db = getDB();
     if (!$db) { echo json_encode(['ok'=>false,'error'=>'DB unavailable']); exit; }
 
     $db->prepare(
-        "INSERT INTO pagos (sesionId, estudianteId, profesorId, monto_usd, monto_local, moneda_local, simbolo_local, metodo, estado)
-         VALUES (:sid,:est,:prof,:usd,:loc,:mon,:sim,:met,'completado')"
+        "INSERT INTO pagos (sesionId, estudianteId, profesorId, monto_usd, monto_local, moneda_local, simbolo_local, metodo, estado, comision_rodrigo)
+         VALUES (:sid,:est,:prof,:usd,:loc,:mon,:sim,:met,'completado',:com)"
     )->execute([
         'sid'  => $sesionId,
         'est'  => $uid,
@@ -192,6 +242,7 @@ if ($action === 'pay') {
         'mon'  => $sesion['moneda_local'],
         'sim'  => $sesion['simbolo_local'] ?? '$',
         'met'  => $metodo,
+        'com'  => $comision_rodrigo,
     ]);
 
     dbExec("UPDATE sesiones_clase SET pagado=1 WHERE sesionId=:id", ['id'=>$sesionId]);
@@ -282,6 +333,150 @@ if ($action === 'poll_signals') {
     );
     if (!is_array($rows)) $rows = [];
     echo json_encode(['ok'=>true,'signals'=>$rows]);
+    exit;
+}
+
+// ── APPROVE SPECTATOR ─────────────────────────────────────────────────────────
+if ($action === 'approve_spectator') {
+    $espectadorId = (int)($_POST['espectadorId'] ?? 0);
+    $salaId = (int)($_POST['salaId'] ?? 0);
+    
+    if (!$espectadorId || !$salaId) {
+        echo json_encode(['ok'=>false,'error'=>'Missing espectadorId or salaId']);
+        exit;
+    }
+    
+    // Verify user is the teacher of this classroom
+    $clase = dbOne(
+        "SELECT cp.instructorId FROM clases_programadas cp JOIN salas s ON s.salaId = :s WHERE s.salaId = :s",
+        ['s' => $salaId]
+    );
+    
+    if (!$clase || $clase['instructorid'] != $uid) {
+        echo json_encode(['ok'=>false,'error'=>'Not authorized']);
+        exit;
+    }
+    
+    // Update spectator status
+    dbExec(
+        "UPDATE espectadores SET estado = 'aprobado', profesor_aprobo = :prof WHERE espectadorId = :id",
+        ['prof' => $uid, 'id' => $espectadorId]
+    );
+    
+    // Update session to no longer be spectator
+    $espectador = dbOne(
+        "SELECT usuarioId FROM espectadores WHERE espectadorId = :id",
+        ['id' => $espectadorId]
+    );
+    
+    if ($espectador) {
+        dbExec(
+            "UPDATE sesiones_clase SET espectador = 0 WHERE estudianteId = :u AND fin IS NULL",
+            ['u' => $espectador['usuarioid']]
+        );
+    }
+    
+    echo json_encode(['ok'=>true,'message'=>'Spectator approved']);
+    exit;
+}
+
+// ── END CLASS ───────────────────────────────────────────────────────────────
+if ($action === 'end_class') {
+    $claseId = (int)($_POST['claseId'] ?? 0);
+    $salaId = (int)($_POST['salaId'] ?? 0);
+    
+    if (!$claseId || !$salaId) {
+        echo json_encode(['ok'=>false,'error'=>'Missing claseId or salaId']);
+        exit;
+    }
+    
+    // Verify user is the teacher
+    $clase = dbOne(
+        "SELECT instructorId FROM clases_programadas WHERE claseId = :id",
+        ['id' => $claseId]
+    );
+    
+    if (!$clase || $clase['instructorid'] != $uid) {
+        echo json_encode(['ok'=>false,'error'=>'Not authorized']);
+        exit;
+    }
+    
+    // Calculate total tokens earned from all completed sessions
+    $sessions = dbAll(
+        "SELECT sc.precio_usd, sc.pagado 
+         FROM sesiones_clase sc 
+         WHERE sc.claseId = :c AND sc.instructorId = :i AND sc.fin IS NOT NULL AND sc.pagado = 1",
+        ['c' => $claseId, 'i' => $uid]
+    );
+    
+    $tokens_ganados = 0;
+    foreach ($sessions as $session) {
+        // 1 USD = 1 token (adjust conversion rate as needed)
+        $tokens_ganados += (float)$session['precio_usd'];
+    }
+    
+    // Mark class as inactive
+    dbExec("UPDATE clases_programadas SET activa = 0 WHERE claseId = :id", ['id' => $claseId]);
+    
+    // End all active sessions
+    dbExec(
+        "UPDATE sesiones_clase SET fin = NOW() WHERE claseId = :c AND fin IS NULL",
+        ['c' => $claseId]
+    );
+    
+    echo json_encode(['ok'=>true,'tokens_ganados'=>$tokens_ganados]);
+    exit;
+}
+
+// ── REJECT SPECTATOR ─────────────────────────────────────────────────────────
+if ($action === 'reject_spectator') {
+    $espectadorId = (int)($_POST['espectadorId'] ?? 0);
+    $salaId = (int)($_POST['salaId'] ?? 0);
+    
+    if (!$espectadorId || !$salaId) {
+        echo json_encode(['ok'=>false,'error'=>'Missing espectadorId or salaId']);
+        exit;
+    }
+    
+    // Verify user is the teacher
+    $clase = dbOne(
+        "SELECT cp.instructorId FROM clases_programadas cp JOIN salas s ON s.salaId = :s WHERE s.salaId = :s",
+        ['s' => $salaId]
+    );
+    
+    if (!$clase || $clase['instructorid'] != $uid) {
+        echo json_encode(['ok'=>false,'error'=>'Not authorized']);
+        exit;
+    }
+    
+    // Update spectator status
+    dbExec(
+        "UPDATE espectadores SET estado = 'rechazado', profesor_aprobo = :prof WHERE espectadorId = :id",
+        ['prof' => $uid, 'id' => $espectadorId]
+    );
+    
+    echo json_encode(['ok'=>true,'message'=>'Spectator rejected']);
+    exit;
+}
+
+// ── GET SPECTATORS ─────────────────────────────────────────────────────────
+if ($action === 'get_spectators') {
+    $salaId = (int)($_GET['salaId'] ?? 0);
+    
+    if (!$salaId) {
+        echo json_encode(['ok'=>false,'error'=>'Missing salaId']);
+        exit;
+    }
+    
+    $spectators = dbAll(
+        "SELECT e.*, u.nombre, u.username FROM espectadores e
+         JOIN usuarios u ON u.usuarioId = e.usuarioId
+         WHERE e.salaId = :s AND e.estado = 'pendiente'
+         ORDER BY e.created_at ASC",
+        ['s' => $salaId]
+    );
+    
+    echo json_encode(['ok'=>true,'spectators'=>$spectators]);
     exit;
 }
 

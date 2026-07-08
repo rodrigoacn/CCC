@@ -3,6 +3,17 @@ require 'menu.php';
 require 'db.php';
 
 // ── Available classes (posted by teachers) ───────────────────────────────────
+$uid = (int)($_SESSION['usuarioId'] ?? 0);
+$rol = $_SESSION['rol'] ?? 'estudiante';
+
+// If user is a teacher, only show their own classes
+$teacherFilter = "";
+$params = [];
+if ($rol !== 'estudiante' && $rol !== 'student') {
+    $teacherFilter = "AND cp.instructorId = :uid";
+    $params['uid'] = $uid;
+}
+
 $clases = dbAll(
     "SELECT cp.claseId, cp.titulo, cp.descripcion, cp.precio_base, cp.codigo_moneda,
             cp.alumnos_min, cp.alumnos_max, cp.solo_yo,
@@ -15,8 +26,9 @@ $clases = dbAll(
      JOIN usuarios u ON u.usuarioId = cp.instructorId
      LEFT JOIN paises pa ON pa.paisId = u.pais_id
      LEFT JOIN materias m ON m.materiaId = cp.materiaId
-     WHERE cp.activa = 1
-     ORDER BY u.calificacion DESC, cp.claseId DESC"
+     WHERE cp.activa = 1 $teacherFilter
+     ORDER BY u.calificacion DESC, cp.claseId DESC",
+    $params
 );
 
 // ── Students looking for a teacher (no active session) ───────────────────────

@@ -187,7 +187,13 @@ function timeAgo(string $ts): string {
             <?php if ($active): ?>
               <div class="card-header border-0 py-2 px-3"
                    style="background:rgba(110,168,110,.15);">
-                <span class="text-success small fw-bold">🟢 Live now — <?= $c['alumnos_activos'] ?> student<?= $c['alumnos_activos']!==1?'s':'' ?> in class</span>
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="text-success small fw-bold">🟢 Live now — <?= $c['alumnos_activos'] ?> student<?= $c['alumnos_activos']!==1?'s':'' ?> in class</span>
+                  <div class="text-center">
+                    <div class="timer-label text-white small">Clase en vivo:</div>
+                    <div class="timer text-primary">00:00</div>
+                  </div>
+                </div>
               </div>
             <?php else: ?>
               <div class="card-header border-0 py-2 px-3 bg-dark">

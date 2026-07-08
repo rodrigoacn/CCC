@@ -14,15 +14,16 @@ import {
   Poppins_700Bold,
 } from '@expo-google-fonts/poppins';
 import { AuthProvider } from '@/context/AuthContext';
+import { ThemeProvider } from '@/context/ThemeContext';
+import { useTheme } from '@/context/ThemeContext';
 import queryClient from '@/lib/queryClient';
-import { useColorScheme } from 'react-native';
 import palette from '@/constants/colors';
 
 SplashScreen.preventAutoHideAsync();
 
 function Inner() {
-  const scheme = useColorScheme();
-  const colors = scheme === 'dark' ? palette.dark : palette.light;
+  const { theme } = useTheme();
+  const colors = theme === 'dark' ? palette.dark : palette.light;
   const [fontsLoaded, fontError] = useFonts({
     Poppins_400Regular,
     Poppins_500Medium,
@@ -38,7 +39,7 @@ function Inner() {
 
   return (
     <>
-      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="(auth)" />
@@ -106,9 +107,11 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
           <AppProviders>
-            <AuthProvider>
-              <Inner />
-            </AuthProvider>
+            <ThemeProvider>
+              <AuthProvider>
+                <Inner />
+              </AuthProvider>
+            </ThemeProvider>
           </AppProviders>
         </QueryClientProvider>
       </SafeAreaProvider>

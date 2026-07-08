@@ -1,11 +1,17 @@
-import { Tabs } from 'expo-router';
+import { Redirect, Tabs } from 'expo-router';
 import { Platform } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useColors } from '@/hooks/useColors';
+import { useAuth } from '@/context/AuthContext';
 
 export default function TabsLayout() {
   const colors = useColors();
+  const { user } = useAuth();
   const tabBarHeight = Platform.OS === 'web' ? 84 : undefined;
+
+  if (user?.pendingPaymentSessionId) {
+    return <Redirect href={`/pago/${user.pendingPaymentSessionId}`} />;
+  }
 
   return (
     <Tabs

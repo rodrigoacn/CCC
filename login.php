@@ -14,23 +14,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $email    = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
 
+    error_log("LOGIN DEBUG - Email recibido: '" . $email . "'");
+    error_log("LOGIN DEBUG - Password recibido: '" . $password . "'");
+
     if (!$email || !$password) {
-        $error_login = 'Please fill in all fields.';
+        $error_login = 'Por favor completa todos los campos.';
     } else {
         $row = dbOne("SELECT usuarioId, nombre, rol, password, verificado, creditos FROM usuarios WHERE email = :email LIMIT 1", ['email' => $email]);
+        error_log("LOGIN DEBUG - Usuario encontrado: " . ($row ? 'Sí (ID: ' . $row['usuarioId'] . ')' : 'No'));
         if ($row === null && !getDB()) {
-            $error_login = 'Database unavailable. Please try again later.';
+            $error_login = 'Base de datos no disponible. Intenta de nuevo más tarde.';
         } elseif (!$row) {
-            $error_login = 'No account found with that email. Please sign up.';
+            $error_login = 'No se encontró una cuenta con ese correo. Regístrate.';
         } elseif (!password_verify($password, $row['password'])) {
-            $error_login = 'Incorrect password.';
+            $error_login = 'Contraseña incorrecta.';
         } elseif (!$row['verificado']) {
-            $error_login = 'Please verify your email before logging in. Check your inbox.';
+            $error_login = 'Por favor verifica tu correo antes de iniciar sesión. Revisa tu bandeja de entrada o solicita un nuevo enlace abajo.';
         } else {
-            $_SESSION['usuarioId'] = $row['usuarioid'];
+            $_SESSION['usuarioId'] = $row['usuarioId'];
             $_SESSION['nombre']    = $row['nombre'];
             $_SESSION['rol']       = $row['rol'];
             $_SESSION['creditos']  = (int)($row['creditos'] ?? 0);
+            $pending = dbOne(
+                "SELECT sesionId FROM sesiones_clase
+                 WHERE estudianteId = :u AND pagado = 0 AND fin IS NOT NULL
+                 ORDER BY fin ASC LIMIT 1",
+                ['u' => $row['usuarioId']]
+            );
+            if ($pending) {
+                header('Location: pago.php?sesion=' . $pending['sesionid']);
+                exit;
+            }
             $rol  = $row['rol'];
             $dest = ($rol !== 'estudiante' && $rol !== 'student') ? 'dashboard_profesor.php' : 'materias.php';
             header('Location: ' . $dest);
@@ -39,60 +53,126 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
+// ─── RESEND VERIFICATION ─────────────────────────────────────────────────────
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'resend_verify') {
+    $active_tab = 'signin';
+    $email = trim($_POST['email'] ?? '');
+    if ($email && filter_var($email, FILTER_VALIDATE_EMAIL) && getDB()) {
+        $row = dbOne("SELECT usuarioId, nombre, verificado FROM usuarios WHERE email = :email LIMIT 1", ['email' => $email]);
+        if ($row && !$row['verificado']) {
+            $token = bin2hex(random_bytes(32));
+            dbExec(
+                "UPDATE usuarios SET token_verificacion = :token WHERE usuarioId = :id",
+                ['token' => $token, 'id' => $row['usuarioid']]
+            );
+            $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+            $link = $protocol . '://' . $_SERVER['HTTP_HOST'] . '/verify.php?token=' . urlencode($token);
+            require_once 'email_helper.php';
+            ceSendVerify($email, $row['nombre'], $link);
+        }
+    }
+    $success_msg = 'Si ese correo está pendiente de verificación, se envió un nuevo enlace. Revisa tu bandeja de entrada y spam.';
+}
+
 // ─── SIGN UP ─────────────────────────────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'signup') {
     $active_tab = 'signup';
     $nombre   = trim($_POST['nombre'] ?? '');
     $email    = trim($_POST['email_signup'] ?? '');
+    $username = trim($_POST['username'] ?? '');
     $password = $_POST['password_signup'] ?? '';
     $confirm  = $_POST['password_confirm'] ?? '';
+    $referido = trim($_POST['referido_por'] ?? '');
     $pais_id  = (int)($_POST['pais_id'] ?? 0) ?: null;
+    $rol      = in_array($_POST['rol'] ?? 'student', ['student', 'instructor'], true) ? $_POST['rol'] : 'student';
 
-    if (!$nombre || !$email || !$password || !$confirm) {
-        $error_signup = 'Please fill in all fields.';
+    if (!$nombre || !$email || !$username || !$password || !$confirm) {
+        $error_signup = 'Por favor completa todos los campos.';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error_signup = 'Please enter a valid email address.';
+        $error_signup = 'Por favor ingresa una dirección de correo válida.';
+    } elseif (strlen($username) < 3) {
+        $error_signup = 'El nombre de usuario debe tener al menos 3 caracteres.';
+    } elseif (!preg_match('/^[a-zA-Z0-9_]+$/', $username)) {
+        $error_signup = 'El nombre de usuario solo puede contener letras, números y guiones bajos.';
     } elseif (strlen($password) < 6) {
-        $error_signup = 'Password must be at least 6 characters.';
+        $error_signup = 'La contraseña debe tener al menos 6 caracteres.';
     } elseif ($password !== $confirm) {
-        $error_signup = 'Passwords do not match.';
+        $error_signup = 'Las contraseñas no coinciden.';
     } else {
         if (!getDB()) {
-            $error_signup = 'Database unavailable. Please try again later.';
+            $error_signup = 'Base de datos no disponible. Intenta de nuevo más tarde.';
         } else {
             $existing = dbOne("SELECT usuarioId, verificado FROM usuarios WHERE email = :email LIMIT 1", ['email' => $email]);
+            $existing_username = dbOne("SELECT usuarioId FROM usuarios WHERE username = :username LIMIT 1", ['username' => $username]);
 
-            if ($existing) {
+            if ($existing_username) {
+                $error_signup = 'Ese nombre de usuario ya está en uso. Elige otro.';
+            } elseif ($existing) {
                 if ($existing['verificado']) {
-                    $error_signup = 'That email is already registered. Please sign in.';
+                    $error_signup = 'Ese correo ya está registrado. Inicia sesión.';
                 } else {
-                    $error_signup = 'That email is registered but not yet verified. Check your inbox.';
+                    $token = bin2hex(random_bytes(32));
+                    dbExec(
+                        "UPDATE usuarios SET token_verificacion = :token WHERE usuarioId = :id",
+                        ['token' => $token, 'id' => $existing['usuarioid']]
+                    );
+                    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+                    $link = $protocol . '://' . $_SERVER['HTTP_HOST'] . '/verify.php?token=' . urlencode($token);
+                    require_once 'email_helper.php';
+                    $sent = ceSendVerify($email, $nombre, $link);
+                    if ($sent) {
+                        $success_msg = 'Ese correo está pendiente de verificación. Enviamos un nuevo enlace a tu bandeja de entrada.';
+                    } else {
+                        $error_signup = 'No se pudo enviar el correo de verificación. Contacta al soporte.';
+                    }
+                    $active_tab  = 'signin';
                 }
             } else {
-                $hash = password_hash($password, PASSWORD_DEFAULT);
-
-                dbExec(
-                    "INSERT INTO usuarios (nombre, email, password, verificado, token_verificacion, pais_id, creditos, ultimoContenido, ultimaClase, ultimaSala)
-                     VALUES (:nombre, :email, :password, 1, '', :pais_id, 100, '', '', '')",
-                    ['nombre' => $nombre, 'email' => $email, 'password' => $hash, 'pais_id' => $pais_id]
-                );
-
-                // Auto-login after signup
-                $newUser = dbOne(
-                    "SELECT usuarioId, nombre, rol, creditos FROM usuarios WHERE email = :email LIMIT 1",
-                    ['email' => $email]
-                );
-                if ($newUser) {
-                    $_SESSION['usuarioId'] = $newUser['usuarioid'];
-                    $_SESSION['nombre']    = $newUser['nombre'];
-                    $_SESSION['rol']       = $newUser['rol'] ?? 'student';
-                    $_SESSION['creditos']  = (int)($newUser['creditos'] ?? 100);
-                    $rol  = $_SESSION['rol'];
-                    header('Location: ' . ($rol !== 'estudiante' && $rol !== 'student' ? 'dashboard_profesor.php' : 'materias.php'));
-                    exit;
+                // Validar referido si se proporcionó
+                $referido_id = null;
+                if ($referido) {
+                    $ref_user = dbOne("SELECT usuarioId, num_referidos FROM usuarios WHERE username = :username LIMIT 1", ['username' => $referido]);
+                    if (!$ref_user) {
+                        $error_signup = 'El nombre de usuario del referido no existe.';
+                    } elseif (($ref_user['num_referidos'] ?? 0) >= 5) {
+                        $error_signup = 'Ese usuario ya alcanzó el máximo de 5 referidos.';
+                    } else {
+                        $referido_id = $ref_user['usuarioid'];
+                    }
                 }
-                $success_msg = "Account created! You can now sign in.";
-                $active_tab  = 'login';
+
+                if (!$error_signup) {
+                    $hash  = password_hash($password, PASSWORD_DEFAULT);
+                    $token = bin2hex(random_bytes(32));
+
+                    dbExec(
+                        "INSERT INTO usuarios (nombre, email, password, rol, verificado, token_verificacion, pais_id, creditos, username, referido_por, ultimoContenido, ultimaClase, ultimaSala)
+                         VALUES (:nombre, :email, :password, :rol, 0, :token, :pais_id, 100, :username, :referido, '', '', '')",
+                        ['nombre' => $nombre, 'email' => $email, 'password' => $hash, 'rol' => $rol, 'token' => $token, 'pais_id' => $pais_id, 'username' => $username, 'referido' => $referido]
+                    );
+
+                    // Si hay referido, actualizar contador y agregar a tabla referidos
+                    if ($referido_id) {
+                        $new_user_id = getDB()->lastInsertId();
+                        dbExec("UPDATE usuarios SET num_referidos = num_referidos + 1 WHERE usuarioId = :id", ['id' => $referido_id]);
+                        dbExec("INSERT INTO referidos (referidor_username, referido_usuarioId) VALUES (:username, :uid)", ['username' => $referido, 'uid' => $new_user_id]);
+                        
+                        // Dar 1 minuto espectador gratis al referido por cada referido nuevo
+                        dbExec("UPDATE usuarios SET minutos_espectador_gratis = minutos_espectador_gratis + 1 WHERE usuarioId = :id", ['id' => $referido_id]);
+                    }
+
+                    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+                    $link = $protocol . '://' . $_SERVER['HTTP_HOST'] . '/verify.php?token=' . urlencode($token);
+                    require_once 'email_helper.php';
+                    $sent = ceSendVerify($email, $nombre, $link);
+                    
+                    if ($sent) {
+                        $success_msg = '¡Cuenta creada! Revisa tu correo y haz clic en el enlace de verificación antes de iniciar sesión.';
+                    } else {
+                        $error_signup = 'No se pudo enviar el correo de verificación. Contacta al soporte.';
+                    }
+                    $active_tab  = 'signin';
+                }
             }
         }
     }
@@ -101,12 +181,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 // Redirect already-logged-in users to the right page
 if (isset($_SESSION['usuarioId'])) {
     $rol = $_SESSION['rol'] ?? 'estudiante';
+    if (($rol === 'estudiante' || $rol === 'student') && isset($_SESSION['usuarioId'])) {
+        $pending = dbOne(
+            "SELECT sesionId FROM sesiones_clase
+             WHERE estudianteId = :u AND pagado = 0 AND fin IS NOT NULL
+             ORDER BY fin ASC LIMIT 1",
+            ['u' => $_SESSION['usuarioId']]
+        );
+        if ($pending) {
+            header('Location: pago.php?sesion=' . $pending['sesionid']);
+            exit;
+        }
+    }
     header('Location: ' . ($rol !== 'estudiante' && $rol !== 'student' ? 'dashboard_profesor.php' : 'materias.php'));
     exit;
 }
 
 // Load LATAM countries for signup dropdown
 $paises_list = dbAll("SELECT paisId, nombre, codigo_moneda, simbolo FROM paises ORDER BY nombre ASC");
+if (!$paises_list) {
+    $paises_list = [];
+}
 
 $resultados = [
     "ultimoContenido"    => "",
@@ -122,7 +217,7 @@ $resultados = [
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ClassExpress – Login</title>
+    <title>ClassExpress – Iniciar sesión</title>
     <link rel="stylesheet" href="./styles.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="icon" href="favico.svg" type="image/svg+xml">
@@ -173,7 +268,7 @@ $resultados = [
 
         <div class="text-center mb-4">
           <h2 class="text-light brand-title fw-bold">ClassExpress</h2>
-          <p class="text-secondary">Your academic progress tracker</p>
+          <p class="text-secondary">Tu plataforma de aprendizaje</p>
         </div>
 
         <div class="login-card p-4">
@@ -190,12 +285,12 @@ $resultados = [
             <li class="nav-item" role="presentation">
               <button class="nav-link <?= $active_tab === 'signin' ? 'active' : '' ?>"
                       id="signin-tab" data-bs-toggle="tab" data-bs-target="#signin"
-                      type="button" role="tab">Sign In</button>
+                      type="button" role="tab">Iniciar sesión</button>
             </li>
             <li class="nav-item" role="presentation">
               <button class="nav-link <?= $active_tab === 'signup' ? 'active' : '' ?>"
                       id="signup-tab" data-bs-toggle="tab" data-bs-target="#signup"
-                      type="button" role="tab">Sign Up</button>
+                      type="button" role="tab">Registrarse</button>
             </li>
           </ul>
 
@@ -210,25 +305,34 @@ $resultados = [
               <form method="POST" action="login.php" novalidate>
                 <input type="hidden" name="action" value="signin">
                 <div class="mb-3">
-                  <label for="email" class="form-label">Email address</label>
+                  <label for="email" class="form-label">Correo electrónico</label>
                   <input type="email" class="form-control" id="email" name="email"
-                         placeholder="you@example.com"
+                         placeholder="correo@ejemplo.com"
                          value="<?= htmlspecialchars($_POST['email'] ?? '') ?>" required>
                 </div>
                 <div class="mb-4">
                   <div class="d-flex justify-content-between align-items-baseline">
-                    <label for="password" class="form-label">Password</label>
-                    <a href="forgot_password.php" class="text-secondary small">Forgot your password?</a>
+                    <label for="password" class="form-label">Contraseña</label>
+                    <a href="forgot_password.php" class="text-secondary small">¿Olvidaste tu contraseña?</a>
                   </div>
                   <input type="password" class="form-control" id="password" name="password"
                          placeholder="••••••••" required>
                 </div>
-                <button type="submit" class="btn btn-secondary w-100 fw-semibold">Sign In</button>
+                <button type="submit" class="btn btn-secondary w-100 fw-semibold">Iniciar sesión</button>
               </form>
               <p class="text-secondary text-center mt-3 small mb-0">
-                Don't have an account?
-                <a href="#" class="text-light" onclick="document.getElementById('signup-tab').click(); return false;">Sign up here</a>
+                ¿No tienes una cuenta?
+                <a href="#" class="text-light" onclick="document.getElementById('signup-tab').click(); return false;">Regístrate aquí</a>
               </p>
+              <form method="POST" action="login.php" class="mt-3 pt-3 border-top border-secondary">
+                <input type="hidden" name="action" value="resend_verify">
+                <p class="text-secondary small mb-2">¿No recibiste el correo de verificación?</p>
+                <div class="input-group input-group-sm">
+                  <input type="email" class="form-control" name="email" placeholder="correo@ejemplo.com"
+                         value="<?= htmlspecialchars($_POST['email'] ?? '') ?>" required>
+                  <button type="submit" class="btn btn-outline-secondary">Reenviar enlace</button>
+                </div>
+              </form>
             </div>
 
             <!-- ── SIGN UP ── -->
@@ -240,45 +344,68 @@ $resultados = [
               <form method="POST" action="login.php" novalidate>
                 <input type="hidden" name="action" value="signup">
                 <div class="mb-3">
-                  <label for="nombre" class="form-label">Full name</label>
+                  <label for="nombre" class="form-label">Nombre completo</label>
                   <input type="text" class="form-control" id="nombre" name="nombre"
-                         placeholder="Jane Doe"
+                         placeholder="Tu nombre"
                          value="<?= htmlspecialchars($_POST['nombre'] ?? '') ?>" required>
                 </div>
                 <div class="mb-3">
-                  <label for="email_signup" class="form-label">Email address</label>
+                  <label for="username" class="form-label">Nombre de usuario <span class="text-secondary">(único, letras/números/_)</span></label>
+                  <input type="text" class="form-control" id="username" name="username"
+                         placeholder="tu_usuario"
+                         value="<?= htmlspecialchars($_POST['username'] ?? '') ?>" required>
+                </div>
+                <div class="mb-3">
+                  <label for="referido_por" class="form-label">Referido por <span class="text-secondary">(opcional)</span></label>
+                  <input type="text" class="form-control" id="referido_por" name="referido_por"
+                         placeholder="nombre_usuario_quien_te_refirió"
+                         value="<?= htmlspecialchars($_POST['referido_por'] ?? '') ?>">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Registrarme como</label>
+                  <select class="form-select" name="rol" id="rol">
+                    <option value="student" <?= (($_POST['rol'] ?? 'student') === 'student') ? 'selected' : '' ?>>Estudiante</option>
+                    <option value="instructor" <?= (($_POST['rol'] ?? '') === 'instructor') ? 'selected' : '' ?>>Profesor</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="email_signup" class="form-label">Correo electrónico</label>
                   <input type="email" class="form-control" id="email_signup" name="email_signup"
-                         placeholder="you@example.com"
+                         placeholder="correo@ejemplo.com"
                          value="<?= htmlspecialchars($_POST['email_signup'] ?? '') ?>" required>
                 </div>
                 <div class="mb-3">
-                  <label for="password_signup" class="form-label">Password <span class="text-secondary">(min. 6 chars)</span></label>
+                  <label for="password_signup" class="form-label">Contraseña <span class="text-secondary">(mín. 6 caracteres)</span></label>
                   <input type="password" class="form-control" id="password_signup" name="password_signup"
                          placeholder="••••••••" required>
                 </div>
                 <div class="mb-3">
-                  <label for="password_confirm" class="form-label">Confirm password</label>
+                  <label for="password_confirm" class="form-label">Confirmar contraseña</label>
                   <input type="password" class="form-control" id="password_confirm" name="password_confirm"
                          placeholder="••••••••" required>
                 </div>
                 <div class="mb-4">
-                  <label for="pais_id" class="form-label">Country <span class="text-secondary">(for LATAM payments)</span></label>
+                  <label for="pais_id" class="form-label">País <span class="text-secondary">(para pagos LATAM)</span></label>
                   <select class="form-select" id="pais_id" name="pais_id">
-                    <option value="">— Select your country —</option>
-                    <?php foreach ($paises_list as $p): ?>
-                      <option value="<?= $p['paisid'] ?>"
-                              <?= (int)($_POST['pais_id'] ?? 0) === (int)$p['paisid'] ? 'selected' : '' ?>>
-                        <?= htmlspecialchars($p['nombre']) ?>
-                        (<?= htmlspecialchars($p['simbolo'] . ' ' . $p['codigo_moneda']) ?>)
-                      </option>
-                    <?php endforeach; ?>
+                    <option value="">— Selecciona tu país —</option>
+                    <?php if (is_array($paises_list)): ?>
+                      <?php foreach ($paises_list as $p): ?>
+                        <?php if (isset($p['paisId']) && isset($p['nombre'])): ?>
+                          <option value="<?= $p['paisId'] ?>"
+                                  <?= (int)($_POST['pais_id'] ?? 0) === (int)$p['paisId'] ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($p['nombre']) ?>
+                            (<?= htmlspecialchars($p['simbolo'] . ' ' . $p['codigo_moneda']) ?>)
+                          </option>
+                        <?php endif; ?>
+                      <?php endforeach; ?>
+                    <?php endif; ?>
                   </select>
                 </div>
-                <button type="submit" class="btn btn-dark border-secondary w-100 fw-semibold">Create Account</button>
+                <button type="submit" class="btn btn-dark border-secondary w-100 fw-semibold">Crear cuenta</button>
               </form>
               <p class="text-secondary text-center mt-3 small mb-0">
-                Already have an account?
-                <a href="#" class="text-light" onclick="document.getElementById('signin-tab').click(); return false;">Sign in here</a>
+                ¿Ya tienes una cuenta?
+                <a href="#" class="text-light" onclick="document.getElementById('signin-tab').click(); return false;">Inicia sesión aquí</a>
               </p>
             </div>
 
@@ -287,7 +414,7 @@ $resultados = [
 
         <footer class="mastfoot mt-auto mt-4">
           <div class="inner float-end">
-            <p class="text-secondary small">ClassExpress done <a href="https://getbootstrap.com/" class="text-secondary">Bootstrap</a>, by <a href="https://www.facebook.com/rodrigo.alejandro.1848816?locale=es_LA" class="text-secondary">@RodrigoConejeros</a>.</p>
+            <p class="text-secondary small">ClassExpress hecho con <a href="https://getbootstrap.com/" class="text-secondary">Bootstrap</a>, por <a href="https://www.facebook.com/rodrigo.alejandro.1848816?locale=es_LA" class="text-secondary">@RodrigoConejeros</a>.</p>
           </div>
         </footer>
 

@@ -1,15 +1,59 @@
-<?php require 'menu.php'; ?>
+<?php
+require 'menu.php';
+require 'db.php';
+
+$sesionId = (int)($_GET['sesion'] ?? 0);
+
+// If POST, save rating then redirect to payment
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $rating = (int)($_POST['rating'] ?? 0);
+    $sesion = dbOne(
+        "SELECT s.sesionId, cp.instructorId
+         FROM sesiones_clase s
+         JOIN clases_programadas cp ON cp.claseId = s.claseId
+         WHERE s.sesionId = :id",
+        ['id' => $sesionId]
+    );
+
+    if ($rating >= 1 && $rating <= 5 && $sesion) {
+        $profId = (int)$sesion['instructorid'];
+        $prof = dbOne("SELECT calificacion, num_resenas FROM usuarios WHERE usuarioId = :id", ['id'=>$profId]);
+        $curAvg = (float)($prof['calificacion'] ?? 0);
+        $curCount = (int)($prof['num_resenas'] ?? 0);
+
+        $newCount = $curCount + 1;
+        $newAvg = ($curAvg * $curCount + $rating) / max(1, $newCount);
+
+        dbExec("UPDATE usuarios SET calificacion = :avg, num_resenas = :count WHERE usuarioId = :id", ['avg'=>round($newAvg,2),'count'=>$newCount,'id'=>$profId]);
+    }
+
+    // After saving rating, go to subjects page
+    header('Location: materias.php');
+    exit;
+}
+
+?>
 
   <div class="container mt-10">
     <div class="d-flex justify-content-center">
      <div class="card text-center mb-5">
       <div class="card" style="width: 36rem;">
         <div class="card-body">
-          <h2 class="card-title">Rate the experience</h2>
-          <h3 class="card-subtitle mb-2 text-muted">How do you feel about the experience you take from this classmate?</h3>
-          <div class="rating"> <input type="radio" name="rating" value="5" id="5"><label for="5">☆</label> <input type="radio" name="rating" value="4" id="4"><label for="4">☆</label> <input type="radio" name="rating" value="3" id="3"><label for="3">☆</label> <input type="radio" name="rating" value="2" id="2"><label for="2">☆</label> <input type="radio" name="rating" value="1" id="1"><label for="1">☆</label> </div>
-          <a href="#" class="btn btn-light btn-lg border-dark float-start">Submit</a>
-          <a href="#" class="btn btn-dark btn-lg border-white float-end">Ignore</a>
+          <h2 class="card-title">Califica la clase</h2>
+          <h3 class="card-subtitle mb-2 text-secondary">¿Cómo fue la experiencia con el profesor?</h3>
+          <form method="POST" action="calificar.php?sesion=<?= $sesionId ?>">
+            <div class="rating mb-3">
+              <input type="radio" name="rating" value="5" id="r5"><label for="r5">☆</label>
+              <input type="radio" name="rating" value="4" id="r4"><label for="r4">☆</label>
+              <input type="radio" name="rating" value="3" id="r3"><label for="r3">☆</label>
+              <input type="radio" name="rating" value="2" id="r2"><label for="r2">☆</label>
+              <input type="radio" name="rating" value="1" id="r1"><label for="r1">☆</label>
+            </div>
+            <div class="d-flex justify-content-between">
+              <button type="submit" class="btn btn-dark btn-lg">Enviar</button>
+              <a href="materias.php" class="btn btn-secondary btn-lg">Omitir</a>
+            </div>
+          </form>
         </div>
       </div>
     </div>
