@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, Platform } from 'react-native';
+import { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -7,7 +7,7 @@ import { Feather } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/context/AuthContext';
-import { apiPayment, apiRoomStatus } from '@/lib/api';
+import { apiPayment, apiSessionStatus, esInstructor } from '@/lib/api';
 
 export default function PagoScreen() {
   const colors = useColors();
@@ -16,33 +16,43 @@ export default function PagoScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user, refreshUser } = useAuth();
   const qc = useQueryClient();
+  const [payError, setPayError] = useState<string | null>(null);
 
-  const { data: roomData, isLoading: roomLoading, isError: roomError } = useQuery({
-    queryKey: ['room_status', id],
-    queryFn: () => apiRoomStatus(id!),
+  const { data, isLoading: sessionLoading, isError: sessionError } = useQuery({
+    queryKey: ['session_status', id],
+    queryFn: () => apiSessionStatus(id!),
     enabled: !!id,
+    retry: false,
   });
 
   const { mutate: pay, isPending, isSuccess, data: result } = useMutation({
     mutationFn: () => apiPayment(Number(id)),
     onSuccess: () => {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      setPayError(null);
+      try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch {}
       refreshUser();
       qc.invalidateQueries({ queryKey: ['credits'] });
     },
-    onError: (e: any) => Alert.alert('Error en el pago', e.message),
+    onError: (e: any) => {
+      setPayError(e?.message || 'No se pudo procesar el pago.');
+      if (Platform.OS !== 'web') {
+        // Alert works only on native
+      }
+    },
   });
 
   useEffect(() => {
     if (isSuccess && result) {
       const timer = setTimeout(() => {
-        router.replace(user?.rol === 'instructor' ? '/profesor/dashboard' : '/(tabs)');
+        router.replace(esInstructor(user?.rol) ? '/profesor/dashboard' : '/(tabs)');
       }, 4000);
       return () => clearTimeout(timer);
     }
   }, [isSuccess, result, router, user]);
 
-  const precioNum = Number(roomData?.sala?.precio ?? 0);
+  const sesion = data?.sesion;
+  const precioNum = Number(sesion?.precio ?? 0);
+  const saldo = Number(data?.balance ?? user?.creditos ?? 0);
   const botPad = Platform.OS === 'web' ? 34 : insets.bottom;
 
   if (isSuccess && result) {
@@ -56,7 +66,7 @@ export default function PagoScreen() {
         <Text style={[styles.balanceTxt, { color: colors.primary }]}>
           Saldo restante: {result.creditos_restantes} créditos
         </Text>
-        <TouchableOpacity style={[styles.doneBtn, { backgroundColor: colors.primary }]} onPress={() => router.replace(user?.rol === 'instructor' ? '/profesor/dashboard' : '/(tabs)')}>
+        <TouchableOpacity style={[styles.doneBtn, { backgroundColor: colors.primary }]} onPress={() => router.replace(esInstructor(user?.rol) ? '/profesor/dashboard' : '/(tabs)')}>
           <Text style={styles.doneTxt}>Volver al inicio</Text>
         </TouchableOpacity>
       </View>
@@ -66,54 +76,89 @@ export default function PagoScreen() {
   return (
     <View style={[styles.page, { backgroundColor: colors.background }]}>
       <View style={{ flex: 1, padding: 24 }}>
-        <View style={[styles.card, { backgroundColor: colors.card }]}>
-          <Feather name="credit-card" size={32} color={colors.primary} style={{ marginBottom: 16 }} />
-          <Text style={[styles.cardLabel, { color: colors.subtext }]}>Total a pagar</Text>
-          <Text style={[styles.cardAmount, { color: colors.foreground }]}>{precioNum}</Text>
-          <Text style={[styles.cardUnit, { color: colors.primary }]}>créditos</Text>
-        </View>
-
-        <View style={[styles.infoBox, { backgroundColor: colors.muted }]}>
-          <View style={styles.infoRow}>
-            <Text style={[styles.infoLabel, { color: colors.subtext }]}>Saldo actual</Text>
-            <Text style={[styles.infoVal, { color: colors.foreground }]}>{user?.creditos ?? 0} cr.</Text>
+        {sessionLoading ? (
+          <View style={styles.center}>
+            <ActivityIndicator color={colors.primary} size="large" />
+            <Text style={[styles.infoLabel, { color: colors.subtext }]}>Cargando sesión…</Text>
           </View>
-          <View style={styles.infoRow}>
-            <Text style={[styles.infoLabel, { color: colors.subtext }]}>Costo de la clase</Text>
-            <Text style={[styles.infoVal, { color: colors.danger }]}>-{precioNum} cr.</Text>
-          </View>
-          <View style={[styles.infoRow, { borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 12, marginTop: 4 }]}>
-            <Text style={[styles.infoLabel, { color: colors.subtext }]}>Saldo después</Text>
-            <Text style={[styles.infoVal, { color: colors.success }]}>{(user?.creditos ?? 0) - precioNum} cr.</Text>
-          </View>
-        </View>
-
-        {(user?.creditos ?? 0) < precioNum && (
-          <View style={[styles.warnBox, { backgroundColor: colors.danger + '22' }]}>
-            <Feather name="alert-circle" size={16} color={colors.danger} />
-            <Text style={[styles.warnTxt, { color: colors.danger }]}>
-              Saldo insuficiente. Recarga créditos primero.
+        ) : sessionError || !sesion ? (
+          <View style={[styles.infoBox, { backgroundColor: colors.muted }]}>
+            <Feather name="alert-circle" size={20} color={colors.danger} style={{ marginBottom: 8 }} />
+            <Text style={[styles.infoVal, { color: colors.danger, textAlign: 'center' }]}>
+              No se encontró la sesión pendiente.
             </Text>
+            <TouchableOpacity style={[styles.doneBtn, { backgroundColor: colors.primary, marginTop: 16 }]} onPress={() => router.replace('/(tabs)')}>
+              <Text style={styles.doneTxt}>Volver al inicio</Text>
+            </TouchableOpacity>
           </View>
+        ) : (
+          <>
+            <View style={[styles.card, { backgroundColor: colors.card }]}>
+              <Feather name="credit-card" size={32} color={colors.primary} style={{ marginBottom: 16 }} />
+              <Text style={[styles.cardLabel, { color: colors.subtext }]}>Total a pagar</Text>
+              <Text style={[styles.cardAmount, { color: colors.foreground }]}>{precioNum}</Text>
+              <Text style={[styles.cardUnit, { color: colors.primary }]}>créditos</Text>
+              <Text style={[styles.infoLabel, { color: colors.subtext, marginTop: 12, textAlign: 'center' }]}>
+                {sesion.titulo}
+              </Text>
+            </View>
+
+            <View style={[styles.infoBox, { backgroundColor: colors.muted }]}>
+              <View style={styles.infoRow}>
+                <Text style={[styles.infoLabel, { color: colors.subtext }]}>Profesor</Text>
+                <Text style={[styles.infoVal, { color: colors.foreground }]}>{sesion.instructor_nombre}</Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Text style={[styles.infoLabel, { color: colors.subtext }]}>Saldo actual</Text>
+                <Text style={[styles.infoVal, { color: colors.foreground }]}>{saldo} cr.</Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Text style={[styles.infoLabel, { color: colors.subtext }]}>Costo de la clase</Text>
+                <Text style={[styles.infoVal, { color: colors.danger }]}>-{precioNum} cr.</Text>
+              </View>
+              <View style={[styles.infoRow, { borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 12, marginTop: 4 }]}>
+                <Text style={[styles.infoLabel, { color: colors.subtext }]}>Saldo después</Text>
+                <Text style={[styles.infoVal, { color: colors.success }]}>{saldo - precioNum} cr.</Text>
+              </View>
+            </View>
+
+            {saldo < precioNum && (
+              <View style={[styles.warnBox, { backgroundColor: colors.danger + '22' }]}>
+                <Feather name="alert-circle" size={16} color={colors.danger} />
+                <Text style={[styles.warnTxt, { color: colors.danger }]}>
+                  Saldo insuficiente. Recarga créditos primero.
+                </Text>
+              </View>
+            )}
+
+            {payError && (
+              <View style={[styles.warnBox, { backgroundColor: colors.danger + '22', marginTop: 16 }]}>
+                <Feather name="x-circle" size={16} color={colors.danger} />
+                <Text style={[styles.warnTxt, { color: colors.danger }]}>{payError}</Text>
+              </View>
+            )}
+          </>
         )}
       </View>
 
-      <View style={[styles.footer, { paddingBottom: botPad + 16, borderTopColor: colors.border, backgroundColor: colors.surface }]}>
-        <TouchableOpacity style={[styles.cancelBtn, { borderColor: colors.border }]} onPress={() => router.back()}>
-          <Text style={[styles.cancelTxt, { color: colors.subtext }]}>Cancelar</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.payBtn, { backgroundColor: (user?.creditos ?? 0) < precioNum ? colors.muted : colors.primary }]}
-          onPress={() => pay()}
-          disabled={isPending || (user?.creditos ?? 0) < precioNum}
-        >
-          {isPending ? <ActivityIndicator color="#fff" /> : (
-            <Text style={[styles.payTxt, { color: (user?.creditos ?? 0) < precioNum ? colors.subtext : '#fff' }]}>
-              Confirmar pago
-            </Text>
-          )}
-        </TouchableOpacity>
-      </View>
+      {!sessionLoading && !sessionError && sesion && (
+        <View style={[styles.footer, { paddingBottom: botPad + 16, borderTopColor: colors.border, backgroundColor: colors.surface }]}>
+          <TouchableOpacity style={[styles.cancelBtn, { borderColor: colors.border }]} onPress={() => router.back()}>
+            <Text style={[styles.cancelTxt, { color: colors.subtext }]}>Cancelar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.payBtn, { backgroundColor: saldo < precioNum ? colors.muted : colors.primary }]}
+            onPress={() => pay()}
+            disabled={isPending || saldo < precioNum}
+          >
+            {isPending ? <ActivityIndicator color="#fff" /> : (
+              <Text style={[styles.payTxt, { color: saldo < precioNum ? colors.subtext : '#fff' }]}>
+                Confirmar pago
+              </Text>
+            )}
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }

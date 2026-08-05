@@ -5,10 +5,11 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Feather } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useColors } from '@/hooks/useColors';
+import { useI18n } from '@/context/I18nContext';
 import { apiCreateClass, apiSubjects, Subject } from '@/lib/api';
 
 const DURATIONS = [30, 45, 60, 90, 120];
@@ -18,6 +19,7 @@ export default function CrearClaseScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const qc = useQueryClient();
+  const { t } = useI18n();
 
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
@@ -28,30 +30,41 @@ export default function CrearClaseScreen() {
   const { data: subjData } = useQuery({ queryKey: ['subjects'], queryFn: apiSubjects });
   const subjects = subjData?.subjects ?? [];
 
-  const { mutate: create, isPending } = useMutation({
-    mutationFn: () => apiCreateClass({
-      titulo: titulo.trim(),
-      descripcion: descripcion.trim(),
-      precio: Number(precio),
-      materia_id: materiaId,
-      duracion,
-    }),
-    onSuccess: () => {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      qc.invalidateQueries({ queryKey: ['teacher_dashboard'] });
-      Alert.alert('¡Clase creada!', 'Ya aparece en tu panel.', [
-        { text: 'OK', onPress: () => router.back() },
-      ]);
-    },
-    onError: (e: any) => Alert.alert('Error', e.message),
-  });
+  const [sending, setSending] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!titulo || !materiaId || !precio) {
-      Alert.alert('Completa todos los campos requeridos');
+      Alert.alert(t('create.error'));
       return;
     }
-    create();
+    setSending(true);
+    try {
+      const result = await apiCreateClass({
+        titulo: titulo.trim(),
+        descripcion: descripcion.trim(),
+        precio: Number(precio),
+        materia_id: materiaId,
+        duracion,
+      });
+      if (__DEV__) console.log('create_class success', result);
+      try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch {}
+      qc.invalidateQueries({ queryKey: ['teacher_dashboard'] });
+      if (Platform.OS === 'web') {
+        window.alert(t('create.success'));
+      } else {
+        Alert.alert(t('create.success'));
+      }
+      router.push(`/materia/clase?id=${result.clase.id}`);
+    } catch (e: any) {
+      if (__DEV__) console.log('create_class error', e);
+      if (Platform.OS === 'web') {
+        window.alert(t('general.error') + ': ' + (e?.message ?? t('general.error')));
+      } else {
+        Alert.alert(t('general.error'), e?.message ?? t('general.error'));
+      }
+    } finally {
+      setSending(false);
+    }
   };
 
   const botPad = Platform.OS === 'web' ? 34 : insets.bottom;
@@ -62,19 +75,19 @@ export default function CrearClaseScreen() {
       contentContainerStyle={{ padding: 20, paddingBottom: botPad + 32 }}
       keyboardShouldPersistTaps="handled"
     >
-      <Text style={[styles.label, { color: colors.subtext }]}>Título de la clase *</Text>
+      <Text style={[styles.label, { color: colors.subtext }]}>{t('create.class_title')}</Text>
       <TextInput
         style={[styles.input, { backgroundColor: colors.muted, color: colors.foreground }]}
-        placeholder="Ej: Álgebra para principiantes"
+        placeholder={t('create.class_placeholder')}
         placeholderTextColor={colors.mutedForeground}
         value={titulo}
         onChangeText={setTitulo}
       />
 
-      <Text style={[styles.label, { color: colors.subtext }]}>Descripción</Text>
+      <Text style={[styles.label, { color: colors.subtext }]}>{t('create.description')}</Text>
       <TextInput
         style={[styles.input, { backgroundColor: colors.muted, color: colors.foreground, height: 100, textAlignVertical: 'top' }]}
-        placeholder="Describe lo que aprenderán..."
+        placeholder={t('create.desc_placeholder')}
         placeholderTextColor={colors.mutedForeground}
         value={descripcion}
         onChangeText={setDescripcion}
@@ -82,7 +95,7 @@ export default function CrearClaseScreen() {
         numberOfLines={4}
       />
 
-      <Text style={[styles.label, { color: colors.subtext }]}>Materia *</Text>
+      <Text style={[styles.label, { color: colors.subtext }]}>{t('create.subject')}</Text>
       <View style={styles.chipWrap}>
         {subjects.map((s: Subject) => (
           <TouchableOpacity
@@ -95,17 +108,17 @@ export default function CrearClaseScreen() {
         ))}
       </View>
 
-      <Text style={[styles.label, { color: colors.subtext }]}>Precio en créditos *</Text>
+      <Text style={[styles.label, { color: colors.subtext }]}>{t('create.price')}</Text>
       <TextInput
         style={[styles.input, { backgroundColor: colors.muted, color: colors.foreground }]}
-        placeholder="Ej: 5"
+        placeholder={t('create.price_placeholder')}
         placeholderTextColor={colors.mutedForeground}
         value={precio}
         onChangeText={setPrecio}
         keyboardType="numeric"
       />
 
-      <Text style={[styles.label, { color: colors.subtext }]}>Duración</Text>
+      <Text style={[styles.label, { color: colors.subtext }]}>{t('create.duration')}</Text>
       <View style={styles.chipWrap}>
         {DURATIONS.map(d => (
           <TouchableOpacity
@@ -119,14 +132,14 @@ export default function CrearClaseScreen() {
       </View>
 
       <TouchableOpacity
-        style={[styles.btn, { backgroundColor: isPending ? colors.muted : colors.primary, marginTop: 24 }]}
+        style={[styles.btn, { backgroundColor: sending ? colors.muted : colors.primary, marginTop: 24 }]}
         onPress={handleSubmit}
-        disabled={isPending}
+        disabled={sending}
       >
-        {isPending ? <ActivityIndicator color="#fff" /> : (
+        {sending ? <ActivityIndicator color="#fff" /> : (
           <>
             <Feather name="plus-circle" size={20} color="#fff" />
-            <Text style={styles.btnTxt}>Publicar clase</Text>
+            <Text style={styles.btnTxt}>{t('create.publish')}</Text>
           </>
         )}
       </TouchableOpacity>

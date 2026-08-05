@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { Platform } from 'react-native';
-import { apiSendSignal, apiPollSignals } from '@/lib/api';
+import { Platform, PermissionsAndroid } from 'react-native';
+
+const WS_URL = 'wss://classexpress.online/ws/';
 
 const RTC_CONFIG = {
   iceServers: [
@@ -35,7 +36,7 @@ function loadWebRTC() {
 
 export type VideoCallStatus = 'idle' | 'starting' | 'waiting' | 'connecting' | 'connected' | 'error';
 
-export function useVideoCall(salaId: number, userId: number, isTeacher: boolean) {
+export function useVideoCall(salaId: number, userId: number, isTeacher: boolean, onChatMessage?: (msg: any) => void) {
   const [status, setStatus] = useState<VideoCallStatus>('idle');
   const [localStream, setLocalStream] = useState<MediaStreamLike>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStreamLike>(null);
@@ -45,14 +46,17 @@ export function useVideoCall(salaId: number, userId: number, isTeacher: boolean)
 
   const pcRef = useRef<PeerConnectionLike>(null);
   const localRef = useRef<MediaStreamLike>(null);
-  const lastSigRef = useRef(0);
-  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const activeRef = useRef(false);
   const webrtcRef = useRef(loadWebRTC());
 
-  const sendSignal = useCallback(async (tipo: string, payload: string) => {
-    await apiSendSignal(salaId, tipo, payload);
-  }, [salaId]);
+  const wsRef = useRef<WebSocket | null>(null);
+  const wsReadyRef = useRef(false);
+
+  const sendSignal = useCallback((tipo: string, payload: string) => {
+    if (wsReadyRef.current && wsRef.current) {
+      wsRef.current.send(JSON.stringify({ type: 'signal', tipo, payload }));
+    }
+  }, []);
 
   const buildPC = useCallback(() => {
     const { RTCPeerConnection } = webrtcRef.current;
@@ -80,7 +84,7 @@ export function useVideoCall(salaId: number, userId: number, isTeacher: boolean)
 
     pc.onicecandidate = (event: any) => {
       if (event.candidate) {
-        sendSignal('candidate', JSON.stringify(event.candidate)).catch(() => {});
+        sendSignal('candidate', JSON.stringify(event.candidate));
       }
     };
 
@@ -93,9 +97,8 @@ export function useVideoCall(salaId: number, userId: number, isTeacher: boolean)
     return pc;
   }, [sendSignal]);
 
-  const handleSignal = useCallback(async (sig: { signalId: number; tipo: string; payload: string }) => {
+  const handleSignal = useCallback(async (sig: { tipo: string; payload: string }) => {
     const { RTCSessionDescription, RTCIceCandidate } = webrtcRef.current;
-    lastSigRef.current = Math.max(lastSigRef.current, sig.signalId);
     const payload = JSON.parse(sig.payload);
 
     if (sig.tipo === 'offer' && isTeacher) {
@@ -121,18 +124,6 @@ export function useVideoCall(salaId: number, userId: number, isTeacher: boolean)
     }
   }, [buildPC, isTeacher, sendSignal]);
 
-  const pollSignals = useCallback(async () => {
-    if (!activeRef.current) return;
-    try {
-      const { signals } = await apiPollSignals(String(salaId), lastSigRef.current);
-      for (const sig of signals) {
-        await handleSignal(sig);
-      }
-    } catch {
-      // polling errors are non-fatal
-    }
-  }, [handleSignal, salaId]);
-
   const startCall = useCallback(async () => {
     if (activeRef.current) return;
     activeRef.current = true;
@@ -140,6 +131,17 @@ export function useVideoCall(salaId: number, userId: number, isTeacher: boolean)
     setErrorMsg('');
 
     try {
+      if (Platform.OS === 'android') {
+        const granted = await PermissionsAndroid.requestMultiple([
+          PermissionsAndroid.PERMISSIONS.CAMERA,
+          PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+        ]);
+        if (granted[PermissionsAndroid.PERMISSIONS.CAMERA] !== 'granted' ||
+            granted[PermissionsAndroid.PERMISSIONS.RECORD_AUDIO] !== 'granted') {
+          throw new Error('Permisos de cámara y micrófono denegados');
+        }
+      }
+
       const { mediaDevices } = webrtcRef.current;
       if (!mediaDevices?.getUserMedia) {
         throw new Error('Cámara/micrófono no disponibles en este dispositivo');
@@ -150,27 +152,55 @@ export function useVideoCall(salaId: number, userId: number, isTeacher: boolean)
       setLocalStream(stream);
       setStatus(isTeacher ? 'waiting' : 'connecting');
 
-      pollRef.current = setInterval(pollSignals, 1500);
+      // WebSocket connection for signaling
+      const ws = new WebSocket(WS_URL);
+      wsRef.current = ws;
+
+      ws.onopen = () => {
+        wsReadyRef.current = true;
+        ws.send(JSON.stringify({ type: 'join', salaId: String(salaId), userId }));
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg.type === 'signal') {
+            handleSignal(msg.data);
+          } else if (msg.type === 'chat' && onChatMessage) {
+            onChatMessage(msg.data);
+          }
+        } catch { /* ignore */ }
+      };
+
+      ws.onclose = () => {
+        wsReadyRef.current = false;
+      };
+
+      ws.onerror = () => {
+        wsReadyRef.current = false;
+      };
 
       if (!isTeacher) {
         const pc = buildPC();
         const offer = await pc.createOffer();
         await pc.setLocalDescription(offer);
-        await sendSignal('offer', JSON.stringify(offer));
+        sendSignal('offer', JSON.stringify(offer));
       }
     } catch (e: any) {
       activeRef.current = false;
       setStatus('error');
       setErrorMsg(e.message || 'No se pudo acceder a cámara/micrófono');
     }
-  }, [buildPC, isTeacher, pollSignals, sendSignal]);
+  }, [buildPC, isTeacher, sendSignal, salaId, userId, handleSignal]);
 
   const stopCall = useCallback(async () => {
     activeRef.current = false;
-    if (pollRef.current) {
-      clearInterval(pollRef.current);
-      pollRef.current = null;
+    if (wsReadyRef.current && wsRef.current) {
+      wsRef.current.send(JSON.stringify({ type: 'leave' }));
+      wsRef.current.close();
     }
+    wsRef.current = null;
+    wsReadyRef.current = false;
     if (pcRef.current) {
       pcRef.current.close();
       pcRef.current = null;
@@ -182,12 +212,7 @@ export function useVideoCall(salaId: number, userId: number, isTeacher: boolean)
     setLocalStream(null);
     setRemoteStream(null);
     setStatus('idle');
-    try {
-      await sendSignal('bye', 'bye');
-    } catch {
-      // ignore
-    }
-  }, [sendSignal]);
+  }, []);
 
   const toggleMic = useCallback(() => {
     setMicOn(v => {
@@ -205,9 +230,17 @@ export function useVideoCall(salaId: number, userId: number, isTeacher: boolean)
     });
   }, []);
 
+  const sendChat = useCallback((mensaje: string) => {
+    if (wsReadyRef.current && wsRef.current) {
+      wsRef.current.send(JSON.stringify({ type: 'chat_send', data: { mensaje } }));
+    }
+  }, []);
+
   useEffect(() => () => {
     activeRef.current = false;
-    if (pollRef.current) clearInterval(pollRef.current);
+    if (wsRef.current) {
+      try { wsRef.current.close(); } catch {}
+    }
     if (pcRef.current) pcRef.current.close();
     if (localRef.current) localRef.current.getTracks().forEach((t: any) => t.stop());
   }, []);
@@ -224,6 +257,7 @@ export function useVideoCall(salaId: number, userId: number, isTeacher: boolean)
     stopCall,
     toggleMic,
     toggleCam,
+    sendChat,
   };
 }
 

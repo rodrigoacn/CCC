@@ -1,0 +1,20 @@
+# OS
+Thumbs.db
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment
+.env
+.local/
+
+# PHP
+vendor/
+
+# Logs
+*.log
+.aider*

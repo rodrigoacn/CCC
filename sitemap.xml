@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+    <url>
+        <loc>https://classexpress.online/</loc>
+        <lastmod>2026-07-27</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>1.0</priority>
+        <xhtml:link rel="alternate" hreflang="es" href="https://classexpress.online/?lang=es"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://classexpress.online/?lang=en"/>
+        <xhtml:link rel="alternate" hreflang="fr" href="https://classexpress.online/?lang=fr"/>
+        <xhtml:link rel="alternate" hreflang="de" href="https://classexpress.online/?lang=de"/>
+        <xhtml:link rel="alternate" hreflang="pt" href="https://classexpress.online/?lang=pt"/>
+        <xhtml:link rel="alternate" hreflang="it" href="https://classexpress.online/?lang=it"/>
+        <xhtml:link rel="alternate" hreflang="zh" href="https://classexpress.online/?lang=zh"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://classexpress.online/?lang=ja"/>
+        <xhtml:link rel="alternate" hreflang="ru" href="https://classexpress.online/?lang=ru"/>
+        <xhtml:link rel="alternate" hreflang="ar" href="https://classexpress.online/?lang=ar"/>
+        <xhtml:link rel="alternate" hreflang="hi" href="https://classexpress.online/?lang=hi"/>
+        <xhtml:link rel="alternate" hreflang="ko" href="https://classexpress.online/?lang=ko"/>
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://classexpress.online/"/>
+    </url>
+    <url>
+        <loc>https://classexpress.online/login.php</loc>
+        <lastmod>2026-07-27</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://classexpress.online/CCC/registro.php</loc>
+        <lastmod>2026-07-27</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+</urlset>

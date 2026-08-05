@@ -8,6 +8,7 @@ interface VideoCallProps {
   salaId: number;
   userId: number;
   isTeacher: boolean;
+  onChatMessage?: (msg: any) => void;
 }
 
 function statusLabel(status: VideoCallStatus): string {
@@ -37,7 +38,6 @@ function WebVideo({ stream, mirror, videoId }: { stream: any; mirror?: boolean; 
   if (Platform.OS !== 'web') return null;
 
   return (
-    // @ts-expect-error web-only element
     <video
       id={videoId}
       autoPlay
@@ -53,12 +53,12 @@ function WebVideo({ stream, mirror, videoId }: { stream: any; mirror?: boolean; 
   );
 }
 
-export default function VideoCall({ salaId, userId, isTeacher }: VideoCallProps) {
+export default function VideoCall({ salaId, userId, isTeacher, onChatMessage }: VideoCallProps) {
   const colors = useColors();
   const {
     status, localStream, remoteStream, micOn, camOn, errorMsg,
-    RTCView, startCall, toggleMic, toggleCam,
-  } = useVideoCall(salaId, userId, isTeacher);
+    RTCView, startCall, toggleMic, toggleCam, sendChat,
+  } = useVideoCall(salaId, userId, isTeacher, onChatMessage);
 
   useEffect(() => {
     startCall();

@@ -2,12 +2,7 @@
 require 'menu.php';
 require 'db.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['temas'])) {
-    $temas = array_slice((array)$_POST['temas'], 0, 5);
-    $qs = http_build_query(['materia' => 4, 'temas' => implode(',', $temas)]);
-    header("Location: profesores.php?$qs");
-    exit;
-}
+ce_handle_subject_themes(4);
 
 $materiaId    = 4;
 $subjectName  = 'Physics';

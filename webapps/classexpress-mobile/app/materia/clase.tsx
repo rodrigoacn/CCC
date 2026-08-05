@@ -3,10 +3,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Feather } from '@expo/vector-icons';
+import { CameraView, useCameraPermissions, useMicrophonePermissions } from 'expo-camera';
 import * as Haptics from 'expo-haptics';
 import { useColors } from '@/hooks/useColors';
 import { useAuth } from '@/context/AuthContext';
-import { apiClassDetail, apiJoinRoom, apiStartRoom } from '@/lib/api';
+import { apiClassDetail, apiJoinRoom, apiStartRoom, esInstructor } from '@/lib/api';
+import { useState } from 'react';
 
 export default function ClaseDetailScreen() {
   const colors = useColors();
@@ -14,6 +16,10 @@ export default function ClaseDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user } = useAuth();
+  const [camEnabled, setCamEnabled] = useState(true);
+  const [micEnabled, setMicEnabled] = useState(true);
+  const [camPermission, requestCamPermission] = useCameraPermissions();
+  const [micPermission, requestMicPermission] = useMicrophonePermissions();
 
   const { data, isLoading } = useQuery({
     queryKey: ['clase', id],
@@ -24,24 +30,52 @@ export default function ClaseDetailScreen() {
   const { mutate: joinRoom, isPending: joining } = useMutation({
     mutationFn: () => apiJoinRoom(Number(clase?.sala_id)),
     onSuccess: ({ sala }) => {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      router.push(`/sala/${sala.id}`);
+      try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch {}
+      if (Platform.OS === 'web') {
+        window.alert('Entrando a la clase...');
+        router.push(`/sala/${sala.id}?from=clase`);
+      } else {
+        Alert.alert('Entrando a la clase...');
+        router.push(`/sala/${sala.id}?from=clase`);
+      }
     },
-    onError: (e: any) => Alert.alert('Error', e.message),
+    onError: (e: any) => {
+      if (Platform.OS === 'web') {
+        window.alert('Error: ' + (e?.message ?? 'Error desconocido'));
+      } else {
+        Alert.alert('Error', e?.message ?? 'Error desconocido');
+      }
+    },
   });
 
   const { mutate: startRoom, isPending: starting } = useMutation({
     mutationFn: () => apiStartRoom(Number(clase?.id)),
     onSuccess: ({ sala }) => {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      router.push(`/sala/${sala.id}`);
+      try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch {}
+      router.push(`/sala/${sala.id}?from=clase`);
     },
-    onError: (e: any) => Alert.alert('Error', e.message),
+    onError: (e: any) => {
+      if (Platform.OS === 'web') {
+        window.alert('Error: ' + (e?.message ?? 'Error desconocido'));
+      } else {
+        Alert.alert('Error', e?.message ?? 'Error desconocido');
+      }
+    },
   });
 
-  const isTeacher = user?.rol === 'instructor' && clase?.profesor_id === user?.id;
-  const canJoin = !isTeacher && clase?.sala_activa && clase?.sala_id;
-  const canStart = isTeacher;
+  const isTeacher = esInstructor(user?.rol) && Number(clase?.profesor_id) === Number(user?.id);
+
+  const handleEmpezar = () => {
+    if (isTeacher) {
+      if (!camPermission?.granted) requestCamPermission();
+      if (!micPermission?.granted) requestMicPermission();
+      startRoom();
+    } else {
+      if (!camPermission?.granted) requestCamPermission();
+      if (!micPermission?.granted) requestMicPermission();
+      joinRoom();
+    }
+  };
 
   if (isLoading) {
     return (
@@ -57,7 +91,13 @@ export default function ClaseDetailScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: botPad + 100 }}>
+      <TouchableOpacity
+        onPress={() => router.back()}
+        style={{ position: 'absolute', top: Platform.OS === 'web' ? 16 : insets.top + 8, left: 16, zIndex: 10, width: 40, height: 40, borderRadius: 20, backgroundColor: colors.muted, justifyContent: 'center', alignItems: 'center' }}
+      >
+        <Feather name="arrow-left" size={22} color={colors.foreground} />
+      </TouchableOpacity>
+      <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: botPad + 240 }}>
         {clase.sala_activa && (
           <View style={[styles.liveBanner, { backgroundColor: colors.danger + '22' }]}>
             <View style={[styles.liveDot, { backgroundColor: colors.danger }]} />
@@ -95,46 +135,97 @@ export default function ClaseDetailScreen() {
           <Text style={[styles.priceLabel, { color: colors.subtext }]}>Precio de la clase</Text>
           <Text style={[styles.priceNum, { color: colors.primary }]}>{clase.precio} créditos</Text>
           <Text style={[styles.priceSub, { color: colors.subtext }]}>
-            Tu saldo: {user?.creditos ?? 0} cr. — {(user?.creditos ?? 0) >= clase.precio ? 'Tienes suficiente ✓' : 'Saldo insuficiente ✗'}
+            Tu saldo: {user?.creditos ?? 0} cr. — {(user?.creditos ?? 0) >= clase.precio ? 'Tienes suficiente \u2713' : 'Saldo insuficiente \u2717'}
           </Text>
+        </View>
+
+        {/* ── Camera preview inline ── */}
+        <Text style={[styles.sectionTitle, { color: colors.foreground, marginTop: 24 }]}>
+          Vista previa
+        </Text>
+        <View style={{ height: 260, borderRadius: 14, overflow: 'hidden', backgroundColor: '#000' }}>
+          {camPermission?.granted && camEnabled ? (
+            <View style={{ flex: 1 }}>
+              <CameraView style={{ flex: 1 }} facing="front" mute={!micEnabled} active={camEnabled} />
+              <View style={{ position: 'absolute', bottom: 8, left: 8, flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(0,0,0,0.6)', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12 }}>
+                <Feather name={micEnabled ? 'mic' : 'mic-off'} size={14} color={micEnabled ? '#4ade80' : '#f87171'} />
+                <Text style={{ color: '#fff', fontFamily: 'Poppins_500Medium', fontSize: 11 }}>{micEnabled ? 'Micrófono activo' : 'Micrófono mute'}</Text>
+              </View>
+            </View>
+          ) : (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <Feather name={camPermission?.granted ? 'camera-off' : 'camera-off'} size={36} color={colors.subtext} />
+              <Text style={[styles.metaTxt, { color: colors.subtext, marginTop: 8 }]}>
+                {camPermission?.granted ? 'Cámara desactivada' : 'Cámara no disponible'}
+              </Text>
+              {!camPermission?.granted && (
+                <TouchableOpacity
+                  style={{ marginTop: 12 }}
+                  onPress={() => requestCamPermission()}
+                >
+                  <Text style={{ color: colors.primary, fontFamily: 'Poppins_600SemiBold' }}>Permitir cámara</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
+        </View>
+
+        {/* ── Camera / Mic toggles ── */}
+        <View style={{ flexDirection: 'row', gap: 12, marginTop: 16, justifyContent: 'center' }}>
+          <TouchableOpacity
+            style={[styles.toggleBtn, { backgroundColor: camEnabled ? colors.primary : colors.muted }]}
+            onPress={() => {
+              setCamEnabled(!camEnabled);
+              if (!camPermission?.granted) requestCamPermission();
+            }}
+          >
+            <Feather name={camEnabled ? 'camera' : 'camera-off'} size={18} color="#fff" />
+            <Text style={{ color: '#fff', fontFamily: 'Poppins_600SemiBold', fontSize: 12 }}>Cámara</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.toggleBtn, { backgroundColor: micEnabled ? colors.primary : colors.muted }]}
+            onPress={() => {
+              setMicEnabled(!micEnabled);
+              if (!micPermission?.granted) requestMicPermission();
+            }}
+          >
+            <Feather name={micEnabled ? 'mic' : 'mic-off'} size={18} color="#fff" />
+            <Text style={{ color: '#fff', fontFamily: 'Poppins_600SemiBold', fontSize: 12 }}>Micrófono</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
 
       <View style={[styles.footer, { paddingBottom: botPad + 16, backgroundColor: colors.surface, borderTopColor: colors.border }]}>
-        {canStart ? (
-          <>
-            <TouchableOpacity
-              style={[styles.btn, { backgroundColor: clase.sala_activa ? colors.danger : colors.primary }]}
-              onPress={() => startRoom()}
-              disabled={starting}
-            >
-              {starting ? <ActivityIndicator color="#fff" /> : (
-                <>
-                  <Feather name={clase.sala_activa ? 'refresh-cw' : 'video'} size={20} color="#fff" />
-                  <Text style={styles.btnTxt}>{clase.sala_activa ? 'Reiniciar sala' : 'Abrir sala'}</Text>
-                </>
-              )}
-            </TouchableOpacity>
-          </>
-        ) : canJoin ? (
+        {isTeacher ? (
           <TouchableOpacity
-            style={[styles.btn, { backgroundColor: colors.primary }]}
-            onPress={() => joinRoom()}
+            style={[styles.btn, { backgroundColor: (joining || starting) ? colors.muted : colors.primary }]}
+            onPress={handleEmpezar}
+            disabled={joining || starting}
+          >
+            {(joining || starting) ? <ActivityIndicator color="#fff" /> : (
+              <>
+                <Feather name="video" size={20} color="#fff" />
+                <Text style={styles.btnTxt}>Empezar</Text>
+              </>
+            )}
+          </TouchableOpacity>
+        ) : clase?.sala_activa ? (
+          <TouchableOpacity
+            style={[styles.btn, { backgroundColor: joining ? colors.muted : colors.primary }]}
+            onPress={handleEmpezar}
             disabled={joining}
           >
             {joining ? <ActivityIndicator color="#fff" /> : (
               <>
-                <Feather name="video" size={20} color="#fff" />
-                <Text style={styles.btnTxt}>Unirse a la clase</Text>
+                <Feather name="log-in" size={20} color="#fff" />
+                <Text style={styles.btnTxt}>Entrar a la clase</Text>
               </>
             )}
           </TouchableOpacity>
         ) : (
           <View style={[styles.btn, { backgroundColor: colors.muted }]}>
             <Feather name="clock" size={20} color={colors.subtext} />
-            <Text style={[styles.btnTxt, { color: colors.subtext }]}>
-              {isTeacher ? 'Esperando estudiantes' : 'Clase no iniciada aún'}
-            </Text>
+            <Text style={[styles.btnTxt, { color: colors.subtext }]}>Clase no iniciada aún</Text>
           </View>
         )}
       </View>
@@ -157,6 +248,8 @@ const styles = StyleSheet.create({
   priceLabel: { fontFamily: 'Poppins_400Regular', fontSize: 13, marginBottom: 4 },
   priceNum:   { fontFamily: 'Poppins_700Bold', fontSize: 32, marginBottom: 4 },
   priceSub:   { fontFamily: 'Poppins_400Regular', fontSize: 13 },
+  sectionTitle: { fontFamily: 'Poppins_700Bold', fontSize: 18, marginBottom: 12 },
+  toggleBtn:  { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 10, paddingHorizontal: 16, borderRadius: 24 },
   footer:     { position: 'absolute', bottom: 0, left: 0, right: 0, padding: 20, borderTopWidth: 1 },
   btn:        { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, paddingVertical: 16, borderRadius: 16 },
   btnTxt:     { color: '#fff', fontFamily: 'Poppins_700Bold', fontSize: 16 },

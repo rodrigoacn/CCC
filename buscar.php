@@ -1,285 +1,237 @@
 <?php
+$subjectId  = (int)($_GET['s'] ?? 0);
+if ($subjectId >= 1 && $subjectId <= 11) $_GET['materia'] = $subjectId;
+
 require 'menu.php';
 require 'db.php';
 
-// ── Available classes (posted by teachers) ───────────────────────────────────
-$uid = (int)($_SESSION['usuarioId'] ?? 0);
-$rol = $_SESSION['rol'] ?? 'estudiante';
+$search     = $_GET['q'] ?? '';
+$activeOnly = ($_GET['live'] ?? '') === '1';
+$sort       = $_GET['sort'] ?? 'relevance';
+$uid        = (int)$_SESSION['usuarioId'];
 
-// If user is a teacher, only show their own classes
-$teacherFilter = "";
-$params = [];
-if ($rol !== 'estudiante' && $rol !== 'student') {
-    $teacherFilter = "AND cp.instructorId = :uid";
-    $params['uid'] = $uid;
+$subjects = dbAll("SELECT materiaId AS id, nombre FROM materias ORDER BY nombre");
+if (empty($subjects)) {
+    $names = ['Mathematics','Biology','Chemistry','Physics','History','Geography','Literature','Foreign Languages','Art and Music','Technology','Physical Education'];
+    foreach ($names as $i => $n) $subjects[] = ['id' => $i + 1, 'nombre' => $n];
 }
 
-$clases = dbAll(
-    "SELECT cp.claseId, cp.titulo, cp.descripcion, cp.precio_base, cp.codigo_moneda,
-            cp.alumnos_min, cp.alumnos_max, cp.solo_yo,
-            u.nombre AS profesor, u.calificacion, u.num_resenas, u.avatar,
-            pa.nombre AS pais_profesor, pa.simbolo AS simbolo_prof,
-            m.nombre AS materia, m.imagen AS materia_img,
-            (SELECT COUNT(*) FROM sesiones_clase sc
-             WHERE sc.claseId = cp.claseId AND sc.fin IS NULL) AS alumnos_activos
-     FROM clases_programadas cp
-     JOIN usuarios u ON u.usuarioId = cp.instructorId
-     LEFT JOIN paises pa ON pa.paisId = u.pais_id
-     LEFT JOIN materias m ON m.materiaId = cp.materiaId
-     WHERE cp.activa = 1 $teacherFilter
-     ORDER BY u.calificacion DESC, cp.claseId DESC",
-    $params
-);
+$colors = [
+    1=>'#2563EB',2=>'#059669',3=>'#7C3AED',4=>'#0284C7',5=>'#D97706',
+    6=>'#0D9488',7=>'#DC2626',8=>'#DB2777',9=>'#EA580C',10=>'#0891B2',11=>'#E11D48',
+];
 
-// ── Students looking for a teacher (no active session) ───────────────────────
-$estudiantes = dbAll(
-    "SELECT u.usuarioId, u.nombre, u.calificacion, u.avatar, u.biografia,
-            pa.nombre AS pais, pa.codigo_moneda, pa.simbolo
-     FROM usuarios u
-     LEFT JOIN paises pa ON pa.paisId = u.pais_id
-     WHERE u.rol = 'student'
-       AND u.verificado = 1
-       AND u.usuarioId NOT IN (
-           SELECT DISTINCT estudianteId FROM sesiones_clase WHERE fin IS NULL
-       )
-     ORDER BY u.nombre ASC"
-);
-
-// ── Materias for filter ───────────────────────────────────────────────────────
-$materias = dbAll("SELECT materiaId, nombre FROM materias ORDER BY orden ASC");
-
-// ── Pre-filter from URL (e.g. coming from profesores.php or tecnologia.php) ───
-$preMateria = '';
-if (!empty($_GET['materia'])) {
-    $mid = (int)$_GET['materia'];
-    foreach ($materias as $m) {
-        if ((int)$m['materiaid'] === $mid) { $preMateria = $m['nombre']; break; }
-    }
+$sql = "SELECT cp.claseId AS claseId, cp.titulo, cp.descripcion, cp.precio_base, cp.duracion_min, cp.calificacion, cp.alumnos_max, cp.alumnos_activos,
+               m.nombre AS materia,
+               u.nombre AS profesor,
+               (SELECT s.activa FROM salas s WHERE s.claseId = cp.claseId AND s.activa = true LIMIT 1) AS sala_activa,
+               (SELECT COALESCE(SUM(sc.segundos_acumulados), 0) FROM sesiones_clase sc WHERE sc.claseId = cp.claseId) AS total_visto,
+               (SELECT COUNT(*) FROM relaciones r WHERE r.seguidoId = cp.instructorId AND r.seguidorId = :uid AND r.estado = 'following') AS es_amigo
+        FROM clases_programadas cp
+        JOIN materias m ON m.materiaId = cp.materiaId
+        JOIN usuarios u ON u.usuarioId = cp.instructorId
+        WHERE cp.activa = true";
+$params = ['uid' => $uid];
+if ($search) {
+    $sql .= " AND (cp.titulo LIKE :q OR u.nombre LIKE :q2 OR m.nombre LIKE :q3 OR cp.descripcion LIKE :q4)";
+    $params['q'] = "%$search%"; $params['q2'] = "%$search%"; $params['q3'] = "%$search%"; $params['q4'] = "%$search%";
 }
+if ($subjectId) { $sql .= " AND cp.materiaId = :s"; $params['s'] = $subjectId; }
+if ($activeOnly) { $sql .= " AND EXISTS (SELECT 1 FROM salas s WHERE s.claseId = cp.claseId AND s.activa = true)"; }
+
+switch ($sort) {
+    case 'price_asc':   $orderBy = "cp.precio_base ASC"; break;
+    case 'price_desc':  $orderBy = "cp.precio_base DESC"; break;
+    case 'rating':      $orderBy = "cp.calificacion DESC, total_visto DESC"; break;
+    case 'popular':     $orderBy = "total_visto DESC"; break;
+    case 'newest':      $orderBy = "cp.created_at DESC"; break;
+    case 'relevance':
+    default:
+        $orderBy = "es_amigo DESC, sala_activa IS NULL, sala_activa DESC, total_visto DESC, cp.precio_base ASC";
+        break;
+}
+$sql .= " ORDER BY $orderBy LIMIT 50";
+$classes = dbAll($sql, $params);
+
+$sortOpts = [
+    'relevance' => t('buscar.sort_relevance'),
+    'popular'   => t('buscar.sort_popular'),
+    'rating'    => t('buscar.sort_rating'),
+    'price_asc' => t('buscar.sort_price_low'),
+    'price_desc'=> t('buscar.sort_price_high'),
+    'newest'    => t('buscar.sort_newest'),
+];
 ?>
+<style>
+.bc-card{display:block;border-radius:16px;padding:16px;background:var(--sf);margin-bottom:10px;border:1px solid var(--bd);position:relative;transition:box-shadow .15s}
+.bc-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08)}
+.bc-card.live{border-color:var(--s)}
+.bc-live{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;background:var(--s);color:#fff;font-size:10px;font-weight:700;letter-spacing:.5px;margin-bottom:8px}
+.bc-title{font-weight:600;font-size:15px;color:var(--fg);margin-bottom:4px;line-height:1.3}
+.bc-prof{font-size:12px;color:var(--sub);margin-bottom:10px}
+.bc-meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.bc-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:10px;background:var(--bg-card);font-size:11px;font-weight:500;color:var(--sub)}
+.bc-bottom{display:flex;justify-content:space-between;align-items:center}
+.bc-price{font-weight:700;font-size:16px;color:var(--p)}
+.bc-stars{display:inline-flex;gap:1px;margin-right:4px}
+.bc-rating{font-size:11px;font-weight:600;color:var(--sub)}
+.bc-amigo{font-size:10px;color:var(--p);margin-left:6px}
+.bc-section{font-size:13px;font-weight:600;color:var(--p);margin-bottom:8px;margin-top:4px;display:flex;align-items:center;gap:4px}
+.bc-section-more{font-size:13px;font-weight:600;color:var(--sub);margin-bottom:8px;margin-top:16px;display:flex;align-items:center;gap:4px}
+.bc-count{font-size:11px;font-weight:500;color:var(--sub);margin-bottom:8px}
+.sort-bar{display:flex;align-items:center;gap:8px;margin-top:8px}
+.sort-btn{display:inline-flex;align-items:center;gap:4px;padding:6px 14px;border-radius:20px;background:var(--sf);border:1px solid var(--bd);color:var(--sub);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit}
+.sort-btn.active{background:var(--p);color:#fff;border-color:var(--p)}
+</style>
 
-  <div class="container mt-10">
+<div class="ml-wrap">
+  <div class="ml-wrap-inner">
+  <div style="padding:0 20px 12px">
+    <div class="ml-head-title" style="margin-bottom:14px"><?= t('buscar.title') ?></div>
 
-    <h2 class="text-white mb-1">Find a Class</h2>
-    <p class="text-secondary mb-4">Connect with teachers or recruit students for your next session.</p>
-
-    <!-- Tabs -->
-    <ul class="nav nav-tabs mb-0" id="buscarTabs" role="tablist">
-      <li class="nav-item">
-        <button class="nav-link active text-white" id="tab-student-btn"
-                data-bs-toggle="tab" data-bs-target="#tab-student" type="button">
-          🎓 I'm a Student — Find a Teacher
-        </button>
-      </li>
-      <li class="nav-item">
-        <button class="nav-link text-secondary" id="tab-teacher-btn"
-                data-bs-toggle="tab" data-bs-target="#tab-teacher" type="button">
-          📋 I'm a Teacher — Find Students
-        </button>
-      </li>
-    </ul>
-
-    <div class="tab-content bg-dark border border-top-0 border-secondary rounded-bottom p-4" id="buscarTabContent">
-
-      <!-- ── STUDENT VIEW ──────────────────────────────────────────────────── -->
-      <div class="tab-pane fade show active" id="tab-student" role="tabpanel">
-
-        <!-- Filters -->
-        <div class="row g-2 mb-4">
-          <div class="col-sm-4">
-            <input type="text" id="filter-title" class="form-control bg-dark text-white border-secondary"
-                   placeholder="🔍 Search class title or teacher…">
-          </div>
-          <div class="col-sm-3">
-            <select id="filter-materia" class="form-select bg-dark text-white border-secondary">
-              <option value="">All subjects</option>
-              <?php foreach ($materias as $m): ?>
-                <option value="<?= htmlspecialchars($m['nombre']) ?>"
-                        <?= $preMateria === $m['nombre'] ? 'selected' : '' ?>>
-                  <?= htmlspecialchars($m['nombre']) ?>
-                </option>
-              <?php endforeach; ?>
-            </select>
-          </div>
-          <div class="col-sm-3">
-            <input type="number" id="filter-max-price" class="form-control bg-dark text-white border-secondary"
-                   placeholder="Max price (USD)" min="0">
-          </div>
-          <div class="col-sm-2">
-            <button class="btn btn-secondary w-100" onclick="filterClases()">Filter</button>
-          </div>
-        </div>
-
-        <!-- Class Cards -->
-        <?php if (empty($clases)): ?>
-          <div class="alert alert-secondary text-center">
-            No classes available right now. Check back soon!
-          </div>
-        <?php else: ?>
-          <div class="row g-3" id="clases-grid">
-            <?php foreach ($clases as $c):
-              $spots_left = $c['alumnos_max'] - $c['alumnos_activos'];
-              $full       = $spots_left <= 0;
-              $stars      = str_repeat('★', min(5, round($c['calificacion'])))
-                          . str_repeat('☆', max(0, 5 - round($c['calificacion'])));
-            ?>
-            <div class="col-sm-6 col-lg-4 clase-card"
-                 data-titulo="<?= strtolower(htmlspecialchars($c['titulo'])) ?>"
-                 data-materia="<?= htmlspecialchars($c['materia'] ?? '') ?>"
-                 data-precio="<?= $c['precio_base'] ?>">
-              <div class="card bg-dark border-secondary h-100">
-                <div class="card-body">
-                  <!-- Subject badge -->
-                  <?php if ($c['materia']): ?>
-                    <span class="badge bg-secondary mb-2"><?= htmlspecialchars($c['materia']) ?></span>
-                  <?php endif; ?>
-
-                  <h5 class="card-title text-white"><?= htmlspecialchars($c['titulo']) ?></h5>
-                  <?php if ($c['descripcion']): ?>
-                    <p class="text-secondary small"><?= htmlspecialchars($c['descripcion']) ?></p>
-                  <?php endif; ?>
-
-                  <!-- Teacher info -->
-                  <div class="d-flex align-items-center gap-2 mt-3 mb-2">
-                    <?php if ($c['avatar']): ?>
-                      <img src="<?= htmlspecialchars($c['avatar']) ?>"
-                           class="rounded-circle" width="36" height="36" style="object-fit:cover;" alt="">
-                    <?php else: ?>
-                      <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center"
-                           style="width:36px;height:36px;font-size:1rem;">👤</div>
-                    <?php endif; ?>
-                    <div>
-                      <div class="text-white fw-semibold small"><?= htmlspecialchars($c['profesor']) ?></div>
-                      <div class="text-warning" style="font-size:.75rem;"><?= $stars ?> <span class="text-secondary">(<?= $c['num_resenas'] ?>)</span></div>
-                    </div>
-                    <?php if ($c['pais_profesor']): ?>
-                      <span class="ms-auto badge bg-dark border border-secondary text-secondary small">
-                        📍 <?= htmlspecialchars($c['pais_profesor']) ?>
-                      </span>
-                    <?php endif; ?>
-                  </div>
-
-                  <hr class="border-secondary">
-
-                  <!-- Price and spots -->
-                  <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                      <span class="text-white fw-bold fs-5">
-                        <?= $c['simbolo_prof'] ?? '$' ?><?= number_format($c['precio_base'], 2) ?>
-                      </span>
-                      <span class="text-secondary small ms-1"><?= htmlspecialchars($c['codigo_moneda']) ?> / session</span>
-                    </div>
-                    <span class="badge <?= $full ? 'bg-danger' : 'bg-success' ?>">
-                      <?= $full ? 'Full' : $spots_left . ' spot' . ($spots_left !== 1 ? 's' : '') . ' left' ?>
-                    </span>
-                  </div>
-                </div>
-
-                <div class="card-footer bg-dark border-secondary">
-                  <?php if ($full): ?>
-                    <button class="btn btn-secondary w-100" disabled>Class Full</button>
-                  <?php else: ?>
-                    <a href="sala.php?clase=<?= $c['claseid'] ?>"
-                       class="btn btn-dark border-secondary w-100 text-white">
-                      Join Class →
-                    </a>
-                  <?php endif; ?>
-                </div>
-              </div>
-            </div>
-            <?php endforeach; ?>
-          </div>
-        <?php endif; ?>
-      </div>
-
-      <!-- ── TEACHER VIEW ──────────────────────────────────────────────────── -->
-      <div class="tab-pane fade" id="tab-teacher" role="tabpanel">
-
-        <div class="d-flex justify-content-between align-items-center mb-4">
-          <p class="text-secondary mb-0">Students currently looking for a class to join:</p>
-          <a href="crear_clase.php" class="btn btn-dark border-secondary text-white">+ Post a New Class</a>
-        </div>
-
-        <?php if (empty($estudiantes)): ?>
-          <div class="alert alert-secondary text-center">
-            All students are currently in a session. Check back soon!
-          </div>
-        <?php else: ?>
-          <div class="row g-3">
-            <?php foreach ($estudiantes as $e):
-              $stars = $e['calificacion'] > 0
-                ? str_repeat('★', round($e['calificacion'])) . str_repeat('☆', 5 - round($e['calificacion']))
-                : '—';
-            ?>
-            <div class="col-sm-6 col-lg-4">
-              <div class="card bg-dark border-secondary h-100">
-                <div class="card-body d-flex gap-3 align-items-start">
-                  <?php if ($e['avatar']): ?>
-                    <img src="<?= htmlspecialchars($e['avatar']) ?>"
-                         class="rounded-circle" width="48" height="48" style="object-fit:cover;" alt="">
-                  <?php else: ?>
-                    <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center flex-shrink-0"
-                         style="width:48px;height:48px;font-size:1.3rem;">👤</div>
-                  <?php endif; ?>
-                  <div>
-                    <h6 class="text-white mb-0"><?= htmlspecialchars($e['nombre']) ?></h6>
-                    <?php if ($e['pais']): ?>
-                      <div class="text-secondary small">📍 <?= htmlspecialchars($e['pais']) ?>
-                        (<?= htmlspecialchars($e['simbolo'] . ' ' . $e['codigo_moneda']) ?>)
-                      </div>
-                    <?php endif; ?>
-                    <?php if ($e['biografia']): ?>
-                      <p class="text-secondary small mt-1 mb-0"><?= htmlspecialchars(mb_substr($e['biografia'], 0, 80)) ?>…</p>
-                    <?php endif; ?>
-                  </div>
-                </div>
-                <div class="card-footer bg-dark border-secondary">
-                  <a href="crear_clase.php?invite=<?= $e['usuarioid'] ?>"
-                     class="btn btn-dark border-secondary w-100 text-white small">
-                    Invite to a Class →
-                  </a>
-                </div>
-              </div>
-            </div>
-            <?php endforeach; ?>
-          </div>
-        <?php endif; ?>
-      </div>
-
-    </div><!-- /tab-content -->
-
-  </div><!-- /container -->
-
-  <footer class="mastfoot mt-auto mt-5">
-    <div class="inner float-end">
-      <p>ClassExpress done <a href="https://getbootstrap.com/">Bootstrap</a>, by <a href="https://www.facebook.com/rodrigo.alejandro.1848816?locale=es_LA">@RodrigoConejeros</a>.</p>
+    <div class="ml-search">
+      <i data-feather="search" style="width:18px;height:18px;color:var(--sub);flex-shrink:0"></i>
+      <input type="text" id="searchInput" placeholder="<?= t('buscar.search_placeholder') ?>" value="<?= htmlspecialchars($search) ?>" oninput="debounceSearch()">
+      <?php if ($search): ?>
+      <button style="background:none;border:0;color:var(--sub);cursor:pointer;padding:0" onclick="clearSearch()"><i data-feather="x" style="width:18px;height:18px"></i></button>
+      <?php endif; ?>
     </div>
-  </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-  <script type="text/javascript" src="./presentacion/odp_ajax.js"></script>
-  <script type="text/javascript" src="./presentacion/js/scripts.js"></script>
-  <script>
-  function filterClases() {
-    const title    = document.getElementById('filter-title').value.toLowerCase();
-    const materia  = document.getElementById('filter-materia').value.toLowerCase();
-    const maxPrice = parseFloat(document.getElementById('filter-max-price').value) || Infinity;
+    <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;align-items:center">
+      <button class="ml-chip <?= $activeOnly ? 'active-l' : '' ?>" onclick="toggleLive()">
+        <i data-feather="radio" style="width:13px;height:13px"></i> <?= t('buscar.live') ?>
+      </button>
+      <?php foreach ($subjects as $s):
+        $sel = (int)$s['id'] === $subjectId;
+        $cc = $colors[(int)$s['id']] ?? '#66ddbd';
+      ?>
+      <button class="ml-chip <?= $sel ? 'active' : '' ?>" style="border-color:<?= $cc ?>;color:<?= $sel ? '#fff' : $cc ?>;background:<?= $sel ? $cc : $cc . '22' ?>" onclick="filterSubject(<?= (int)$s['id'] ?>)"><?= htmlspecialchars($s['nombre']) ?></button>
+      <?php endforeach; ?>
+    </div>
 
-    document.querySelectorAll('.clase-card').forEach(card => {
-      const tOk = !title   || card.dataset.titulo.includes(title);
-      const mOk = !materia || card.dataset.materia.toLowerCase() === materia;
-      const pOk = parseFloat(card.dataset.precio) <= maxPrice;
-      card.style.display = (tOk && mOk && pOk) ? '' : 'none';
-    });
+    <div class="sort-bar">
+      <span style="font-size:11px;font-weight:600;color:var(--sub)"><i data-feather="arrow-up-down" style="width:12px;height:12px"></i> <?= t('buscar.sort') ?>:</span>
+      <?php foreach ($sortOpts as $k => $label): ?>
+        <button class="sort-btn <?= $sort === $k ? 'active' : '' ?>" onclick="setSort('<?= $k ?>')"><?= $label ?></button>
+      <?php endforeach; ?>
+    </div>
+
+    <?php if (!empty($classes)): ?>
+    <div class="bc-count"><?= count($classes) ?> <?= t('buscar.results') ?></div>
+    <?php endif; ?>
+  </div>
+
+  <div id="classList" style="padding:0 20px 24px">
+    <?php if (empty($classes)): ?>
+    <div class="ml-empty">
+      <i data-feather="search" style="width:40px;height:40px;color:var(--tbi)"></i>
+      <div class="ml-empty-txt"><?= t('buscar.no_classes') ?></div>
+    </div>
+    <?php else: ?>
+      <?php
+      $shownFriend = false;
+      foreach ($classes as $c):
+        $live  = !empty($c['sala_activa']);
+        $amigo = !empty($c['es_amigo']);
+        $rating = (float)($c['calificacion'] ?? 0);
+        $mins = (int)($c['duracion_min'] ?? 0);
+        $capacity = (int)($c['alumnos_max'] ?? 0);
+        $enrolled = (int)($c['alumnos_activos'] ?? 0);
+        $precio = (int)($c['precio_base'] ?? 0);
+
+        if ($amigo && !$shownFriend) {
+          echo '<div class="bc-section"><i data-feather="heart" style="width:14px;height:14px"></i> ' . t('buscar.friend_classes') . '</div>';
+          $shownFriend = true;
+        } elseif (!$amigo && $shownFriend === true) {
+          echo '<div class="bc-section-more"><i data-feather="trending-up" style="width:14px;height:14px"></i> ' . t('buscar.more_classes') . '</div>';
+          $shownFriend = false;
+        }
+      ?>
+      <a href="pre_sala.php?clase=<?= (int)$c['claseId'] ?>&from=explorar" class="bc-card<?= $live ? ' live' : '' ?>" style="text-decoration:none<?= $amigo ? ';border:1px solid var(--p)' : '' ?>">
+        <?php if ($live): ?>
+        <div class="bc-live"><i data-feather="radio" style="width:10px;height:10px"></i> <?= t('buscar.live_badge') ?></div>
+        <?php endif; ?>
+        <div class="bc-title">
+          <?= htmlspecialchars($c['titulo']) ?>
+          <?php if ($amigo): ?><span class="bc-amigo">· <?= t('buscar.friend') ?></span><?php endif; ?>
+        </div>
+        <div class="bc-prof"><?= htmlspecialchars($c['profesor']) ?></div>
+        <div class="bc-meta">
+          <span class="bc-chip"><i data-feather="book-open" style="width:11px;height:11px"></i> <?= htmlspecialchars($c['materia']) ?></span>
+          <?php if ($mins > 0): ?>
+          <span class="bc-chip"><i data-feather="clock" style="width:11px;height:11px"></i> <?= $mins ?>min</span>
+          <?php endif; ?>
+          <?php if ($capacity > 0): ?>
+          <span class="bc-chip"><i data-feather="users" style="width:11px;height:11px"></i> <?= $enrolled ?>/<?= $capacity ?></span>
+          <?php endif; ?>
+        </div>
+        <div class="bc-bottom">
+          <div>
+            <?php if ($rating > 0): ?>
+            <span class="bc-stars" id="stars-<?= (int)$c['claseId'] ?>"></span>
+            <span class="bc-rating"><?= number_format($rating, 1) ?></span>
+            <?php endif; ?>
+          </div>
+          <div class="bc-price"><?= $precio ?> cr.</div>
+        </div>
+      </a>
+      <?php endforeach; ?>
+    <?php endif; ?>
+  </div>
+  </div>
+</div>
+
+<script>
+var _searchTimer;
+function debounceSearch(){
+  clearTimeout(_searchTimer);
+  _searchTimer = setTimeout(function(){ filterClasses(); }, 300);
+}
+function featherReplace(){if(typeof feather !== 'undefined') feather.replace()}
+featherReplace();
+
+function buildUrl(extra){
+  var params = new URLSearchParams(location.search);
+  if(extra) for(var k in extra){
+    if(extra[k]===''||extra[k]===null||extra[k]===undefined) params.delete(k);
+    else params.set(k, extra[k]);
   }
-  document.getElementById('filter-title').addEventListener('keyup', filterClases);
-  document.getElementById('filter-materia').addEventListener('change', filterClases);
-  document.getElementById('filter-max-price').addEventListener('input', filterClases);
-  // Auto-run filter if a subject was pre-selected from a subject page
-  <?php if ($preMateria): ?>
-  document.addEventListener('DOMContentLoaded', filterClases);
-  <?php endif; ?>
-  </script>
-</body>
-</html>
+  var qs = params.toString();
+  return 'buscar.php' + (qs ? '?' + qs : '');
+}
+function filterClasses(){
+  var q = document.getElementById('searchInput').value;
+  location.href = buildUrl({q: q || null});
+}
+function filterSubject(id){
+  var cur = new URLSearchParams(location.search).get('s')||'';
+  location.href = buildUrl({s: cur == id ? null : id});
+}
+function toggleLive(){
+  var l = new URLSearchParams(location.search).get('live');
+  location.href = buildUrl({live: l === '1' ? null : '1'});
+}
+function setSort(s){
+  location.href = buildUrl({sort: s === 'relevance' ? null : s});
+}
+function clearSearch(){
+  location.href = buildUrl({q: null});
+}
+
+document.querySelectorAll('.bc-stars').forEach(function(el){
+  var id = el.id.replace('stars-','');
+  var card = el.closest('.bc-card');
+  if(!card) return;
+  var rating = parseFloat(card.querySelector('.bc-rating')?.textContent||'0');
+  var full = Math.floor(rating);
+  var half = (rating - full) >= 0.5;
+  var html = '';
+  for(var i=0;i<5;i++){
+    if(i < full) html += '<svg width="11" height="11" viewBox="0 0 24 24" fill="#F59E0B" stroke="#F59E0B" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+    else if(i === full && half) html += '<svg width="11" height="11" viewBox="0 0 24 24" fill="#F59E0B" stroke="#F59E0B" stroke-width="2" opacity="0.6"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+    else html += '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+  }
+  el.innerHTML = html;
+});
+</script>
+<?php require 'footer.php'; ?>

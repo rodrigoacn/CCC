@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
@@ -20,7 +20,8 @@ export default function VerifyEmailScreen() {
       const { message } = await apiResendVerification(String(email));
       Alert.alert('Correo enviado', message);
     } catch (e: any) {
-      Alert.alert('Error', e.message);
+      if (__DEV__) console.log('resend error', e);
+      Alert.alert('Error', 'No se pudo reenviar el correo. Intenta de nuevo.');
     } finally {
       setSending(false);
     }
@@ -28,7 +29,12 @@ export default function VerifyEmailScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background, paddingTop: insets.top + 40, paddingBottom: insets.bottom + 24 }]}>
-      <View style={[styles.iconWrap, { backgroundColor: colors.primary + '22' }]}>
+      <TouchableOpacity
+        onPress={() => router.back()}
+        style={{ position: 'absolute', top: Platform.OS === 'web' ? 16 : insets.top + 8, left: 16, zIndex: 10, width: 40, height: 40, borderRadius: 20, backgroundColor: colors.muted, justifyContent: 'center', alignItems: 'center' }}
+      >
+        <Feather name="arrow-left" size={22} color={colors.foreground} />
+      </TouchableOpacity><View style={[styles.iconWrap, { backgroundColor: colors.primary + '22' }]}>
         <Feather name="mail" size={40} color={colors.primary} />
       </View>
       <Text style={[styles.title, { color: colors.foreground }]}>Verifica tu correo</Text>

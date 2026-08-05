@@ -4,43 +4,17 @@
 //  Funciones de negocio que pueden ser probadas unitariamente
 // ─────────────────────────────────────────────────────────────────────────────
 
-/**
- * Calcula la comisión del profesor basado en el número de referidos
- * 
- * @param int $numReferidos Número de referidos del profesor
- * @return float Comisión reducida (0-5%)
- */
-function calcularComisionReferidos(int $numReferidos): float
-{
-    $reduccion = min($numReferidos, 5);
-    return $reduccion * 0.01; // 1% por referido, máximo 5%
-}
+require_once __DIR__ . '/../db.php';
 
 /**
- * Calcula el precio final del profesor después de la comisión de la plataforma
+ * Calcula la comisión para Rodrigo (5% extra en compras de tokens/créditos)
  * 
- * @param float $precio Precio base de la clase
- * @param int $numReferidos Número de referidos del profesor
- * @return float Precio final para el profesor
+ * @param float $montoUsd Monto base en USD de la compra
+ * @return float Comisión para Rodrigo
  */
-function calcularPrecioProfesor(float $precio, int $numReferidos): float
+function calcularFeeRodrigo(float $montoUsd): float
 {
-    $comisionBase = 0.15; // 15% comisión base
-    $reduccion = calcularComisionReferidos($numReferidos);
-    $comisionFinal = max($comisionBase - $reduccion, 0.10); // Mínimo 10%
-    
-    return $precio * (1 - $comisionFinal);
-}
-
-/**
- * Calcula los minutos espectador gratis basado en el número de referidos
- * 
- * @param int $numReferidos Número de referidos del usuario
- * @return int Minutos espectador gratis (máximo 5 por referido, pero el límite es por usuario)
- */
-function calcularMinutosEspectadorGratis(int $numReferidos): int
-{
-    return min($numReferidos, 5);
+    return round($montoUsd * 0.05, 2);
 }
 
 /**
@@ -62,7 +36,7 @@ function calcularPrecioPorMinuto(float $precioTotal, int $duracionMinutos): floa
  * @param float $precioTotal Precio total de la clase
  * @param int $duracionMinutos Duración total en minutos
  * @param int $minutosTranscurridos Minutos que el estudiante estuvo en la clase
- * @param int $minutosGratis Minutos gratis (por referido o promoción)
+ * @param int $minutosGratis Minutos gratis (por promoción)
  * @return float Monto a cobrar
  */
 function calcularCobroEstudiante(float $precioTotal, int $duracionMinutos, int $minutosTranscurridos, int $minutosGratis = 0): float
@@ -120,15 +94,4 @@ function validarPassword(string $password): bool
 function convertirMoneda(float $montoUSD, float $tasaCambio): float
 {
     return $montoUSD * $tasaCambio;
-}
-
-/**
- * Verifica si un usuario puede referir más personas
- * 
- * @param int $numReferidosActuales Número actual de referidos
- * @return bool True si puede referir más
- */
-function puedeReferirMas(int $numReferidosActuales): bool
-{
-    return $numReferidosActuales < 5;
 }

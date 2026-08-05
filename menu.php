@@ -2,26 +2,71 @@
 ob_start();
 if (session_status() === PHP_SESSION_NONE) session_start();
 require_once 'db.php';
+require_once 'lang.php';
+require_once __DIR__ . '/lib/app/web_bootstrap.php';
 
-// ── Auth guard ────────────────────────────────────────────────────────────────
+require_once __DIR__ . '/lib/security_headers.php';
+
+// â”€â”€ Remember-me auto-login â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+ce_remember_autologin();
+
+// â”€â”€ Auth guard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Every page that includes menu.php requires a logged-in user.
 // Public pages (login.php, verify.php, forgot_password.php, reset_password.php)
 // do NOT include menu.php, so they are unaffected.
-if (!isset($_SESSION['usuarioId'])) {
-    header('Location: login.php');
-    exit;
-}
+ce_require_login('login.php');
 
 $currentPage = basename($_SERVER['PHP_SELF'] ?? '');
-if (($_SESSION['rol'] === 'estudiante' || $_SESSION['rol'] === 'student') && $currentPage !== 'pago.php') {
-    $pending = dbOne(
+
+// Map current page â†’ materiaId so the UI can adopt the subject's color
+$page_materia = [
+    'matematicas.php'      => 1,
+    'biologia.php'         => 2,
+    'quimica.php'          => 3,
+    'fisica.php'           => 4,
+    'historia.php'         => 5,
+    'geografia.php'        => 6,
+    'literatura.php'       => 7,
+    'idiomas.php'          => 8,
+    'arte.php'             => 9,
+    'tecnologia.php'       => 10,
+    'educacion_fisica.php' => 11,
+];
+$materiaPagina = $page_materia[$currentPage] ?? 0;
+
+// If the current page receives ?materia=N (e.g. contenido.php), adopt that subject's color too
+if ($materiaPagina === 0 && isset($_GET['materia'])) {
+    $m = (int)$_GET['materia'];
+    if ($m >= 1 && $m <= 11) $materiaPagina = $m;
+}
+
+// Non-subject pages (buscar, perfil, personas, sala, etc.) adopt the color of
+// the last subject the user opened, so the whole UI is not stuck on the default green.
+if ($materiaPagina === 0 && isset($_SESSION['usuarioId'])) {
+    $lastMateria = dbOne(
+        "SELECT ultimaMateria FROM usuarios WHERE usuarioId = :u",
+        ['u' => $_SESSION['usuarioId']]
+    );
+    $m = (int)($lastMateria['ultimaMateria'] ?? 0);
+    if ($m >= 1 && $m <= 11) $materiaPagina = $m;
+}
+
+// Remember the last subject opened so it can be resumed next session
+if ($materiaPagina > 0 && isset($_SESSION['usuarioId'])) {
+    dbExec(
+        "UPDATE usuarios SET ultimaMateria = :m WHERE usuarioId = :u",
+        ['m' => $materiaPagina, 'u' => $_SESSION['usuarioId']]
+    );
+}
+
+if (($_SESSION['rol'] === 'estudiante' || $_SESSION['rol'] === 'student') && $currentPage !== 'pago.php') {    $pending = dbOne(
         "SELECT sesionId FROM sesiones_clase
          WHERE estudianteId = :u AND pagado = 0 AND fin IS NOT NULL
          ORDER BY fin ASC LIMIT 1",
         ['u' => $_SESSION['usuarioId']]
     );
     if ($pending) {
-        header('Location: pago.php?sesion=' . $pending['sesionid']);
+        header('Location: pago.php?sesion=' . $pending['sesionId']);
         exit;
     }
 }
@@ -35,7 +80,7 @@ $resultados = [
     "esVisibleSala"       => "d-none",
 ];
 
-// Map materiaId → subject page filename (same as materias.php)
+// Map materiaId â†’ subject page filename (same as materias.php)
 $page_map = [
     1  => 'matematicas.php',
     2  => 'biologia.php',
@@ -49,24 +94,6 @@ $page_map = [
     10 => 'tecnologia.php',
     11 => 'educacion_fisica.php',
 ];
-
-// Fetch the latest chat notification data
-$latestMessages = [];
-$notificationCount = 0;
-if (function_exists('dbAll') && function_exists('dbOne')) {
-    $latestMessages = dbAll(
-        "SELECT m.mensaje, m.enviado_at, u.nombre AS usuario
-         FROM mensajes_chat m
-         LEFT JOIN usuarios u ON u.usuarioid = m.usuarioid
-         ORDER BY m.enviado_at DESC
-         LIMIT 3"
-    );
-    $countRow = dbOne(
-        "SELECT COUNT(*) AS cnt FROM mensajes_chat WHERE enviado_at >= NOW() - INTERVAL 1 DAY",
-        []
-    );
-    $notificationCount = $countRow ? (int)($countRow['cnt'] ?? 0) : 0;
-}
 
 // Fetch user's last-visited items + credit balance from DB
 if (isset($_SESSION['ultimoContenido']) || isset($_SESSION['ultimaClase']) || isset($_SESSION['ultimaSala'])) {
@@ -123,181 +150,123 @@ if (isset($_SESSION['ultimoContenido']) || isset($_SESSION['ultimaClase']) || is
 // Convenience variables for navbar
 $_navNombre   = htmlspecialchars(explode(' ', trim($_SESSION['nombre'] ?? 'Usuario'))[0]);
 $_navCreditos = (int)($_SESSION['creditos'] ?? 0);
-$_navRol      = $_SESSION['rol'] ?? 'estudiante';
+$_dbRol       = $_SESSION['rol'] ?? 'estudiante';
+$_navRol      = $_dbRol;
+// ── Cookie role selector: only for 'both' users switching views ──────────────
+if (isset($_COOKIE['ce_app_modo'])) {
+    $cookieRol = $_COOKIE['ce_app_modo'];
+    // Only allow cookie override if user's DB role is 'both' (instructor+student)
+    if (in_array($_dbRol, ['both', 'instructor', 'estudiante'])) {
+        if ($cookieRol === 'teacher' && in_array($_dbRol, ['instructor', 'both'])) {
+            $_navRol = 'instructor';
+        } else if ($cookieRol === 'student') {
+            $_navRol = 'estudiante';
+        }
+    }
+}
 ?>
 <!DOCTYPE html>
-<html lang="es">
+<html lang="<?= detectLang() ?>">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="ClassExpress — clases online en tiempo real">
-  <title>ClassExpress</title>
-  <link rel="stylesheet" href="./styles.css">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#eef1f6">
+  <title>ClassExpress — Clases Particulares en Línea por Videoconferencia</title>
+  <meta name="description" content="ClassExpress: plataforma de clases particulares en tiempo real. Conecta profesores y estudiantes por videoconferencia. Matemáticas, ciencias, idiomas y más. Aprende desde cualquier lugar.">
+  <meta name="keywords" content="clases particulares, clases online, tutorías, videoconferencia, profesor particular, aprender en línea, matemáticas, ciencias, idiomas, educación, e-learning, clases en vivo">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://classexpress.online/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="ClassExpress — Clases Particulares en Línea por Videoconferencia">
+  <meta property="og:description" content="Plataforma de clases particulares en tiempo real. Conecta profesores y estudiantes por videoconferencia. Aprende desde cualquier lugar.">
+  <meta property="og:url" content="https://classexpress.online/">
+  <meta property="og:site_name" content="ClassExpress">
+  <meta property="og:locale" content="es_CL">
+  <meta property="og:image" content="https://classexpress.online/favico.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="ClassExpress — Clases Particulares en Línea">
+  <meta name="twitter:description" content="Plataforma de clases particulares en tiempo real. Conecta profesores y estudiantes por videoconferencia.">
+  <meta name="twitter:image" content="https://classexpress.online/favico.svg">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-  <link rel="icon" href="favico.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="./styles.css?v=20260805">
+  <link rel="icon" href="favico.svg?v=4" type="image/svg+xml">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+  <style>
+  :root{color-scheme:light;--p:#66ddbd;--pb:#4CBFA3;--bg:#eef1f6;--sf:#ffffff;--fg:#1e293b;--sub:#64748b;--bd:#dbe2ee;--s:#16a34a;--d:#dc2626;--tb:#ffffff;--tbi:#64748b;--r:14px}
+  *{box-sizing:border-box}
+  body{background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;margin:0;padding:0}
+  .ml-wrap{max-width:100%;margin:0 auto;padding:32px 0 100px;min-height:100vh}
+  .ml-wrap-inner{max-width:100%;margin:0 auto;padding:0 32px}
+  @media(min-width:1800px){.ml-wrap-inner{padding:0 48px}}
+  .ml-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:24px;padding:0 4px}
+  .ml-head-title{font-size:36px;font-weight:700;color:var(--fg);margin-bottom:4px}
+  .ml-sub{font-size:18px;color:var(--sub);margin:0 4px 20px}
+  .ml-card{border-radius:18px;padding:28px}
+  .ml-btn{display:inline-flex;align-items:center;gap:10px;padding:18px 36px;border-radius:16px;border:0;font-weight:700;font-size:18px;cursor:pointer;text-decoration:none;color:inherit}
+  .ml-btn-p{background:var(--p);color:#fff}
+  .ml-btn-s{background:var(--s);color:#fff}
+  .ml-btn-l{background:#fff;color:var(--p);border:1px solid var(--p)}
+  .ml-chip{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:24px;background:var(--sf);border:1px solid var(--bd);font-size:15px;font-weight:500;color:var(--sub);cursor:pointer;white-space:nowrap}
+  .ml-chip.active{background:var(--p);color:#fff}
+  .ml-chip.active-l{background:var(--s);color:#fff}
+  .ml-search{display:flex;align-items:center;gap:12px;border-radius:16px;padding:14px 20px;margin:0 4px 16px;background:var(--sf)}
+  .ml-search input{flex:1;background:none;border:0;outline:0;color:var(--fg);font-size:17px;font-family:inherit}
+  .ml-search input::placeholder{color:var(--tbi)}
+  .ml-empty{padding:80px 32px;text-align:center}
+  .ml-empty-txt{font-size:18px;color:var(--sub);margin:16px 0 28px;text-align:center}
+  .ml-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;padding:0 4px 24px}
+  @media(min-width:1000px){.ml-grid{grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}}
+  @media(min-width:1400px){.ml-grid{grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:24px}}
+  .tb{position:fixed;bottom:0;left:0;right:0;z-index:999;background:var(--tb);border-top:1px solid var(--bd);display:flex;justify-content:center;padding:8px 0 env(safe-area-inset-bottom)}
+  .tb-inner{display:flex;max-width:100%;width:100%}
+  .tb a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 0;text-decoration:none;gap:3px;color:var(--tbi)!important;font-size:12px;font-weight:500}
+  .tb a.active{color:#66ddbd!important}
+  .tb a i{width:26px;height:26px}
+  .tb a svg{width:26px;height:26px;stroke:var(--tbi)!important}
+  .tb a.active svg{stroke:#66ddbd!important}
+
+  </style>
 </head>
 <body>
   <script>window.CE_ROLE = '<?= htmlspecialchars($_navRol) ?>';</script>
-  <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-    <div class="container-fluid">
-      <a class="navbar-brand fw-bold" href="materias.php">ClassExpress</a>
+  <?php
+  $page = basename($_SERVER['PHP_SELF']);
+  $isTeacher = $_navRol !== 'estudiante' && $_navRol !== 'student';
+  $tabs = [
+    'materias.php' => ['home', t('nav.materias')],
+    'buscar.php' => ['search', t('nav.buscar')],
+    'mi_sala.php' => ['camera', t('nav.sala')],
+    'personas.php' => ['users', t('nav.personas')],
+    'creditos.php' => ['credit-card', t('nav.creditos')],
+    'retiro.php' => ['dollar-sign', t('retiro.withdraw')],
+    'perfil.php' => ['user', t('nav.perfil')],
+  ];
+  $materiaPages = ['contenido.php','matematicas.php','biologia.php','quimica.php','fisica.php','historia.php','geografia.php','literatura.php','idiomas.php','arte.php','tecnologia.php','educacion_fisica.php'];
+  if (in_array($page, $materiaPages)) $page = 'materias.php';
+  ?>
 
-      <button class="navbar-toggler" type="button"
-              data-bs-toggle="collapse" data-bs-target="#mainNav"
-              aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+<div class="tb"><div class="tb-inner">
+  <?php foreach ($tabs as $f => $d):
+    if ($f === 'buscar.php') { if ($isTeacher) continue; }
+    if ($f === 'retiro.php' && !$isTeacher) continue;
+    if ($f === 'creditos.php' && $isTeacher) continue;
+  ?>
+  <a href="<?= $f ?>" class="<?= $page === $f ? 'active' : '' ?>">
+    <i data-feather="<?= $d[0] ?>"></i><span><?= $d[1] ?></span>
+  </a>
+  <?php endforeach; ?>
 
-      <div class="collapse navbar-collapse" id="mainNav">
-        <ul class="navbar-nav me-auto mb-2 mb-md-0">
-          <li class="nav-item">
-            <a class="nav-link" href="materias.php"><i class="bi bi-grid me-1"></i>Materias</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="<?= htmlspecialchars(($page_map[$resultados['ultimoContenido']] ?? 'arte') . '.php') ?>">
-              <i class="bi bi-bookmark me-1"></i>Contenidos
-            </a>
-          </li>
-          <li class="nav-item <?= $resultados['esVisibleSala'] ?>">
-            <a class="nav-link" href="sala.php?<?= htmlspecialchars($resultados['ultimaSala']) ?>">
-              <i class="bi bi-camera-video me-1"></i>Sala
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="buscar.php"><i class="bi bi-search me-1"></i>Buscar</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="profesores.php"><i class="bi bi-people me-1"></i>Profesores</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="amigos.php"><i class="bi bi-person-heart me-1"></i>Amigos</a>
-          </li>
-        </ul>
 
-        <!-- Right side: credits + user name + logout -->
-        <ul class="navbar-nav align-items-md-center gap-2">
-          <li class="nav-item">
-            <a class="nav-link" href="creditos.php">
-              <span class="badge bg-warning text-dark fs-6 fw-semibold">
-                <i class="bi bi-coin me-1"></i><?= $_navCreditos ?> cr.
-              </span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="comprar_tokens.php">
-              <span class="badge bg-primary fs-6 fw-semibold">
-                <i class="bi bi-cart-plus me-1"></i>Comprar MonedasCE
-              </span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="balance.php">
-              <span class="badge bg-success fs-6 fw-semibold">
-                <i class="bi bi-wallet2 me-1"></i>Balance
-              </span>
-            </a>
-          </li>
-          <?php if ($_navRol !== 'estudiante' && $_navRol !== 'student'): ?>
-          <li class="nav-item d-none d-md-inline">
-            <a class="nav-link btn btn-outline-secondary btn-sm px-3 text-white" href="dashboard_profesor.php">
-              <i class="bi bi-speedometer2 me-1"></i>Dashboard
-            </a>
-          </li>
-          <?php endif; ?>
-          <li class="nav-item dropdown">
-            <a class="nav-link position-relative" href="#" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-              <i class="bi bi-bell"></i>
-              <?php if ($notificationCount > 0): ?>
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                  <?= $notificationCount > 9 ? '9+' : $notificationCount ?>
-                </span>
-              <?php endif; ?>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end p-2" aria-labelledby="notificationDropdown" style="min-width: 280px;">
-              <li><h6 class="dropdown-header">Últimos mensajes</h6></li>
-              <?php if (empty($latestMessages)): ?>
-                <li><span class="dropdown-item-text text-muted">No hay mensajes recientes.</span></li>
-              <?php else: ?>
-                <?php foreach ($latestMessages as $msg): ?>
-                  <li>
-                    <a class="dropdown-item small" href="amigos.php">
-                      <strong><?= htmlspecialchars($msg['usuario'] ?? 'Sistema') ?></strong>
-                      <div class="text-truncate" style="max-width: 240px;"><?= htmlspecialchars($msg['mensaje']) ?></div>
-                      <small class="text-muted"><?= date('d/m H:i', strtotime($msg['enviado_at'])) ?></small>
-                    </a>
-                  </li>
-                <?php endforeach; ?>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item text-center" href="amigos.php">Ver toda la actividad</a></li>
-              <?php endif; ?>
-            </ul>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="perfil.php">
-              <i class="bi bi-person-circle me-1"></i><?= $_navNombre ?>
-            </a>
-          </li>
-          <li class="nav-item">
-            <button class="nav-link btn btn-link" id="theme-toggle" title="Cambiar tema">
-              <i class="bi bi-moon me-1" id="theme-icon"></i>
-            </button>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link text-danger" href="logout.php">
-              <i class="bi bi-box-arrow-right me-1"></i>Salir
-            </a>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
-
+</div></div>
 <script>
-// ── Theme Toggle Logic ─────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', function() {
-  const themeToggle = document.getElementById('theme-toggle');
-  const themeIcon = document.getElementById('theme-icon');
-  
-  // Check for saved theme preference or default to light
-  const savedTheme = localStorage.getItem('theme') || 'light';
-  
-  // Apply saved theme
-  if (savedTheme === 'dark') {
-    document.documentElement.setAttribute('data-theme', 'dark');
-    if (themeIcon) {
-      themeIcon.classList.remove('bi-moon');
-      themeIcon.classList.add('bi-sun');
-    }
-  } else {
-    document.documentElement.setAttribute('data-theme', 'light');
-    if (themeIcon) {
-      themeIcon.classList.remove('bi-sun');
-      themeIcon.classList.add('bi-moon');
-    }
-  }
-  
-  // Toggle theme on click
-  if (themeToggle) {
-    themeToggle.addEventListener('click', () => {
-      const currentTheme = document.documentElement.getAttribute('data-theme');
-      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-      
-      // Apply new theme
-      document.documentElement.setAttribute('data-theme', newTheme);
-      
-      // Update icon
-      if (newTheme === 'dark') {
-        themeIcon.classList.remove('bi-moon');
-        themeIcon.classList.add('bi-sun');
-      } else {
-        themeIcon.classList.remove('bi-sun');
-        themeIcon.classList.add('bi-moon');
-      }
-      
-      // Save preference
-      localStorage.setItem('theme', newTheme);
-    });
-  }
-});
+document.addEventListener('DOMContentLoaded',function(){feather.replace()});
+window.CE_switchLang=function(code){
+  document.cookie='ce_lang='+code+';path=/;max-age=2592000';
+  fetch('lang_api.php?lang='+code+'&save=1').then(function(){location.reload()}).catch(function(){location.reload()});
+};
 </script>
+

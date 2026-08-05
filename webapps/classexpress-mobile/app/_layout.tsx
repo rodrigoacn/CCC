@@ -15,20 +15,19 @@ import {
 } from '@expo-google-fonts/poppins';
 import { AuthProvider } from '@/context/AuthContext';
 import { ThemeProvider } from '@/context/ThemeContext';
-import { useTheme } from '@/context/ThemeContext';
+import { I18nProvider } from '@/context/I18nContext';
 import queryClient from '@/lib/queryClient';
-import palette from '@/constants/colors';
+import colors from '@/constants/colors';
 
 SplashScreen.preventAutoHideAsync();
 
 function Inner() {
-  const { theme } = useTheme();
-  const colors = theme === 'dark' ? palette.dark : palette.light;
   const [fontsLoaded, fontError] = useFonts({
     Poppins_400Regular,
     Poppins_500Medium,
     Poppins_600SemiBold,
     Poppins_700Bold,
+    Feather: require('@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Feather.ttf'),
   });
 
   useEffect(() => {
@@ -39,7 +38,7 @@ function Inner() {
 
   return (
     <>
-      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
+      <StatusBar style="light" />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="(auth)" />
@@ -88,6 +87,17 @@ function Inner() {
             headerShadowVisible: false,
           }}
         />
+        <Stack.Screen
+          name="checkout"
+          options={{
+            headerShown: true,
+            title: 'Checkout',
+            headerStyle: { backgroundColor: colors.background },
+            headerTintColor: colors.foreground,
+            headerShadowVisible: false,
+            presentation: 'modal',
+          }}
+        />
       </Stack>
     </>
   );
@@ -109,7 +119,9 @@ export default function RootLayout() {
           <AppProviders>
             <ThemeProvider>
               <AuthProvider>
-                <Inner />
+                <I18nProvider>
+                  <Inner />
+                </I18nProvider>
               </AuthProvider>
             </ThemeProvider>
           </AppProviders>

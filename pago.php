@@ -2,6 +2,9 @@
 ob_start();
 require 'menu.php';
 require 'db.php';
+require_once __DIR__ . '/lib/csrf.php';
+
+require_once __DIR__ . '/lib/security_headers.php';
 
 if (!isset($_SESSION['usuarioId'])) { header('Location: login.php'); exit; }
 $uid      = (int)$_SESSION['usuarioId'];
@@ -47,6 +50,7 @@ $fmt_local = number_format($monto_local, 2, '.', ',');
 $success = false;
 $pay_error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$already_paid) {
+    csrf_require();
     $metodo = in_array($_POST['metodo'] ?? '', ['tarjeta','transferencia','efectivo'])
               ? $_POST['metodo'] : 'tarjeta';
 
@@ -59,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$already_paid) {
             [
                 'sid'  => $sesionId,
                 'est'  => $uid,
-                'prof' => $sesion['instructorid'],
+                'prof' => $sesion['instructorId'],
                 'usd'  => $precio_usd,
                 'loc'  => $monto_local,
                 'mon'  => $mon_local,
@@ -101,10 +105,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$already_paid) {
       <div class="col-sm-10 col-md-8 col-lg-6">
 
         <?php if ($success): ?>
-        <!-- ── SUCCESS ─────────────────────────────────────────────────── -->
+        <!-- â”€â”€ SUCCESS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
         <div class="card bg-dark border-secondary text-center p-4">
           <div class="mb-3">
-            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="#6ea86e" viewBox="0 0 16 16">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="var(--p)" viewBox="0 0 16 16">
               <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
             </svg>
           </div>
@@ -115,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$already_paid) {
           </p>
           <div class="alert alert-dark border border-secondary mt-3">
             <span class="fs-4 fw-bold text-white"><?= $simbolo . $fmt_local ?> <?= $mon_local ?></span><br>
-            <small class="text-secondary">≈ $<?= number_format($precio_usd, 2) ?> USD</small>
+            <small class="text-secondary">â‰ˆ $<?= number_format($precio_usd, 2) ?> USD</small>
           </div>
           <a href="materias.php" class="btn btn-secondary mt-3">Ir a materias</a>
           <a href="buscar.php" class="btn btn-dark border-secondary mt-3 ms-2">Buscar otra clase</a>
@@ -125,7 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$already_paid) {
         </script>
 
         <?php elseif ($already_paid): ?>
-        <!-- ── ALREADY PAID ────────────────────────────────────────────── -->
+        <!-- â”€â”€ ALREADY PAID â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
         <div class="card bg-dark border-secondary text-center p-4">
           <h4 class="text-light">Session Already Paid</h4>
           <p class="text-secondary">This session was already settled.</p>
@@ -133,7 +137,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$already_paid) {
         </div>
 
         <?php else: ?>
-        <!-- ── PAYMENT FORM ────────────────────────────────────────────── -->
+        <!-- â”€â”€ PAYMENT FORM â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
         <div class="card bg-dark border-secondary">
           <div class="card-body p-4">
 
@@ -152,20 +156,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$already_paid) {
                   <div class="text-white fw-semibold"><?= htmlspecialchars($sesion['clase_titulo']) ?></div>
                 </div>
                 <div class="col-6">
-                  <div>👨‍🏫 Teacher</div>
+                  <div>👨‍🏤 Teacher</div>
                   <div class="text-white fw-semibold"><?= htmlspecialchars($sesion['prof_nombre']) ?></div>
                 </div>
                 <div class="col-6 mt-2">
                   <div>📍 Teacher's country</div>
-                  <div class="text-white"><?= htmlspecialchars($sesion['pais_prof'] ?? '—') ?></div>
+                  <div class="text-white"><?= htmlspecialchars($sesion['pais_prof'] ?? '”') ?></div>
                 </div>
                 <div class="col-6 mt-2">
-                  <div>⏱ Duration</div>
+                  <div>â± Duration</div>
                   <div class="text-white"><?= $duracion ?> min<?= $duracion !== 1 ? 's' : '' ?></div>
                 </div>
                 <?php if ($sesion['materia']): ?>
                 <div class="col-12 mt-2">
-                  <div>📖 Subject</div>
+                  <div>📗 Subject</div>
                   <div class="text-white"><?= htmlspecialchars($sesion['materia']) ?></div>
                 </div>
                 <?php endif; ?>
@@ -194,6 +198,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$already_paid) {
 
             <!-- Payment method -->
             <form method="POST" action="pago.php?sesion=<?= $sesionId ?>">
+              <?= csrf_field() ?>
               <p class="text-secondary small mb-2">Payment method:</p>
               <div class="d-flex gap-3 mb-4 flex-wrap">
                 <div class="form-check">
@@ -224,7 +229,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$already_paid) {
 
         <footer class="mastfoot mt-4">
           <div class="inner float-end">
-            <p class="text-secondary small">ClassExpress done <a href="https://getbootstrap.com/" class="text-secondary">Bootstrap</a>, by <a href="https://www.facebook.com/rodrigo.alejandro.1848816?locale=es_LA" class="text-secondary">@RodrigoConejeros</a>.</p>
+            <p class="text-secondary small"><?= t('general.footer_text', ['bootstrap' => '<a href="https://getbootstrap.com/" class="text-secondary">Bootstrap</a>', 'author' => '<a href="https://www.facebook.com/rodrigo.alejandro.1848816?locale=es_LA" class="text-secondary">@RodrigoConejeros</a>']) ?></p>
           </div>
         </footer>
 
@@ -234,7 +239,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$already_paid) {
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-  <script type="text/javascript" src="./presentacion/odp_ajax.js"></script>
-  <script type="text/javascript" src="./presentacion/js/scripts.js"></script>
 </body>
 </html>

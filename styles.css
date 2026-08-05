@@ -1,57 +1,32 @@
 /* ─────────────────────────────────────────────────────────────────────────────
    ClassExpress - Theme Variables
-   Verde agua para botones principales
+   Tema claro académico con acento índigo
    ───────────────────────────────────────────────────────────────────────────── */
 :root {
-  /* Light mode (default) */
-  --bg-primary: #f8f9fa;
-  --bg-secondary: #e9ecef;
-  --bg-tertiary: #dee2e6;
-  --text-primary: #68ddbd;
-  --text-secondary: #6c757d;
-  --border-color: #dee2e6;
+  /* Modo claro académico */
+  color-scheme: light;
+  --bg-primary: #eef1f6;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #e6eaf1;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --border-color: #dbe2ee;
   --card-bg: #ffffff;
   --navbar-bg: #ffffff;
-  --navbar-text: #68ddbd;
+  --navbar-text: #66ddbd;
   --input-bg: #ffffff;
-  --input-border: #ced4da;
-  
-  /* Verde agua para botones principales */
-  --primary-color: #20c997;
-  --primary-hover: #1aa179;
-  --primary-text: #ffffff;
-  
-  /* Secondary colors */
-  --success-color: #28a745;
-  --danger-color: #dc3545;
-  --warning-color: #ffc107;
-  --info-color: #17a2b8;
-}
+  --input-border: #cbd5e1;
 
-[data-theme="dark"] {
-  /* Dark mode */
-  --bg-primary: #1a1a1a;
-  --bg-secondary: #2d2d2d;
-  --bg-tertiary: #3d3d3d;
-  --text-primary: #68ddbd;
-  --text-secondary: #adb5bd;
-  --border-color: #495057;
-  --card-bg: #2d2d2d;
-  --navbar-bg: #1a1a1a;
-  --navbar-text: #68ddbd;
-  --input-bg: #2d2d2d;
-  --input-border: #495057;
-  
-  /* Verde agua para botones principales (mismo en ambos modos) */
-  --primary-color: #20c997;
-  --primary-hover: #1aa179;
+  /* Verde menta para botones principales */
+  --primary-color: #66ddbd;
+  --primary-hover: #4CBFA3;
   --primary-text: #ffffff;
-  
+
   /* Secondary colors */
-  --success-color: #28a745;
-  --danger-color: #dc3545;
-  --warning-color: #ffc107;
-  --info-color: #17a2b8;
+  --success-color: #16a34a;
+  --danger-color: #dc2626;
+  --warning-color: #f59e0b;
+  --info-color: #0ea5e9;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -188,13 +163,53 @@ a:hover {
   background-color: var(--bg-secondary) !important;
 }
 
+.bg-black {
+  background-color: var(--bg-tertiary) !important;
+}
+
+.bg-white {
+  background-color: var(--card-bg) !important;
+}
+
 .bg-light {
   background-color: var(--bg-tertiary) !important;
 }
 
 /* Border utilities */
-.border-secondary {
+.border-secondary,
+.border-dark,
+.border-black {
   border-color: var(--border-color) !important;
+}
+
+/* Text color utilities */
+.text-dark,
+.text-black,
+.text-body {
+  color: var(--text-primary) !important;
+}
+
+/* Button dark */
+.btn-dark {
+  background-color: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.btn-dark:hover {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.btn-outline-dark {
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.btn-outline-dark:hover {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
 }
 
 /* Dropdown */
@@ -273,7 +288,7 @@ a:hover {
   color: var(--text-primary);
 }
 .rating-container {
-  background-color: #f8f9fa; /* Fondo claro */
+  background-color: var(--bg-primary);
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
@@ -344,8 +359,8 @@ a:hover {
 
         /* Estilo ultra compacto para el marco físico */
         .marco-fotografico {
-            background-color: #1e1e1e;
-            border: 8px solid #2d2d2d;
+            background-color: var(--bg-secondary);
+            border: 8px solid var(--border-color);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(0,0,0,0.6);
             border-radius: 4px;
             padding: 12px;
@@ -361,9 +376,9 @@ a:hover {
 
         /* Contenedor de la imagen */
         .contenedor-imagen {
-            border: 2px solid #121212;
+            border: 2px solid var(--border-color);
             overflow: hidden;
-            background-color: #121212;
+            background-color: var(--bg-primary);
             border-radius: 2px;
         }
 
@@ -372,7 +387,7 @@ a:hover {
             position: relative;
             display: inline-block;
             font-size: 1rem;
-            color: #333333; 
+            color: var(--text-secondary); 
         }
 
         .estrellas-activas {
@@ -409,30 +424,30 @@ a:hover {
     margin: 0;
     font-size: 0.8rem;
     font-weight: 400;
-    color: #9fa8b9;
+    color: var(--text-secondary);
 }
 .account-settings .about {
     text-align: center;
 }
 .account-settings .about h5 {
     margin: 0 0 15px 0;
-    color: #007ae1;
+    color: var(--primary-color);
 }
 .account-settings .about p {
     font-size: 0.825rem;
 }
 .form-control {
-    border: 1px solid #cfd1d8;
+    border: 1px solid var(--border-color);
     -webkit-border-radius: 2px;
     -moz-border-radius: 2px;
     border-radius: 2px;
     font-size: .825rem;
-    background: #ffffff;
-    color: #2e323c;
+    background: var(--input-bg);
+    color: var(--text-primary);
 }
 
 .card {
-    background: #ffffff;
+    background: var(--card-bg);
     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;
     border-radius: 5px;
@@ -441,17 +456,17 @@ a:hover {
 }
 
 .form-check-input:checked {
-    background-color: gray;
-    border-color: black;
+    background-color: var(--bg-tertiary);
+    border-color: var(--border-color);
 }
 
 .form-check-input-s {
-    background-color: gray;
-    border-color: black;
-    border: 3px solid #000000 !important; /* 3px da el grosor semigrueso */
-    border-radius: 6px; /* Esquinas ligeramente redondeadas */
-    padding: 12px 16px; /* Espacio interno para que no se pegue al borde */
-    display: inline-block; /* Ajusta el marco al tamaño del contenido */
+    background-color: var(--bg-tertiary);
+    border-color: var(--border-color);
+    border: 3px solid var(--border-color) !important;
+    border-radius: 6px;
+    padding: 12px 16px;
+    display: inline-block;
 }
 
  .main-layout {
@@ -471,13 +486,13 @@ a:hover {
         }
 
         .bg-classexpress-dark {
-            background-color: #121212;
+            background-color: var(--bg-secondary);
         }
         .bg-classexpress-chat {
-            background-color: #1a1a1a;
+            background-color: var(--bg-primary);
         }
         .border-grey {
-            border-color: #2e2e2e !important;
+            border-color: var(--border-color) !important;
         }
 
         /* Ajuste para que todo el texto dentro del chat use el color del tema */
@@ -502,13 +517,13 @@ a:hover {
             color: #000000 !important;
         }
         .btn-classexpress {
-            background-color: #ffffff;
-            color: #000000;
-            border: 1px solid #ffffff;
+            background-color: var(--card-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
             font-weight: 500;
         }
         .btn-classexpress:hover {
-            background-color: #cccccc;
-            color: #000000;
-            border-color: #cccccc;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--border-color);
         }

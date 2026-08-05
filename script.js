@@ -329,31 +329,6 @@ $(document).ready(function() {
             });
         });
 
-        let localStream = null;
-
-// 2. Función asíncrona que se comunica con el navegador
-async function startWebcam() {
-    try {
-        localStream = await navigator.mediaDevices.getUserMedia({ 
-            video: { width: { ideal: 1280 }, height: { ideal: 720 } }, 
-            audio: false 
-        });
-        
-        let videoElement = document.getElementById('local-video');
-        videoElement.srcObject = localStream;
-        
-        // CORRECCIÓN: Forzamos al reproductor a iniciar el flujo de la cámara USB
-        videoElement.play(); 
-        
-        $('#video-placeholder').addClass('d-none');
-        $('#local-video').removeClass('d-none');
-    } catch (error) {
-        console.error("Error: ", error);
-    }
-}
-// 3. Ejecuta la función inmediatamente al cargar la página
-startWebcam();
-
 $(document).ready(function() {
     $('#btn-enviar-seleccionados').on('click', function() {
         // 1. Buscar filas usando la clase nativa de Bootstrap (.form-check-input)

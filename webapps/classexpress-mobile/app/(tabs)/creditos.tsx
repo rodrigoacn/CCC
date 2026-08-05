@@ -1,58 +1,57 @@
 import { useState } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
-  Platform, Alert, ActivityIndicator, TextInput, Modal,
+  Platform, ActivityIndicator, TextInput, Modal,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useColors } from '@/hooks/useColors';
+import { useI18n } from '@/context/I18nContext';
 import { apiCredits, apiTopup, Pago } from '@/lib/api';
+import { useRole } from '@/lib/useRole';
 
 const PACKS = [10, 25, 50, 100, 200];
-const TOKEN_PACKS = [
-  { tokens: 100, price: 1.99, name: 'Básico' },
-  { tokens: 500, price: 7.99, name: 'Estándar' },
-  { tokens: 1000, price: 14.99, name: 'Premium' },
-  { tokens: 2500, price: 29.99, name: 'Profesional' },
-];
 
 export default function CreditosScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
+  const { t } = useI18n();
+  const router = useRouter();
+  const { isTeacher } = useRole();
   const [modal, setModal] = useState(false);
-  const [tokenModal, setTokenModal] = useState(false);
   const [custom, setCustom] = useState('');
+  const [error, setError] = useState('');
 
   const { data, isLoading } = useQuery({ queryKey: ['credits'], queryFn: apiCredits });
   const balance = data?.balance ?? 0;
   const tokens = data?.tokens ?? 0;
   const history = data?.history ?? [];
-  const numReferidos = data?.num_referidos ?? 0;
-  const minutosGratis = data?.minutos_gratis ?? 0;
+
+  const openCheckout = (checkoutUrl: string) => {
+    if (Platform.OS === 'web') {
+      if (typeof window !== 'undefined') window.location.href = checkoutUrl;
+    } else {
+      router.push({ pathname: '/checkout' as any, params: { url: checkoutUrl, type: 'payment' } });
+    }
+  };
 
   const { mutate: topup, isPending } = useMutation({
     mutationFn: (amount: number) => apiTopup(amount),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['credits'] });
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    onSuccess: (data) => {
+      try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch {}
       setModal(false);
-      Alert.alert('¡Listo!', 'Créditos añadidos con éxito.');
+      setError('');
+      if (data?.checkout_url) {
+        openCheckout(data.checkout_url);
+      }
     },
-    onError: (e: any) => Alert.alert('Error', e.message),
-  });
-
-  const { mutate: buyTokens, isPending: tokenPending } = useMutation({
-    mutationFn: (pkg: any) => apiTopup(pkg.tokens), // Reusing apiTopup for demo
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['credits'] });
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      setTokenModal(false);
-      Alert.alert('¡Listo!', 'MonedasCE compradas con éxito.');
+    onError: (e: any) => {
+      setError(e.message || t('general.error'));
     },
-    onError: (e: any) => Alert.alert('Error', e.message),
   });
 
   const topPad = Platform.OS === 'web' ? 67 : insets.top;
@@ -68,7 +67,7 @@ export default function CreditosScreen() {
         <Text style={[styles.rowDate, { color: colors.subtext }]}>{new Date(item.created_at).toLocaleDateString('es-ES')}</Text>
       </View>
       <Text style={[styles.rowAmount, { color: item.monto > 0 ? colors.success : colors.danger }]}>
-        {item.monto > 0 ? '+' : ''}{item.monto} cr.
+        {item.monto > 0 ? '+' : ''}{item.monto} {t('tokens.unit_label')}
       </Text>
     </View>
   );
@@ -76,32 +75,47 @@ export default function CreditosScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View style={[styles.headerWrap, { paddingTop: topPad + 12, backgroundColor: colors.primary }]}>
-        <Text style={styles.headerTitle}>Mi Billetera</Text>
+        <Text style={styles.headerTitle}>{t('credits.title')}</Text>
         {isLoading
           ? <ActivityIndicator color="#fff" />
           : <Text style={styles.balance}>{balance}</Text>}
-        <Text style={styles.creditLabel}>créditos disponibles</Text>
+        <Text style={styles.creditLabel}>{t('credits.available')}</Text>
         <View style={styles.btnRow}>
-          <TouchableOpacity style={styles.addBtn} onPress={() => setModal(true)}>
+          <TouchableOpacity style={styles.addBtn} onPress={() => { setCustom(''); setError(''); setModal(true); }}>
             <Feather name="plus" size={18} color={colors.primary} />
-            <Text style={[styles.addText, { color: colors.primary }]}>Recargar</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.tokenBtn, { backgroundColor: colors.success }]} onPress={() => setTokenModal(true)}>
-            <Feather name="shopping-bag" size={18} color="#fff" />
-            <Text style={[styles.addText, { color: '#fff' }]}>MonedasCE</Text>
+            <Text style={[styles.addText, { color: colors.primary }]}>{t('credits.recharge')}</Text>
           </TouchableOpacity>
         </View>
       </View>
 
+      {error ? (
+        <View style={{ marginHorizontal: 20, marginTop: 16, padding: 10, borderRadius: 12, backgroundColor: `${colors.danger}22` }}>
+          <Text style={{ color: colors.danger, fontFamily: 'Poppins_400Regular', fontSize: 13, textAlign: 'center' }}>{error}</Text>
+        </View>
+      ) : null}
+
       <View style={[styles.tokenCard, { backgroundColor: colors.card, marginHorizontal: 20, marginTop: 20, padding: 16, borderRadius: 16 }]}>
-        <Text style={[styles.tokenLabel, { color: colors.subtext }]}>MonedasCE</Text>
-        <Text style={[styles.tokenBalance, { color: colors.foreground }]}>{tokens}</Text>
-        <Text style={[styles.tokenSub, { color: colors.subtext }]}>Minutos gratis: {minutosGratis}</Text>
-        <Text style={[styles.tokenSub, { color: colors.subtext }]}>Referidos: {numReferidos}/5</Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <View>
+            <Text style={[styles.tokenLabel, { color: colors.subtext }]}>{t('credits.token_balance')}</Text>
+            <Text style={[styles.tokenBalance, { color: colors.foreground }]}>{tokens}</Text>
+          </View>
+          <Feather name="dollar-sign" size={24} color={colors.success} />
+        </View>
+
+        {isTeacher && balance > 0 && (
+          <TouchableOpacity
+            style={[styles.tokenBtn, { backgroundColor: colors.primary, marginTop: 12, justifyContent: 'center' }]}
+            onPress={() => router.push('/(tabs)/retiro')}
+          >
+            <Feather name="credit-card" size={16} color="#fff" />
+            <Text style={[styles.addText, { color: '#fff' }]}>{t('retiro.withdraw')}</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       <Text style={[styles.sectionTitle, { color: colors.foreground, paddingHorizontal: 20, paddingTop: 20 }]}>
-        Historial
+        {t('credits.history')}
       </Text>
 
       <FlatList
@@ -114,7 +128,7 @@ export default function CreditosScreen() {
             <View style={{ alignItems: 'center', paddingTop: 40 }}>
               <Feather name="inbox" size={36} color={colors.mutedForeground} />
               <Text style={{ color: colors.subtext, marginTop: 10, fontFamily: 'Poppins_400Regular' }}>
-                Sin movimientos aún
+                {t('credits.empty')}
               </Text>
             </View>
           ) : null
@@ -124,8 +138,8 @@ export default function CreditosScreen() {
       <Modal visible={modal} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={[styles.modalCard, { backgroundColor: colors.card }]}>
-            <Text style={[styles.modalTitle, { color: colors.foreground }]}>Recargar créditos</Text>
-            <Text style={[styles.modalSub, { color: colors.subtext }]}>1 crédito = $1 USD (modo demo)</Text>
+            <Text style={[styles.modalTitle, { color: colors.foreground }]}>{t('credits.modal_title')}</Text>
+            <Text style={[styles.modalSub, { color: colors.subtext }]}>{t('credits.modal_sub')}</Text>
 
             <View style={styles.packRow}>
               {PACKS.map(p => (
@@ -140,7 +154,7 @@ export default function CreditosScreen() {
             <View style={[styles.customRow, { backgroundColor: colors.muted }]}>
               <TextInput
                 style={[styles.customInput, { color: colors.foreground }]}
-                placeholder="Cantidad personalizada"
+                placeholder={t('credits.custom')}
                 placeholderTextColor={colors.mutedForeground}
                 value={custom}
                 onChangeText={setCustom}
@@ -156,31 +170,7 @@ export default function CreditosScreen() {
             </View>
 
             <TouchableOpacity onPress={() => setModal(false)} style={{ alignItems: 'center', marginTop: 16 }}>
-              <Text style={{ color: colors.subtext, fontFamily: 'Poppins_400Regular' }}>Cancelar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      <Modal visible={tokenModal} transparent animationType="slide">
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalCard, { backgroundColor: colors.card }]}>
-            <Text style={[styles.modalTitle, { color: colors.foreground }]}>Comprar MonedasCE</Text>
-            <Text style={[styles.modalSub, { color: colors.subtext }]}>Tokens para gastar en clases</Text>
-
-            <View style={styles.packRow}>
-              {TOKEN_PACKS.map((pkg, idx) => (
-                <TouchableOpacity key={idx} style={[styles.tokenPack, { backgroundColor: colors.success + '22' }]}
-                  onPress={() => buyTokens(pkg)} disabled={tokenPending}>
-                  <Text style={[styles.packNum, { color: colors.success }]}>{pkg.tokens}</Text>
-                  <Text style={[styles.packLabel, { color: colors.subtext }]}>tokens</Text>
-                  <Text style={[styles.packPrice, { color: colors.subtext }]}>${pkg.price}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            <TouchableOpacity onPress={() => setTokenModal(false)} style={{ alignItems: 'center', marginTop: 16 }}>
-              <Text style={{ color: colors.subtext, fontFamily: 'Poppins_400Regular' }}>Cancelar</Text>
+              <Text style={{ color: colors.subtext, fontFamily: 'Poppins_400Regular' }}>{t('credits.cancel')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -214,10 +204,8 @@ const styles = StyleSheet.create({
   modalSub:    { fontFamily: 'Poppins_400Regular', fontSize: 13, marginBottom: 20 },
   packRow:     { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 16 },
   pack:        { width: 68, height: 68, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
-  tokenPack:   { width: 80, height: 80, borderRadius: 16, justifyContent: 'center', alignItems: 'center' },
   packNum:     { fontFamily: 'Poppins_700Bold', fontSize: 20 },
   packLabel:   { fontFamily: 'Poppins_400Regular', fontSize: 12 },
-  packPrice:   { fontFamily: 'Poppins_400Regular', fontSize: 10 },
   customRow:   { flexDirection: 'row', alignItems: 'center', borderRadius: 14, overflow: 'hidden' },
   customInput: { flex: 1, paddingHorizontal: 16, paddingVertical: 12, fontFamily: 'Poppins_400Regular', fontSize: 15 },
   customBtn:   { paddingHorizontal: 20, paddingVertical: 12 },

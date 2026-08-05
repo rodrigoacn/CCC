@@ -8,13 +8,37 @@ if (!function_exists('getDB')) {
 
 // Error reporting configuration (hide warnings, show errors)
 error_reporting(E_ALL & ~E_WARNING & ~E_NOTICE & ~E_DEPRECATED);
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/logs/php_error.log');
+ini_set('display_startup_errors', 0);
 
-// Mailgun Configuration (get from https://app.mailgun.com/settings/api_security)
-putenv('MAILGUN_API_KEY=YOUR_MAILGUN_API_KEY');
-putenv('MAILGUN_DOMAIN=YOUR_MAILGUN_DOMAIN');
-putenv('EMAIL_DEV_MODE=true'); // Log emails instead of sending (for development)
+// ── Load .env file if present ──────────────────────────────────────────────
+$envFile = __DIR__ . '/.env';
+if (file_exists($envFile)) {
+    foreach (file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
+        $line = trim($line);
+        if ($line === '' || $line[0] === '#') continue;
+        if (strpos($line, '=') === false) continue;
+        list($key, $value) = explode('=', $line, 2);
+        $key = trim($key);
+        $value = trim($value, " \t\n\r\0\x0B\"'");
+        if (!getenv($key)) {
+            putenv("$key=$value");
+            $_ENV[$key] = $value;
+            $_SERVER[$key] = $value;
+        }
+    }
+}
+
+// ── Redis sessions (auto-starts if Redis available) ─────────────────────────
+require_once __DIR__ . '/lib/RedisSession.php';
+
+// Email Configuration (from .env or defaults)
+if (!getenv('EMAIL_PROVIDER'))    putenv('EMAIL_PROVIDER=brevo');
+if (!getenv('EMAIL_FROM'))        putenv('EMAIL_FROM=noreply@classexpress.online');
+if (!getenv('EMAIL_FROM_NAME'))   putenv('EMAIL_FROM_NAME=ClassExpress');
+if (!getenv('EMAIL_DEV_MODE'))    putenv('EMAIL_DEV_MODE=false');
 
 function getDB(): ?PDO {
     static $pdo = null;

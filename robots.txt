@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Allow: /CCC/api.php?action=search*
+Disallow: /CCC/menu.php
+Disallow: /CCC/sala.php
+Disallow: /CCC/perfil.php
+Disallow: /CCC/creditos.php
+Disallow: /CCC/admin.php
+Disallow: /CCC/clases.php
+
+Sitemap: https://classexpress.online/sitemap.xml

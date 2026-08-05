@@ -1,0 +1,15 @@
+RewriteEngine On
+RewriteCond %{HTTP:Authorization} ^(.+)$
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# ── Bloquear archivos y directorios sensibles ──────────────────────────────
+<FilesMatch "^(\.env|\.gitignore|\.htaccess|\.htpasswd|composer\.json|composer\.lock)$">
+    Require all denied
+</FilesMatch>
+<FilesMatch "\.(env|sql|pem|key|log|bak|old|swp|ini|inc)$">
+    Require all denied
+</FilesMatch>
+<IfModule mod_rewrite.c>
+    RewriteRule ^(?:\.git|logs|deploy|vendor|node_modules|storage|backups?|database|bin|tmp|migrations|lib)(/.*)?$ - [F,L,NC]
+    RewriteRule ^.*\.(?:env|sql|pem|key|log|bak|old|swp|ini)$ - [F,L,NC]
+</IfModule>

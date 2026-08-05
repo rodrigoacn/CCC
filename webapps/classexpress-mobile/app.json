@@ -8,6 +8,11 @@
     "scheme": "classexpress",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "updates": {
+      "enabled": false,
+      "checkOnLaunch": "ON_ERROR_RECOVERY",
+      "fallbackToCacheTimeout": 0
+    },
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
@@ -16,6 +21,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.classexpress.app",
+      "associatedDomains": ["applinks:classexpress.app"],
       "infoPlist": {
         "NSCameraUsageDescription": "ClassExpress necesita acceso a la cámara para videollamadas en clases.",
         "NSMicrophoneUsageDescription": "ClassExpress necesita acceso al micrófono para videollamadas en clases."
@@ -27,10 +33,23 @@
         "backgroundColor": "#1A1A1A"
       },
       "package": "com.classexpress.app",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "classexpress.app",
+              "pathPrefix": "/"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ],
       "permissions": [
         "CAMERA",
         "RECORD_AUDIO",
-        "MODIFY_AUDIO_SETTINGS",
         "INTERNET",
         "ACCESS_NETWORK_STATE"
       ]
@@ -40,14 +59,26 @@
       "output": "single",
       "favicon": "./assets/images/favicon.png"
     },
+    "jsEngine": "hermes",
     "plugins": [
       "expo-router",
       "expo-font",
       [
-        "react-native-webrtc",
+        "@config-plugins/react-native-webrtc",
         {
           "cameraPermission": "ClassExpress necesita acceso a la cámara para videollamadas en clases.",
           "microphonePermission": "ClassExpress necesita acceso al micrófono para videollamadas en clases."
+        }
+      ],
+      "expo-secure-store",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableProguardInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true,
+            "kotlinVersion": "2.1.0"
+          }
         }
       ]
     ],

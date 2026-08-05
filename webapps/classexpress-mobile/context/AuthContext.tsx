@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Storage from '@/lib/storage';
 import { apiProfile, User } from '@/lib/api';
 
 interface AuthState {
@@ -20,14 +20,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     (async () => {
-      const t = await AsyncStorage.getItem('ce_token');
+      const t = await Storage.getItem('ce_token');
       if (t) {
         setToken(t);
         try {
           const { user: u } = await apiProfile();
           setUser(u);
         } catch {
-          await AsyncStorage.removeItem('ce_token');
+          await Storage.removeItem('ce_token');
         }
       }
       setLoading(false);
@@ -35,13 +35,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (t: string, u: User) => {
-    await AsyncStorage.setItem('ce_token', t);
+    await Storage.setItem('ce_token', t);
     setToken(t);
     setUser(u);
   };
 
   const logout = async () => {
-    await AsyncStorage.removeItem('ce_token');
+    await Storage.removeItem('ce_token');
     setToken(null);
     setUser(null);
   };

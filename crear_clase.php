@@ -2,12 +2,16 @@
 ob_start();
 require 'menu.php';
 require 'db.php';
+require_once __DIR__ . '/lib/csrf.php';
+
+require_once __DIR__ . '/lib/security_headers.php';
 
 if (!isset($_SESSION['usuarioId'])) { header('Location: login.php'); exit; }
 $uid = (int)$_SESSION['usuarioId'];
 
 $error   = '';
 $success = '';
+$materiaPref = (int)($_GET['materia'] ?? 0) ?: null;
 
 $materias = dbAll("SELECT materiaId, nombre FROM materias ORDER BY orden ASC");
 $teacher  = dbOne(
@@ -17,8 +21,9 @@ $teacher  = dbOne(
     ['id' => $uid]
 );
 
-// ── SAVE ─────────────────────────────────────────────────────────────────────
+// â”€â”€ SAVE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_require();
     $titulo      = trim($_POST['titulo']      ?? '');
     $descripcion = trim($_POST['descripcion'] ?? '');
     $precio_min  = max(0, (float)($_POST['precio_min']  ?? 0));
@@ -30,11 +35,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $precio_base = $precio_min > 0 ? $precio_min : max(1, $precio_max);
 
     if (!$titulo) {
-        $error = 'Class title is required.';
+        $error = t('crear.title_required');
     } elseif ($precio_max > 0 && $precio_max < $precio_min) {
-        $error = 'Maximum price cannot be less than minimum.';
+        $error = t('crear.price_invalid');
     } elseif ($alumnos_max < $alumnos_min) {
-        $error = 'Maximum students cannot be less than minimum.';
+        $error = t('crear.students_invalid');
     } else {
         $claseId = dbExec(
             "INSERT INTO clases_programadas
@@ -55,10 +60,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]
         );
         if ($claseId) {
-            $success = 'Class <strong>' . htmlspecialchars($titulo) . '</strong> is now live! '
-                     . '<a href="buscar.php" class="alert-link">View it in Find a Class →</a>';
+            header('Location: pre_sala.php?clase=' . (int)$claseId . '&from=crear');
+            exit;
         } else {
-            $error = 'Database unavailable. Please try again.';
+            $error = t('crear.db_error');
         }
     }
 }
@@ -68,53 +73,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="row justify-content-center">
       <div class="col-sm-10 col-md-8 col-lg-6">
 
-        <h3 class="text-white mb-1">Create a Class</h3>
-        <p class="text-secondary mb-4">
-          Fill in all details. Students will see your class in
-          <a href="buscar.php" class="text-secondary">Find a Class</a> and join instantly.
-        </p>
+        <h3 class="text-white mb-1"><?= t('crear.title') ?></h3>
+        <p class="text-secondary mb-4"><?= t('crear.subtitle') ?></p>
 
         <?php if ($error): ?>
-          <div class="alert alert-danger"><?= $error ?></div>
+          <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
         <?php if ($success): ?>
-          <div class="alert alert-success"><?= $success ?></div>
+          <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
         <?php endif; ?>
 
         <?php if ($teacher): ?>
           <div class="alert alert-dark border border-secondary mb-4 small">
-            💰 Prices will be posted in
-            <strong class="text-white"><?= htmlspecialchars($teacher['simbolo'] . ' ' . $teacher['codigo_moneda']) ?></strong>
-            · Your country: <strong class="text-white"><?= htmlspecialchars($teacher['pais'] ?? '—') ?></strong>
-            <br><span class="text-secondary">Students pay in their own local currency, auto-converted.</span>
+            💰 <?= t('crear.price_info', ['sym' => htmlspecialchars($teacher['simbolo'] . ' ' . $teacher['codigo_moneda']), 'pais' => htmlspecialchars($teacher['pais'] ?? '”')]) ?>
           </div>
         <?php endif; ?>
 
         <form method="POST" action="crear_clase.php" class="card bg-dark border-secondary p-4">
+          <?= csrf_field() ?>
 
           <!-- Title -->
           <div class="mb-3">
-            <label class="form-label text-secondary">Class title <span class="text-danger">*</span></label>
+            <label class="form-label text-secondary"><?= t('crear.class_title') ?> <span class="text-danger">*</span></label>
             <input type="text" name="titulo" class="form-control bg-dark text-white border-secondary"
-                   placeholder="e.g. Introduction to Algebra — Grade 9"
+                   placeholder="<?= t('crear.title_placeholder') ?>"
                    value="<?= htmlspecialchars($_POST['titulo'] ?? '') ?>" required>
           </div>
 
           <!-- Description -->
           <div class="mb-3">
-            <label class="form-label text-secondary">Short description <span class="text-secondary">(optional)</span></label>
+            <label class="form-label text-secondary"><?= t('crear.description') ?> <span class="text-secondary">(<?= t('crear.optional') ?>)</span></label>
             <textarea name="descripcion" class="form-control bg-dark text-white border-secondary"
-                      rows="2" placeholder="What will students learn in this session?"><?= htmlspecialchars($_POST['descripcion'] ?? '') ?></textarea>
+                      rows="2" placeholder="<?= t('crear.description_placeholder') ?>"><?= htmlspecialchars($_POST['descripcion'] ?? '') ?></textarea>
           </div>
 
           <!-- Subject -->
           <div class="mb-3">
-            <label class="form-label text-secondary">Subject</label>
+            <label class="form-label text-secondary"><?= t('crear.subject') ?></label>
             <select name="materiaId" class="form-select bg-dark text-white border-secondary">
-              <option value="">— Any subject —</option>
+              <option value=""><?= t('oferta.any_subject') ?></option>
               <?php foreach ($materias as $m): ?>
                 <option value="<?= $m['materiaid'] ?>"
-                        <?= (int)($_POST['materiaId'] ?? 0) === (int)$m['materiaid'] ? 'selected' : '' ?>>
+                        <?= ((int)($_POST['materiaId'] ?? ($materiaPref ?? 0)) === (int)$m['materiaid']) ? 'selected' : '' ?>>
                   <?= htmlspecialchars($m['nombre']) ?>
                 </option>
               <?php endforeach; ?>
@@ -125,7 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <div class="row g-3 mb-3">
             <div class="col-6">
               <label class="form-label text-secondary">
-                Min price <span class="text-white">(<?= htmlspecialchars($teacher['codigo_moneda'] ?? 'USD') ?>)</span>
+                <?= t('crear.min_price') ?> <span class="text-white">(<?= htmlspecialchars($teacher['codigo_moneda'] ?? 'USD') ?>)</span>
               </label>
               <div class="input-group">
                 <span class="input-group-text bg-dark border-secondary text-secondary">
@@ -139,7 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <div class="col-6">
               <label class="form-label text-secondary">
-                Max price <span class="text-white">(<?= htmlspecialchars($teacher['codigo_moneda'] ?? 'USD') ?>)</span>
+                <?= t('crear.max_price') ?> <span class="text-white">(<?= htmlspecialchars($teacher['codigo_moneda'] ?? 'USD') ?>)</span>
               </label>
               <div class="input-group">
                 <span class="input-group-text bg-dark border-secondary text-secondary">
@@ -156,14 +156,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <!-- Student count -->
           <div class="row g-3 mb-4">
             <div class="col-6">
-              <label class="form-label text-secondary">Min students</label>
+              <label class="form-label text-secondary"><?= t('crear.min_students') ?></label>
               <input type="number" name="alumnos_min"
                      class="form-control bg-dark text-white border-secondary"
                      placeholder="1" min="1" step="1"
                      value="<?= htmlspecialchars($_POST['alumnos_min'] ?? '1') ?>">
             </div>
             <div class="col-6">
-              <label class="form-label text-secondary">Max students</label>
+              <label class="form-label text-secondary"><?= t('crear.max_students') ?></label>
               <input type="number" name="alumnos_max"
                      class="form-control bg-dark text-white border-secondary"
                      placeholder="10" min="1" step="1"
@@ -172,10 +172,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           </div>
 
           <button type="submit" class="btn btn-secondary w-100 fw-semibold py-2">
-            🚀 Publish Class
+            🚀 <?= t('crear.publish') ?>
           </button>
           <p class="text-secondary text-center small mt-2 mb-0">
-            Students in any LATAM country will see the price converted to their local currency.
+            <?= t('crear.conversion_note') ?>
           </p>
         </form>
 
@@ -185,14 +185,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   <footer class="mastfoot mt-auto mt-5">
     <div class="inner float-end">
-      <p>ClassExpress done <a href="https://getbootstrap.com/">Bootstrap</a>, by <a href="https://www.facebook.com/rodrigo.alejandro.1848816?locale=es_LA">@RodrigoConejeros</a>.</p>
+      <p><?= t('general.footer_text', ['bootstrap' => '<a href="https://getbootstrap.com/">Bootstrap</a>', 'author' => '<a href="https://www.facebook.com/rodrigo.alejandro.1848816?locale=es_LA">@RodrigoConejeros</a>']) ?></p>
     </div>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-  <script type="text/javascript" src="./presentacion/odp_ajax.js"></script>
-  <script type="text/javascript" src="./presentacion/js/scripts.js"></script>
+
   <script type="text/javascript" src="./script.js"></script>
 </body>
 </html>
