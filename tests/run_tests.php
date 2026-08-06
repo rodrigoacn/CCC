@@ -105,7 +105,25 @@ check('menu.php con sesion responde 200 sin redirect', $r['code'] === 200 && ($r
 $r = http("$BASE/materias.php", ['jar' => $jar]);
 check('materias.php con sesion responde 200 sin redirect', $r['code'] === 200 && ($r['location'] ?? '') === '', "code={$r['code']} loc=" . (string)$r['location']);
 
+echo "\n== SALAS (web, sesion activa) ==" . "\n";
+$r = http("$BASE/api_sala.php?action=weird_action", ['jar' => $jar]);
+check('api_sala con sesion y accion desconocida -> ok=false', ($r['json']['ok'] ?? true) === false && strpos($r['body'], 'Unknown action') !== false, "code={$r['code']} body=" . substr($r['body'], 0, 120));
+
+$r = http("$BASE/api_sala.php", ['jar' => $jar, 'form' => ['action' => 'join']]);
+check('api_sala accion de escritura sin CSRF -> 403', $r['code'] === 403 && strpos($r['body'], 'CSRF token invalid') !== false, "code={$r['code']} body=" . substr($r['body'], 0, 120));
+
+echo "\n== PAGOS (web) ==" . "\n";
+$r = http("$BASE/pago.php", ['jar' => $jar]);
+check('pago.php con sesion y sin sesion_id -> redirect a buscar.php', $r['code'] === 302 && strpos((string)$r['location'], 'buscar.php') !== false, "code={$r['code']} loc=" . (string)$r['location']);
+
+$r = http("$BASE/creditos.php", ['jar' => $jar]);
+check('creditos.php con sesion responde 200', $r['code'] === 200, "code={$r['code']} loc=" . (string)$r['location']);
+
 $r = http("$BASE/logout.php", ['jar' => $jar]);
+check('logout redirige', $r['code'] === 302, "code={$r['code']}");
+
+$r = http("$BASE/creditos.php", ['jar' => $jar]);
+check('creditos.php sin sesion -> redirect a login', $r['code'] === 302 && strpos((string)$r['location'], 'login.php') !== false, "code={$r['code']} loc=" . (string)$r['location']);
 check('logout redirige', $r['code'] === 302, "code={$r['code']}");
 
 $r = http("$BASE/");
@@ -182,6 +200,38 @@ check('api switch_role con password incorrecta -> 401', $r['code'] === 401, "cod
 
 $r = http("$BASE/api_mobile.php?action=switch_role", ['json' => ['target_role' => 'student', 'password' => $PASS], 'token' => $ot]);
 check('api switch_role valido -> ok o locked', in_array($r['code'], [200, 403], true), "code={$r['code']} body=" . substr($r['body'], 0, 160));
+
+echo "\n== WALLET" . " — creditos ==" . "\n";
+$r = http("$BASE/api_mobile.php?action=credits", ['token' => $token]);
+check('api credits con token -> 200 con balance e history', $r['code'] === 200 && isset($r['json']['balance']) && isset($r['json']['history']), "code={$r['code']} body=" . substr($r['body'], 0, 160));
+
+$r = http("$BASE/api_mobile.php?action=withdrawal_history", ['token' => $token]);
+check('api withdrawal_history con token -> 200 ok', $r['code'] === 200 && ($r['json']['ok'] ?? false) === true && isset($r['json']['withdrawals']), "code={$r['code']} body=" . substr($r['body'], 0, 120));
+
+$r = http("$BASE/api_mobile.php?action=withdraw_tokens", ['token' => $token, 'json' => ['cantidad' => 10]]);
+check('api withdraw_tokens como estudiante -> 403', $r['code'] === 403, "code={$r['code']} body=" . substr($r['body'], 0, 120));
+
+$r = http("$BASE/api_mobile.php?action=withdraw_tokens", ['token' => $ot, 'json' => ['cantidad' => 0]]);
+check('api withdraw_tokens owner con monto invalido -> 400', $r['code'] === 400, "code={$r['code']} body=" . substr($r['body'], 0, 120));
+
+$r = http("$BASE/api_mobile.php?action=buy_tokens", ['token' => $token, 'json' => ['amount' => 5]]);
+check('api buy_tokens paquete invalido -> 400', $r['code'] === 400, "code={$r['code']} body=" . substr($r['body'], 0, 120));
+
+$r = http("$BASE/api_mobile.php?action=topup", ['token' => $token, 'json' => ['amount' => 0]]);
+check('api topup monto invalido -> 400', $r['code'] === 400, "code={$r['code']} body=" . substr($r['body'], 0, 120));
+
+$r = http("$BASE/api_mobile.php?action=create_checkout", ['token' => $token, 'json' => ['type' => 'tarjeta']]);
+check('api create_checkout tipo invalido -> 400', $r['code'] === 400, "code={$r['code']} body=" . substr($r['body'], 0, 120));
+
+$r = http("$BASE/api_mobile.php?action=checkout_status", ['token' => $token]);
+check('api checkout_status sin external_reference -> 400', $r['code'] === 400, "code={$r['code']} body=" . substr($r['body'], 0, 120));
+
+echo "\n== PAGOS" . " — webhook MercadoPago ==" . "\n";
+$r = http("$BASE/mp_webhook.php");
+check('mp_webhook GET -> 405', $r['code'] === 405, "code={$r['code']} body=" . substr($r['body'], 0, 80));
+
+$r = http("$BASE/mp_webhook.php", ['json' => ['type' => 'otro_evento']]);
+check('mp_webhook POST no-payment -> 200 ignored', $r['code'] === 200 && ($r['json']['ignored'] ?? false) === true, "code={$r['code']} body=" . substr($r['body'], 0, 120));
 
 echo "\n== CRIPTOGRAFIA (BD local)" . " ==\n";
 if (!$isLocal) {
