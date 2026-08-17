@@ -1,0 +1,150 @@
+{{ define "content" }}<div class="ml-wrap">
+  <div class="ml-wrap-inner">
+    {{ if .NotFound }}
+    <div class="ml-wrap"><div class="ml-wrap-inner"><div style="text-align:center;padding:60px 20px;color:var(--sub)">Usuario no encontrado</div></div></div>
+    {{ else }}
+    <div style="padding:0 20px 16px;border-bottom:1px solid var(--bd)">
+      <a href="personas.php" style="color:var(--fg);text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:16px;font-size:13px">
+        <i data-feather="arrow-left" style="width:18px;height:18px"></i> Personas
+      </a>
+      <div style="display:flex;align-items:center;gap:16px">
+        <div style="width:72px;height:72px;border-radius:36px;background:var(--pb);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden">
+          {{ if .Avatar }}
+            <img src="{{ .Avatar }}" alt="" style="width:100%;height:100%;object-fit:cover">
+          {{ else }}
+            <span style="font-weight:700;font-size:28px;color:var(--p)">{{ .Initial }}</span>
+          {{ end }}
+        </div>
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:20px;color:var(--fg)">{{ .Nombre }}</div>
+          <div style="font-size:13px;color:var(--sub)">@{{ .Username }}</div>
+          <div style="font-size:13px;color:var(--p);margin-top:2px">{{ if .EsProfesor }}Profesor{{ else }}Estudiante{{ end }}</div>
+        </div>
+        {{ if not .EsMiPerfil }}
+        <div style="display:flex;flex-direction:column;gap:6px">
+          {{ if .YoLoSigo }}
+          <button id="btn-follow" class="btn btn-sm btn-outline-secondary" onclick="toggleFollow({{ .TargetId }})" style="font-size:12px;padding:6px 16px;border-radius:20px">Dejar de seguir</button>
+          {{ else }}
+          <button id="btn-follow" class="btn btn-sm btn-primary" onclick="toggleFollow({{ .TargetId }})" style="font-size:12px;padding:6px 16px;border-radius:20px">Seguir</button>
+          {{ end }}
+          <a href="personas.php?chat={{ .TargetId }}" class="btn btn-sm btn-outline-primary" style="font-size:12px;padding:6px 16px;border-radius:20px;text-decoration:none">Enviar mensaje</a>
+        </div>
+        {{ end }}
+      </div>
+    </div>
+
+    {{ if .Biografia }}
+    <div style="padding:16px 20px;border-bottom:1px solid var(--bd)">
+      <div style="font-size:13px;color:var(--sub);white-space:pre-wrap">{{ .Biografia }}</div>
+    </div>
+    {{ end }}
+
+    <div style="padding:16px 20px;border-bottom:1px solid var(--bd)">
+      <div style="font-size:13px;color:var(--fg);display:flex;flex-wrap:wrap;gap:16px">
+        {{ if .Pais }}
+        <div><span style="color:var(--sub)">País:</span> {{ .Pais }}</div>
+        {{ end }}
+        {{ if .IdiomasJoined }}
+        <div><span style="color:var(--sub)">Idiomas:</span> {{ .IdiomasJoined }}</div>
+        {{ end }}
+        {{ if .SitioWeb }}
+        <div><span style="color:var(--sub)">Web:</span> {{ if .SitioWebLink }}<a href="{{ .SitioWeb }}" target="_blank" style="color:var(--p)">{{ .SitioWeb }}</a>{{ else }}<span style="color:var(--p)">{{ .SitioWeb }}</span>{{ end }}</div>
+        {{ end }}
+        <div><span style="color:var(--sub)">Miembro desde:</span> {{ .MiembroDesde }}</div>
+      </div>
+    </div>
+
+    {{ if .EsProfesor }}
+    <div style="padding:16px 20px;border-bottom:1px solid var(--bd)">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="font-size:36px;font-weight:700;color:var(--p)">{{ .Calificacion }}</div>
+        <div>
+          <div style="font-size:14px;color:var(--p)">★ ★ ★ ★ ★</div>
+          <div style="font-size:12px;color:var(--sub)">{{ .NumResenas }} reseñas</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding:0">
+      <div style="padding:12px 20px;font-weight:600;font-size:14px;color:var(--fg);border-bottom:1px solid var(--bd)">Reseñas ({{ len .Resenas }})</div>
+      {{ if eq (len .Resenas) 0 }}
+      <div style="text-align:center;padding:40px 20px;color:var(--sub);font-size:13px">Aún no tiene reseñas</div>
+      {{ else }}
+        {{ range .Resenas }}
+        <div style="padding:14px 20px;border-bottom:1px solid var(--bd)">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+            <div style="width:32px;height:32px;border-radius:16px;background:var(--pb);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden">
+              {{ if .EstudianteAvatar }}
+                <img src="{{ .EstudianteAvatar }}" alt="" style="width:100%;height:100%;object-fit:cover">
+              {{ else }}
+                <span style="font-weight:700;font-size:13px;color:var(--p)">{{ .Initial }}</span>
+              {{ end }}
+            </div>
+            <div style="flex:1">
+              <div style="font-weight:600;font-size:13px;color:var(--fg)">{{ .EstudianteNombre }}</div>
+              <div style="font-size:11px;color:var(--p)">{{ .Stars }}</div>
+            </div>
+            <div style="font-size:10px;color:var(--sub)">{{ .Fecha }}</div>
+          </div>
+          {{ if .Comentario }}
+          <div style="font-size:13px;color:var(--sub);margin-left:42px;white-space:pre-wrap">{{ .Comentario }}</div>
+          {{ end }}
+        </div>
+        {{ end }}
+      {{ end }}
+    </div>
+    {{ end }}
+
+    {{ if .EsProfesor }}
+    {{ if gt (len .Clases) 0 }}
+    <div style="padding:0">
+      <div style="padding:12px 20px;font-weight:600;font-size:14px;color:var(--fg);border-bottom:1px solid var(--bd)">{{ t "friends.classes_available" }} ({{ len .Clases }})</div>
+      {{ range .Clases }}
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 20px;border-bottom:1px solid var(--bd)">
+        <div style="width:36px;height:36px;border-radius:18px;background:{{ if .Color }}{{ .Color }}{{ else }}var(--pb){{ end }};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <i data-feather="{{ if .Icono }}{{ .Icono }}{{ else }}book-open{{ end }}" style="width:16px;height:16px;color:#fff"></i>
+        </div>
+        <div style="flex:1">
+          <div style="font-weight:600;font-size:13px;color:var(--fg)">{{ .Titulo }}</div>
+          <div style="font-size:12px;color:var(--sub)">{{ .Materia }} · ${{ .Precio }} · {{ .Duracion }}min</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          {{ if gt .AlumnosActivos 0 }}
+          <span style="font-size:11px;color:var(--s)">🔴 {{ .AlumnosActivos }} en clase</span>
+          {{ end }}
+          {{ if not $.EsMiPerfil }}
+          <a href="pre_sala.php?clase={{ .ID }}" class="btn btn-sm btn-primary" style="font-size:12px;padding:6px 16px;border-radius:20px;text-decoration:none">Reservar</a>
+          {{ end }}
+        </div>
+      </div>
+      {{ end }}
+    </div>
+    {{ end }}
+    {{ end }}
+    {{ end }}
+  </div>
+</div>
+
+<script>
+const CSRF_TOKEN = '{{ .CSRF }}';
+function toggleFollow(targetId){
+  const btn = document.getElementById('btn-follow');
+  const following = btn.textContent.trim() !== 'Seguir';
+  fetch('personas.php', {
+    method:'POST',
+    headers:{'Content-Type':'application/x-www-form-urlencoded', 'X-CSRF-Token': CSRF_TOKEN},
+    body:'action='+(following?'unfollow':'follow')+'&usuario_id='+targetId
+  }).then(r=>r.json()).then(d=>{
+    if(d.ok){
+      if(following){
+        btn.textContent = 'Seguir';
+        btn.className = 'btn btn-sm btn-primary';
+      } else {
+        btn.textContent = 'Dejar de seguir';
+        btn.className = 'btn btn-sm btn-outline-secondary';
+      }
+    }
+  });
+}
+</script>
+{{ end }}

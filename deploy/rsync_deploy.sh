@@ -27,6 +27,7 @@ EXCLUDES=(
     "app.js"
     "*.pyc"
     "__pycache__/"
+    "*.exe"
 )
 
 echo "=== ClassExpress Deploy ==="
@@ -53,6 +54,8 @@ for node in "${WEB_NODES[@]}"; do
         chown -R www-data:www-data /var/www/classexpress
         find /var/www/classexpress -type d -exec chmod 755 {} \;
         find /var/www/classexpress -type f -exec chmod 644 {} \;
+        # Keep the Go binaries executable (chmod 644 above strips the +x bit)
+        chmod 755 /var/www/classexpress/go/bin/server /var/www/classexpress/go/bin/cron
         # Restart PHP-FPM to clear opcache
         systemctl reload php8.0-fpm 2>/dev/null || true
 REMOTE

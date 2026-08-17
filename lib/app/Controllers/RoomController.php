@@ -300,7 +300,10 @@ final class RoomController
         if (!$clase) jsonOut(['error' => 'Clase no encontrada'], 404);
 
         dbExec("UPDATE salas SET activa = false WHERE claseId = ? AND activa = true", [$clase_id]);
-        dbExec("INSERT INTO salas (claseId, activa) VALUES (?, true)", [$clase_id]);
+        dbExec(
+            "INSERT INTO salas (claseId, titulo, curso, instructorId) VALUES (?, ?, '', ?)",
+            [$clase_id, $clase['titulo'], $clase['instructorId']]
+        );
 
         $sala = dbOne("SELECT salaId AS id, claseId, activa, created_at FROM salas WHERE claseId = ? ORDER BY salaId DESC LIMIT 1", [$clase_id]);
         dbExec(

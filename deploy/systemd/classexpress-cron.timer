@@ -1,0 +1,13 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  classexpress-cron.timer — runs the cleanup service hourly
+# ─────────────────────────────────────────────────────────────────────────────
+[Unit]
+Description=ClassExpress hourly cleanup timer
+
+[Timer]
+OnCalendar=hourly
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target

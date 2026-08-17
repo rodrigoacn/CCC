@@ -1,0 +1,89 @@
+{{ define "content" }}<style>
+.admin-retiro { max-width: 900px; margin: 0 auto; padding: 24px; padding-top: 80px; }
+.admin-retiro h1 { font-size: 24px; font-weight: 900; margin-bottom: 20px; }
+.stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.stat-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; }
+.stat-box .num { font-size: 24px; font-weight: 900; }
+.stat-box .lbl { font-size: 12px; color: var(--tbi); margin-top: 4px; }
+.filter-bar { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.filter-bar a { padding: 6px 16px; border-radius: 20px; background: var(--sf); color: var(--sub); text-decoration: none; font-size: 13px; font-weight: 600; border: 1px solid var(--bd); }
+.filter-bar a.active { background: var(--p); color: #fff; border-color: var(--p); }
+.w-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.w-table th { text-align: left; padding: 10px 8px; border-bottom: 2px solid var(--bd); color: var(--tbi); font-weight: 600; }
+.w-table td { padding: 10px 8px; border-bottom: 1px solid var(--bd); }
+.btn-approve { background: #238636; color: #fff; border: none; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; }
+.btn-reject { background: #da3633; color: #fff; border: none; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; }
+.badge-pending { background: rgba(240,136,62,0.15); color: #f0883e; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+.badge-approved { background: rgba(63,185,80,0.15); color: #3fb950; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+.badge-rejected { background: rgba(248,81,73,0.15); color: #f85149; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+.alert { padding: 12px 16px; border-radius: 10px; margin-bottom: 16px; font-size: 14px; background: rgba(63,185,80,0.12); color: #3fb950; border: 1px solid rgba(63,185,80,0.25); }
+</style>
+
+<div class="admin-retiro">
+    <h1>Withdrawal Management</h1>
+    {{ if .Msg }}<div class="alert">{{ .Msg }}</div>{{ end }}
+
+    <div class="stats-row">
+        <div class="stat-box"><div class="num">{{ .StatsTotal }}</div><div class="lbl">Total</div></div>
+        <div class="stat-box"><div class="num" style="color:#f0883e;">{{ .StatsPending }}</div><div class="lbl">Pending</div></div>
+        <div class="stat-box"><div class="num" style="color:#3fb950;">{{ .StatsApproved }}</div><div class="lbl">Approved</div></div>
+        <div class="stat-box"><div class="num" style="color:#f85149;">{{ .StatsRejected }}</div><div class="lbl">Rejected</div></div>
+        <div class="stat-box"><div class="num" style="color:#58a6ff;">{{ .StatsPendingUSD }}</div><div class="lbl">Pending (tokens)</div></div>
+    </div>
+
+    <div class="filter-bar">
+        <a href="?filter=" class="{{ if not .Filter }}active{{ end }}">All</a>
+        <a href="?filter=pendiente" class="{{ if eq .Filter "pendiente" }}active{{ end }}">Pending</a>
+        <a href="?filter=completado" class="{{ if eq .Filter "completado" }}active{{ end }}">Approved</a>
+        <a href="?filter=rechazado" class="{{ if eq .Filter "rechazado" }}active{{ end }}">Rejected</a>
+    </div>
+
+    {{ if .Empty }}
+        <p style="color:var(--tbi); text-align:center; padding:40px;">No withdrawal requests.</p>
+    {{ else }}
+    <div style="overflow-x:auto;">
+        <table class="w-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Teacher</th>
+                    <th>Tokens</th>
+                    <th>Net (CLP)</th>
+                    <th>Bank</th>
+                    <th>Account</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+            {{ range .Withdrawals }}
+                <tr>
+                    <td>{{ .ID }}</td>
+                    <td>{{ .Nombre }}<br><span style="font-size:11px;color:var(--tbi);">{{ .Email }}</span></td>
+                    <td>{{ .Cantidad }}</td>
+                    <td>${{ .MontoCLP }}</td>
+                    <td>{{ .Banco }}</td>
+                    <td>{{ .Cuenta }}</td>
+                    <td>{{ .Fecha }}</td>
+                    <td><span class="badge-{{ if or (eq .Estado "pendiente") (eq .Estado "procesando") }}pending{{ else if or (eq .Estado "completado") (eq .Estado "aprobado") }}approved{{ else }}rejected{{ end }}">{{ .Badge }}</span></td>
+                    <td>
+                        {{ if .Pendiente }}
+                        <form method="POST" style="display:inline; gap:4px; align-items:center;" onsubmit="return confirm('Are you sure?')">
+                            {{ csrf }}
+                            <input type="hidden" name="retiro_id" value="{{ .ID }}">
+                            <input type="text" name="note" placeholder="Note..." style="width:80px;padding:4px 6px;border:1px solid var(--bd);border-radius:6px;background:var(--sf);color:var(--fg);font-size:11px;">
+                            <button type="submit" name="action" value="approve" class="btn-approve">Approve</button>
+                            <button type="submit" name="action" value="reject" class="btn-reject">Reject</button>
+                        </form>
+                        {{ else }}
+                            <span style="font-size:11px;color:var(--tbi);">{{ .Note }}</span>
+                        {{ end }}
+                    </td>
+                </tr>
+            {{ end }}
+            </tbody>
+        </table>
+    </div>
+    {{ end }}
+</div>{{ end }}

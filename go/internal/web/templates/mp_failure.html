@@ -1,0 +1,19 @@
+{{ define "content" }}<div class="ml-wrap">
+  <div class="ml-wrap-inner" style="text-align:center;padding:60px 20px">
+    <div style="width:80px;height:80px;border-radius:50%;background:var(--d)22;display:flex;align-items:center;justify-content:center;margin:0 auto 20px">
+      <i data-feather="x-circle" style="width:40px;height:40px;color:var(--d)"></i>
+    </div>
+    <h2 style="color:var(--fg);margin-bottom:8px">{{ t "mp.failure_title" }}</h2>
+    <p style="color:var(--sub);font-size:14px;margin-bottom:24px">
+      {{ t "mp.failure_not_processed" (dict "type" .TypeLabel) }}
+    </p>
+
+    <a href="creditos.php" class="ml-btn ml-btn-l" style="text-decoration:none">
+      <i data-feather="arrow-left" style="width:18px;height:18px"></i> {{ t "mp.back_wallet" }}
+    </a>
+  </div>
+  <div class="text-center mt-4" style="font-size:12px;color:var(--sub);">
+    <small>ClassExpress · Hecho con <a href="https://go.dev" target="_blank" style="color:var(--p)">Go</a></small>
+  </div>
+</div>
+<script>if (typeof feather !== 'undefined') feather.replace();</script>{{ end }}

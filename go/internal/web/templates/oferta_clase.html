@@ -1,0 +1,90 @@
+{{ define "content" }}<div class="container mt-10">
+    <div class="row justify-content-center">
+      <div class="col-sm-10 col-md-7 col-lg-6">
+
+        <h3 class="text-white mb-1">{{ t "oferta.title" }}</h3>
+        <p class="text-secondary mb-4">{{ t "oferta.subtitle" }}</p>
+
+        {{ if .Error }}
+          <div class="alert alert-danger">{{ .Error }}</div>
+        {{ end }}
+        {{ if .Success }}
+          <div class="alert alert-success">{{ .Success }}</div>
+        {{ end }}
+
+        {{ if .HasTeacher }}
+          <div class="alert alert-dark border border-secondary mb-4 small">
+            💰 {{ t "oferta.your_currency" }}
+            <strong class="text-white">{{ .Simbolo }} {{ .Moneda }}</strong>
+            · {{ t "oferta.country" }} <strong class="text-white">{{ .Pais }}</strong>
+          </div>
+        {{ end }}
+
+        <form method="POST" action="oferta_clase.php" class="card bg-dark border-secondary p-4">
+{{ csrf }}
+
+          <div class="mb-3">
+            <label class="form-label text-secondary">{{ t "oferta.subject" }} <span class="text-secondary">{{ t "oferta.optional" }}</span></label>
+            <select name="materiaId" class="form-select bg-dark text-white border-secondary">
+              <option value="">{{ t "oferta.any_subject" }}</option>
+              {{ range .Materias }}
+                <option value="{{ .ID }}"{{ if .Selected }} selected{{ end }}>{{ .Nombre }}</option>
+              {{ end }}
+            </select>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-6">
+              <label class="form-label text-secondary">{{ t "oferta.min_price" }} ({{ .Moneda }})</label>
+              <input type="number" name="precio_min" class="form-control bg-dark text-white border-secondary"
+                     placeholder="0" min="0" step="0.01"
+                     value="{{ .PrecioMin }}">
+            </div>
+            <div class="col-6">
+              <label class="form-label text-secondary">{{ t "oferta.max_price" }} ({{ .Moneda }})</label>
+              <input type="number" name="precio_max" class="form-control bg-dark text-white border-secondary"
+                     placeholder="0" min="0" step="0.01"
+                     value="{{ .PrecioMax }}">
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-6">
+              <label class="form-label text-secondary">{{ t "oferta.min_students" }}</label>
+              <input type="number" name="alumnos_min" class="form-control bg-dark text-white border-secondary"
+                     placeholder="1" min="1" step="1"
+                     value="{{ .AlumnosMin }}">
+            </div>
+            <div class="col-6">
+              <label class="form-label text-secondary">{{ t "oferta.max_students" }}</label>
+              <input type="number" name="alumnos_max" class="form-control bg-dark text-white border-secondary"
+                     placeholder="10" min="1" step="1"
+                     value="{{ .AlumnosMax }}">
+            </div>
+          </div>
+
+          <div class="mb-4 form-check">
+            <input class="form-check-input" type="checkbox" name="solo_yo" id="solo_yo"{{ if .SoloYo }} checked{{ end }}>
+            <label class="form-check-label text-secondary" for="solo_yo">
+              {{ t "oferta.one_on_one" }}
+            </label>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-secondary flex-grow-1">{{ t "oferta.save" }}</button>
+            <a href="crear_clase.php" class="btn btn-dark border-secondary">{{ t "oferta.add_title" }}</a>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  <footer class="mastfoot mt-auto mt-5">
+    <div class="inner float-end">
+      <p>{{ t "general.footer_text" }}</p>
+    </div>
+  </footer>
+
+  <script type="text/javascript" src="./script.js"></script>
+{{ end }}

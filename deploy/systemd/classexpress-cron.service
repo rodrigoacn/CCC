@@ -1,0 +1,14 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  classexpress-cron.service — one-shot run of the hourly cleanup cron
+#  (ports cron_cleanup.php). Triggered by classexpress-cron.timer.
+# ─────────────────────────────────────────────────────────────────────────────
+[Unit]
+Description=ClassExpress hourly cleanup (go/bin/cron)
+
+[Service]
+Type=oneshot
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/classexpress/go
+ExecStart=/var/www/classexpress/go/bin/cron
+TimeoutStartSec=120

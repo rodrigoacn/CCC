@@ -1,0 +1,36 @@
+{{ define "content" }}<div class="container mt-10">
+    <div class="d-flex justify-content-center">
+     <div class="card text-center mb-5">
+      <div class="card" style="width: 36rem;">
+        <div class="card-body">
+          <h2 class="card-title">{{ t "calificar.title" }}</h2>
+          <h3 class="card-subtitle mb-2 text-secondary">{{ t "calificar.subtitle" }}</h3>
+          <form method="POST" action="calificar.php?sesion={{ .Sesion }}">
+{{ csrf }}
+            <div class="rating mb-3">
+              <input type="radio" name="rating" value="5" id="r5"><label for="r5">★</label>
+              <input type="radio" name="rating" value="4" id="r4"><label for="r4">★</label>
+              <input type="radio" name="rating" value="3" id="r3"><label for="r3">★</label>
+              <input type="radio" name="rating" value="2" id="r2"><label for="r2">★</label>
+              <input type="radio" name="rating" value="1" id="r1"><label for="r1">★</label>
+            </div>
+            <div class="mb-3">
+              <textarea name="comentario" class="form-control bg-black border-secondary text-white" rows="3" placeholder="{{ t "calificar.comment_placeholder" }}" maxlength="500"></textarea>
+            </div>
+            <div class="d-flex justify-content-between">
+              <button type="submit" class="btn btn-dark btn-lg">{{ t "calificar.send" }}</button>
+              <a href="materias.php" class="btn btn-secondary btn-lg">{{ t "calificar.skip" }}</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <footer class="mastfoot mt-auto">
+    <div class="inner float-end">
+      <p>{{ t "general.footer_text" }}</p>
+    </div>
+  </footer>
+{{ end }}

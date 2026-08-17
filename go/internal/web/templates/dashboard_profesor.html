@@ -1,0 +1,227 @@
+{{ define "content" }}<div class="container-fluid mt-10 pb-5 px-4">
+
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div>
+      <h1 class="text-white mb-1 fs-3 fw-bold">{{ t "dashboard.title" }}</h1>
+      <p class="text-secondary mb-0">
+        {{ htmlsafe .WelcomeTxt }}
+        · <span class="badge bg-secondary text-capitalize">{{ .Rol }}</span>
+        {{ if .HasRating }}
+          · ⭐ {{ .Calificacion }} ({{ .NumResenas }} {{ t "general.reviews" }})
+        {{ end }}
+        {{ if .Pais }}
+          · 📍 {{ .Pais }}
+        {{ end }}
+      </p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="crear_clase.php" class="btn btn-primary fw-semibold">{{ t "dashboard.post_class" }}</a>
+      <a href="oferta_clase.php" class="btn btn-outline-secondary">{{ t "dashboard.quick_offer_btn" }}</a>
+      <a href="buscar.php" class="btn btn-outline-secondary">{{ t "dashboard.find_students" }}</a>
+      <a href="perfil.php" class="btn btn-outline-secondary">{{ t "dashboard.my_profile" }}</a>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="card bg-dark border-secondary h-100">
+        <div class="card-body">
+          <div class="text-secondary small text-uppercase mb-1" style="font-size:.7rem;letter-spacing:.07em;">{{ t "dashboard.active_classes" }}</div>
+          <div class="fs-2 fw-bold text-white">{{ .Stats.ClasesActivas }}</div>
+          <div class="text-secondary small">{{ .TotalPostedTxt }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card bg-dark border-secondary h-100">
+        <div class="card-body">
+          <div class="text-secondary small text-uppercase mb-1" style="font-size:.7rem;letter-spacing:.07em;">{{ t "dashboard.live_students" }}</div>
+          <div class="fs-2 fw-bold {{ if gt .Live 0 }}text-success{{ else }}text-white{{ end }}">{{ .Live }}</div>
+          <div class="text-secondary small">{{ .SessionsTotalTxt }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card bg-dark border-secondary h-100">
+        <div class="card-body">
+          <div class="text-secondary small text-uppercase mb-1" style="font-size:.7rem;letter-spacing:.07em;">{{ t "dashboard.paid_sessions" }}</div>
+          <div class="fs-2 fw-bold text-white">{{ .Stats.SesionesPagadas }}</div>
+          <div class="text-secondary small">{{ .PaidOutOfTxt }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card bg-dark border-secondary h-100">
+        <div class="card-body">
+          <div class="text-secondary small text-uppercase mb-1" style="font-size:.7rem;letter-spacing:.07em;">{{ t "dashboard.total_earnings" }}</div>
+          <div class="fs-2 fw-bold text-success">{{ .GananciasStr }}</div>
+          <div class="text-secondary small">{{ t "dashboard.usd_across" }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {{ if .HasEarnings }}
+  <div class="row g-3 mb-4">
+    <div class="col-12">
+      <div class="card bg-dark border-secondary">
+        <div class="card-header border-secondary d-flex align-items-center gap-2">
+          <span class="text-white fw-semibold">{{ t "dashboard.earnings_by_currency" }}</span>
+          <span class="text-secondary small ms-auto">{{ t "dashboard.currency_hint" }}</span>
+        </div>
+        <div class="card-body py-2">
+          <div class="d-flex flex-wrap gap-3">
+            {{ range .Earnings }}
+            <div class="border border-secondary rounded px-3 py-2 text-center" style="min-width:130px;">
+              <div class="text-secondary small">{{ .MonedaLocal }}</div>
+              <div class="fs-5 fw-bold text-white">{{ .Total }}</div>
+              <div class="text-secondary" style="font-size:.72rem;">{{ .NumPagos }} {{ .PagosTxt }}</div>
+            </div>
+            {{ end }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {{ end }}
+
+  <div class="card bg-dark border-secondary mb-4">
+    <div class="card-header border-secondary d-flex align-items-center justify-content-between">
+      <span class="text-white fw-semibold">{{ t "dashboard.my_classes" }}</span>
+      <a href="crear_clase.php" class="btn btn-sm btn-primary">{{ t "dashboard.new_class" }}</a>
+    </div>
+    {{ if not .HasClases }}
+    <div class="card-body text-center py-5">
+      <p class="text-secondary mb-3">{{ t "dashboard.no_classes" }}</p>
+      <a href="crear_clase.php" class="btn btn-primary">{{ t "dashboard.first_class" }}</a>
+    </div>
+    {{ else }}
+    <div class="table-responsive">
+      <table class="table table-light table-bordered table-hover mb-0">
+        <thead>
+          <tr>
+            <th class="text-secondary ps-3" style="width:2rem;">{{ t "dashboard.status" }}</th>
+            <th class="text-secondary">{{ t "dashboard.title_header" }}</th>
+            <th class="text-secondary d-none d-md-table-cell">{{ t "dashboard.subject" }}</th>
+            <th class="text-secondary d-none d-lg-table-cell">{{ t "dashboard.price" }}</th>
+            <th class="text-secondary d-none d-lg-table-cell">{{ t "dashboard.students" }}</th>
+            <th class="text-secondary d-none d-md-table-cell">{{ t "dashboard.sessions" }}</th>
+            <th class="text-secondary d-none d-lg-table-cell">{{ t "dashboard.posted" }}</th>
+            <th class="text-secondary text-end pe-3">{{ t "dashboard.actions" }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{ range .Clases }}
+          <tr>
+            <td class="ps-3">
+              {{ if .Activa }}
+                <span class="badge bg-success">{{ t "dashboard.live_badge" }}</span>
+              {{ else }}
+                <span class="badge bg-secondary">{{ t "dashboard.off_badge" }}</span>
+              {{ end }}
+            </td>
+            <td class="ps-3 fw-semibold">{{ .Titulo }}</td>
+            <td class="text-secondary d-none d-md-table-cell">{{ .Materia }}</td>
+            <td class="text-secondary d-none d-lg-table-cell">{{ .PrecioStr }} <span class="text-secondary small">{{ .Moneda }}</span></td>
+            <td class="text-secondary d-none d-lg-table-cell">{{ .AlumnosMin }}–{{ .AlumnosMax }}</td>
+            <td class="d-none d-md-table-cell">
+              <span class="fw-semibold">{{ .NumSesiones }}</span>
+              {{ if gt .NumPagados 0 }}
+                <span class="text-secondary small">({{ .NumPagados }} {{ .PagadosTxt }})</span>
+              {{ end }}
+            </td>
+            <td class="text-secondary small d-none d-lg-table-cell">{{ .CreatedAt }}</td>
+            <td class="text-end pe-3">
+              <div class="d-flex gap-1 justify-content-end">
+                <a href="pre_sala.php?clase={{ .ClaseId }}&from=dashboard" class="btn btn-sm btn-outline-primary">{{ t "dashboard.join_btn" }}</a>
+                <form method="POST" class="d-inline">
+                  {{ csrf }}
+                  <input type="hidden" name="claseId" value="{{ .ClaseId }}">
+                  {{ if .Activa }}
+                    <input type="hidden" name="action" value="deactivate">
+                    <button type="submit" class="btn btn-sm btn-outline-warning">{{ t "dashboard.pause_btn" }}</button>
+                  {{ else }}
+                    <input type="hidden" name="action" value="activate">
+                    <button type="submit" class="btn btn-sm btn-outline-success">{{ t "dashboard.activate_btn" }}</button>
+                  {{ end }}
+                </form>
+                <form method="POST" class="d-inline" onsubmit="return confirm('{{ t "dashboard.delete_confirm" }}')">
+                  {{ csrf }}
+                  <input type="hidden" name="claseId" value="{{ .ClaseId }}">
+                  <input type="hidden" name="action" value="delete">
+                  <button type="submit" class="btn btn-sm btn-outline-danger"><i data-feather="trash-2" style="width:14px;height:14px"></i></button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {{ end }}
+        </tbody>
+      </table>
+    </div>
+    {{ end }}
+  </div>
+
+  <div class="card bg-dark border-secondary mb-4">
+    <div class="card-header border-secondary">
+      <span class="text-white fw-semibold">{{ t "dashboard.recent_sessions" }}</span>
+      <span class="text-secondary small ms-2">{{ t "dashboard.last_15" }}</span>
+    </div>
+    {{ if not .HasSesiones }}
+    <div class="card-body text-center py-4">
+      <p class="text-secondary mb-0">{{ t "dashboard.no_sessions" }}</p>
+    </div>
+    {{ else }}
+    <div class="table-responsive">
+      <table class="table table-light table-bordered table-hover mb-0">
+        <thead>
+          <tr>
+            <th class="text-secondary ps-3">{{ t "dashboard.student" }}</th>
+            <th class="text-secondary d-none d-md-table-cell">{{ t "dashboard.class" }}</th>
+            <th class="text-secondary d-none d-md-table-cell">{{ t "dashboard.subject" }}</th>
+            <th class="text-secondary">{{ t "dashboard.duration" }}</th>
+            <th class="text-secondary">{{ t "dashboard.amount" }}</th>
+            <th class="text-secondary">{{ t "general.status" }}</th>
+            <th class="text-secondary d-none d-lg-table-cell">{{ t "dashboard.date" }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{ range .Sesiones }}
+          <tr>
+            <td class="ps-3 fw-semibold">{{ .Estudiante }}</td>
+            <td class="text-secondary small d-none d-md-table-cell">{{ .Clase }}</td>
+            <td class="text-secondary small d-none d-md-table-cell">{{ .Materia }}</td>
+            <td class="text-secondary">{{ .Duracion }}</td>
+            <td>
+              {{ if ne .MontoStr "–" }}
+                <span class="fw-semibold">{{ .MontoStr }}</span>
+                <span class="text-secondary small"> {{ .MonedaLocal }}</span>
+              {{ else }}
+                <span class="text-secondary">–</span>
+              {{ end }}
+            </td>
+            <td>
+              {{ if .Pagado }}
+                <span class="badge bg-success">{{ t "dashboard.paid_badge" }}</span>
+              {{ else if .Fin }}
+                <span class="badge bg-warning text-dark">{{ t "dashboard.unpaid_badge" }}</span>
+              {{ else }}
+                <span class="badge bg-primary">{{ t "dashboard.live_badge_session" }}</span>
+              {{ end }}
+            </td>
+            <td class="text-secondary small d-none d-lg-table-cell">{{ .Inicio }}</td>
+          </tr>
+          {{ end }}
+        </tbody>
+      </table>
+    </div>
+    {{ end }}
+  </div>
+
+</div>
+
+<footer class="mastfoot" style="margin-bottom:2rem;">
+  <div class="inner float-end px-4">
+    <p>{{ t "general.footer_text" }}</p>
+  </div>
+</footer>
+{{ end }}

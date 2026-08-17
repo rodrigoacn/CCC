@@ -1,0 +1,32 @@
+{{ define "content" }}<div class="ml-wrap">
+  <div class="ml-wrap-inner">
+    <div style="padding:0 20px">
+      <div class="ml-head-title" style="margin-bottom:4px">{{ t "nav.sala" }}</div>
+      <div class="ml-sub" style="margin:0 0 16px">{{ if .HasRoom }}{{ t "misala.active" }}{{ else }}{{ if .IsTeacher }}{{ t "misala.no_room_teacher" }}{{ else }}{{ t "misala.no_room_student" }}{{ end }}{{ end }}</div>
+    </div>
+
+    {{ if .HasRoom }}
+    <div style="padding:0 20px">
+      <a href="sala.php?clase={{ .ClaseId }}&from=mi_sala" style="text-decoration:none;display:flex;align-items:center;gap:12px;border-radius:14px;padding:16px;background:var(--sf)">
+        <div style="flex:1">
+          <div style="font-weight:600;font-size:16px;color:var(--fg);margin-bottom:2px">{{ .ClaseTitulo }}</div>
+          <div style="font-size:13px;color:var(--sub)">{{ .PrecioTxt }}</div>
+        </div>
+        <div style="padding:4px 10px;border-radius:8px;background:var(--s);font-size:10px;font-weight:700;color:#fff;letter-spacing:1px">{{ t "buscar.live_badge" }}</div>
+      </a>
+    </div>
+    {{ else }}
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center">
+      <i data-feather="video-off" style="width:48px;height:48px;color:var(--sub)"></i>
+      <div style="font-size:14px;color:var(--sub);margin-top:16px;margin-bottom:24px;max-width:260px">
+        {{ if .IsTeacher }}{{ t "misala.hint_teacher" }}{{ else }}{{ t "misala.hint_student" }}{{ end }}
+      </div>
+      <a href="{{ if .IsTeacher }}dashboard_profesor.php{{ else }}buscar.php{{ end }}" style="display:inline-flex;align-items:center;gap:10px;padding:18px 36px;border-radius:16px;font-weight:700;font-size:18px;cursor:pointer;text-decoration:none;background:var(--p, #66ddbd);color:#fff;border:0">
+        <i data-feather="{{ if .IsTeacher }}plus-circle{{ else }}search{{ end }}" style="width:24px;height:24px;color:#fff"></i>
+        <span style="color:#fff">{{ if .IsTeacher }}{{ t "misala.create_class" }}{{ else }}{{ t "misala.find_classes" }}{{ end }}</span>
+      </a>
+    </div>
+    {{ end }}
+  </div>
+</div>
+{{ end }}

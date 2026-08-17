@@ -1,0 +1,101 @@
+{{ define "content" }}<div class="container mt-10">
+    <div class="row justify-content-center">
+      <div class="col-sm-10 col-md-8 col-lg-6">
+
+        <h3 class="text-white mb-1">{{ t "crear.title" }}</h3>
+        <p class="text-secondary mb-4">{{ t "crear.subtitle" }}</p>
+
+        {{ if .Error }}
+          <div class="alert alert-danger">{{ .Error }}</div>
+        {{ end }}
+
+        {{ if .HasTeacher }}
+          <div class="alert alert-dark border border-secondary mb-4 small">
+            💰 {{ .PriceInfo }}
+          </div>
+        {{ end }}
+
+        <form method="POST" action="crear_clase.php" class="card bg-dark border-secondary p-4">
+{{ csrf }}
+
+          <div class="mb-3">
+            <label class="form-label text-secondary">{{ t "crear.class_title" }} <span class="text-danger">*</span></label>
+            <input type="text" name="titulo" class="form-control bg-dark text-white border-secondary"
+                   placeholder="{{ t "crear.title_placeholder" }}"
+                   value="{{ .Titulo }}" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-secondary">{{ t "crear.description" }} <span class="text-secondary">({{ t "crear.optional" }})</span></label>
+            <textarea name="descripcion" class="form-control bg-dark text-white border-secondary"
+                      rows="2" placeholder="{{ t "crear.description_placeholder" }}">{{ .Descripcion }}</textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-secondary">{{ t "crear.subject" }}</label>
+            <select name="materiaId" class="form-select bg-dark text-white border-secondary">
+              <option value="">{{ t "oferta.any_subject" }}</option>
+              {{ range .Materias }}
+                <option value="{{ .ID }}"{{ if .Selected }} selected{{ end }}>{{ .Nombre }}</option>
+              {{ end }}
+            </select>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-6">
+              <label class="form-label text-secondary">{{ t "crear.min_price" }} <span class="text-white">({{ .Moneda }})</span></label>
+              <div class="input-group">
+                <span class="input-group-text bg-dark border-secondary text-secondary">{{ .Simbolo }}</span>
+                <input type="number" name="precio_min"
+                       class="form-control bg-dark text-white border-secondary"
+                       placeholder="0.00" min="0" step="0.01"
+                       value="{{ .PrecioMin }}">
+              </div>
+            </div>
+            <div class="col-6">
+              <label class="form-label text-secondary">{{ t "crear.max_price" }} <span class="text-white">({{ .Moneda }})</span></label>
+              <div class="input-group">
+                <span class="input-group-text bg-dark border-secondary text-secondary">{{ .Simbolo }}</span>
+                <input type="number" name="precio_max"
+                       class="form-control bg-dark text-white border-secondary"
+                       placeholder="0.00" min="0" step="0.01"
+                       value="{{ .PrecioMax }}">
+              </div>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-6">
+              <label class="form-label text-secondary">{{ t "crear.min_students" }}</label>
+              <input type="number" name="alumnos_min"
+                     class="form-control bg-dark text-white border-secondary"
+                     placeholder="1" min="1" step="1"
+                     value="{{ .AlumnosMin }}">
+            </div>
+            <div class="col-6">
+              <label class="form-label text-secondary">{{ t "crear.max_students" }}</label>
+              <input type="number" name="alumnos_max"
+                     class="form-control bg-dark text-white border-secondary"
+                     placeholder="10" min="1" step="1"
+                     value="{{ .AlumnosMax }}">
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-secondary w-100 fw-semibold py-2">
+            🚀 {{ t "crear.publish" }}
+          </button>
+          <p class="text-secondary text-center small mt-2 mb-0">
+            {{ t "crear.conversion_note" }}
+          </p>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  <footer class="mastfoot mt-auto mt-5">
+    <div class="inner float-end">
+      <p>{{ t "general.footer_text" }}</p>
+    </div>
+  </footer>
+{{ end }}

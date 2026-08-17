@@ -1,0 +1,156 @@
+{{ define "content" }}<style>
+.bc-card{display:block;border-radius:16px;padding:16px;background:var(--sf);margin-bottom:10px;border:1px solid var(--bd);position:relative;transition:box-shadow .15s}
+.bc-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08)}
+.bc-card.live{border-color:var(--s)}
+.bc-live{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;background:var(--s);color:#fff;font-size:10px;font-weight:700;letter-spacing:.5px;margin-bottom:8px}
+.bc-title{font-weight:600;font-size:15px;color:var(--fg);margin-bottom:4px;line-height:1.3}
+.bc-prof{font-size:12px;color:var(--sub);margin-bottom:10px}
+.bc-meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.bc-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:10px;background:var(--bg-card);font-size:11px;font-weight:500;color:var(--sub)}
+.bc-bottom{display:flex;justify-content:space-between;align-items:center}
+.bc-price{font-weight:700;font-size:16px;color:var(--p)}
+.bc-stars{display:inline-flex;gap:1px;margin-right:4px}
+.bc-rating{font-size:11px;font-weight:600;color:var(--sub)}
+.bc-amigo{font-size:10px;color:var(--p);margin-left:6px}
+.bc-section{font-size:13px;font-weight:600;color:var(--p);margin-bottom:8px;margin-top:4px;display:flex;align-items:center;gap:4px}
+.bc-section-more{font-size:13px;font-weight:600;color:var(--sub);margin-bottom:8px;margin-top:16px;display:flex;align-items:center;gap:4px}
+.bc-count{font-size:11px;font-weight:500;color:var(--sub);margin-bottom:8px}
+.sort-bar{display:flex;align-items:center;gap:8px;margin-top:8px}
+.sort-btn{display:inline-flex;align-items:center;gap:4px;padding:6px 14px;border-radius:20px;background:var(--sf);border:1px solid var(--bd);color:var(--sub);font-size:12px;font-weight:500;cursor:pointer;font-family:inherit}
+.sort-btn.active{background:var(--p);color:#fff;border-color:var(--p)}
+</style>
+
+<div class="ml-wrap">
+  <div class="ml-wrap-inner">
+  <div style="padding:0 20px 12px">
+    <div class="ml-head-title" style="margin-bottom:14px">{{ t "buscar.title" }}</div>
+
+    <div class="ml-search">
+      <i data-feather="search" style="width:18px;height:18px;color:var(--sub);flex-shrink:0"></i>
+      <input type="text" id="searchInput" placeholder="{{ t "buscar.search_placeholder" }}" value="{{ .Search }}" oninput="debounceSearch()">
+      {{ if .HasSearch }}
+      <button style="background:none;border:0;color:var(--sub);cursor:pointer;padding:0" onclick="clearSearch()"><i data-feather="x" style="width:18px;height:18px"></i></button>
+      {{ end }}
+    </div>
+
+    <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;align-items:center">
+      <button class="ml-chip {{ if .ActiveOnly }}active-l{{ end }}" onclick="toggleLive()">
+        <i data-feather="radio" style="width:13px;height:13px"></i> {{ t "buscar.live" }}
+      </button>
+      {{ range .Subjects }}
+      <button class="ml-chip {{ if .Selected }}active{{ end }}" style="border-color:{{ .Color }};color:{{ if .Selected }}#fff{{ else }}{{ .Color }}{{ end }};background:{{ if .Selected }}{{ .Color }}{{ else }}{{ .Color }}22{{ end }}" onclick="filterSubject({{ .ID }})">{{ .Nombre }}</button>
+      {{ end }}
+    </div>
+
+    <div class="sort-bar">
+      <span style="font-size:11px;font-weight:600;color:var(--sub)"><i data-feather="arrow-up-down" style="width:12px;height:12px"></i> {{ t "buscar.sort" }}:</span>
+      {{ range .SortList }}
+        <button class="sort-btn {{ if .Active }}active{{ end }}" onclick="setSort('{{ .Key }}')">{{ .Label }}</button>
+      {{ end }}
+    </div>
+
+    {{ if .HasResults }}
+    <div class="bc-count">{{ .Count }} {{ t "buscar.results" }}</div>
+    {{ end }}
+  </div>
+
+  <div id="classList" style="padding:0 20px 24px">
+    {{ if not .HasResults }}
+    <div class="ml-empty">
+      <i data-feather="search" style="width:40px;height:40px;color:var(--tbi)"></i>
+      <div class="ml-empty-txt">{{ t "buscar.no_classes" }}</div>
+    </div>
+    {{ else }}
+      {{ range .Classes }}
+      {{ if eq .Section "friend" }}
+      <div class="bc-section"><i data-feather="heart" style="width:14px;height:14px"></i> {{ t "buscar.friend_classes" }}</div>
+      {{ else if eq .Section "more" }}
+      <div class="bc-section-more"><i data-feather="trending-up" style="width:14px;height:14px"></i> {{ t "buscar.more_classes" }}</div>
+      {{ end }}
+      <a href="pre_sala.php?clase={{ .ClaseId }}&from=explorar" class="bc-card{{ if .Live }} live{{ end }}" style="text-decoration:none{{ if .Amigo }};border:1px solid var(--p){{ end }}">
+        {{ if .Live }}
+        <div class="bc-live"><i data-feather="radio" style="width:10px;height:10px"></i> {{ t "buscar.live_badge" }}</div>
+        {{ end }}
+        <div class="bc-title">
+          {{ .Titulo }}
+          {{ if .Amigo }}<span class="bc-amigo">· {{ t "buscar.friend" }}</span>{{ end }}
+        </div>
+        <div class="bc-prof">{{ .Profesor }}</div>
+        <div class="bc-meta">
+          <span class="bc-chip"><i data-feather="book-open" style="width:11px;height:11px"></i> {{ .Materia }}</span>
+          {{ if gt .Mins 0 }}
+          <span class="bc-chip"><i data-feather="clock" style="width:11px;height:11px"></i> {{ .Mins }}min</span>
+          {{ end }}
+          {{ if gt .Capacity 0 }}
+          <span class="bc-chip"><i data-feather="users" style="width:11px;height:11px"></i> {{ .Enrolled }}/{{ .Capacity }}</span>
+          {{ end }}
+        </div>
+        <div class="bc-bottom">
+          <div>
+            {{ if .ShowRating }}
+            <span class="bc-stars" id="stars-{{ .ClaseId }}"></span>
+            <span class="bc-rating">{{ .Rating }}</span>
+            {{ end }}
+          </div>
+          <div class="bc-price">{{ .Precio }} cr.</div>
+        </div>
+      </a>
+      {{ end }}
+    {{ end }}
+  </div>
+  </div>
+</div>
+
+<script>
+var _searchTimer;
+function debounceSearch(){
+  clearTimeout(_searchTimer);
+  _searchTimer = setTimeout(function(){ filterClasses(); }, 300);
+}
+function featherReplace(){if(typeof feather !== 'undefined') feather.replace()}
+featherReplace();
+
+function buildUrl(extra){
+  var params = new URLSearchParams(location.search);
+  if(extra) for(var k in extra){
+    if(extra[k]===''||extra[k]===null||extra[k]===undefined) params.delete(k);
+    else params.set(k, extra[k]);
+  }
+  var qs = params.toString();
+  return 'buscar.php' + (qs ? '?' + qs : '');
+}
+function filterClasses(){
+  var q = document.getElementById('searchInput').value;
+  location.href = buildUrl({q: q || null});
+}
+function filterSubject(id){
+  var cur = new URLSearchParams(location.search).get('s')||'';
+  location.href = buildUrl({s: cur == id ? null : id});
+}
+function toggleLive(){
+  var l = new URLSearchParams(location.search).get('live');
+  location.href = buildUrl({live: l === '1' ? null : '1'});
+}
+function setSort(s){
+  location.href = buildUrl({sort: s === 'relevance' ? null : s});
+}
+function clearSearch(){
+  location.href = buildUrl({q: null});
+}
+
+document.querySelectorAll('.bc-stars').forEach(function(el){
+  var id = el.id.replace('stars-','');
+  var card = el.closest('.bc-card');
+  if(!card) return;
+  var rating = parseFloat(card.querySelector('.bc-rating')?.textContent||'0');
+  var full = Math.floor(rating);
+  var half = (rating - full) >= 0.5;
+  var html = '';
+  for(var i=0;i<5;i++){
+    if(i < full) html += '<svg width="11" height="11" viewBox="0 0 24 24" fill="#F59E0B" stroke="#F59E0B" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+    else if(i === full && half) html += '<svg width="11" height="11" viewBox="0 0 24 24" fill="#F59E0B" stroke="#F59E0B" stroke-width="2" opacity="0.6"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+    else html += '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+  }
+  el.innerHTML = html;
+});
+</script>{{ end }}
