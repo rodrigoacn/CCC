@@ -2,6 +2,10 @@
 session_start();
 require_once 'db.php';
 
+// La landing ya no se usa: todo va directo al login.
+header('Location: login.php');
+exit;
+
 // Get counts from pre-registrations + base numbers
 $baseStudents = 154;
 $baseTeachers = 201;
@@ -17,6 +21,13 @@ if (getDB()) {
 $totalStudents = $baseStudents + $extraStudents;
 $totalTeachers = $baseTeachers + $extraTeachers;
 $totalRegistered = $totalStudents + $totalTeachers;
+
+// Verifica si hay una compra "sin anuncios" activa (global)
+$adsFreeActive = false;
+if (getDB()) {
+    $adsFree = dbOne("SELECT id FROM ads_free_compras WHERE estado='activo' AND valido_hasta > NOW() ORDER BY valido_hasta DESC LIMIT 1");
+    $adsFreeActive = $adsFree !== null;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -254,6 +265,20 @@ $totalRegistered = $totalStudents + $totalTeachers;
     </div>
 </nav>
 
+<!-- Banner 728x90 -->
+<?php if (!$adsFreeActive): ?>
+<ins class="adsbygoogle"
+     style="display:block; text-align:center; width:728px; height:90px"
+     data-ad-layout="content"
+     data-ad-format="fluid"
+     data-ad-client="ca-pub-9551209959871075"
+     data-ad-slot="1234567890"></ins>
+
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+<?php endif; ?>
+
 <!-- Hero -->
 <section class="hero">
     <div class="hero-content">
@@ -336,6 +361,20 @@ $totalRegistered = $totalStudents + $totalTeachers;
         </div>
     </div>
 </section>
+
+<!-- Medium Rectangle 300x250 -->
+<?php if (!$adsFreeActive): ?>
+<ins class="adsbygoogle"
+     style="display:block; text-align:center; width:300px; height:250px"
+     data-ad-layout="content"
+     data-ad-format="fluid"
+     data-ad-client="ca-pub-9551209959871075"
+     data-ad-slot="9876543210"></ins>
+
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+<?php endif; ?>
 
 <!-- How it Works -->
 <div class="section-divider"></div>
@@ -442,11 +481,32 @@ $totalRegistered = $totalStudents + $totalTeachers;
     </div>
 </section>
 
+<!-- Large Rectangle 336x280 -->
+<?php if (!$adsFreeActive): ?>
+<ins class="adsbygoogle"
+     style="display:block; text-align:center; width:336px; height:280px"
+     data-ad-layout="content"
+     data-ad-format="fluid"
+     data-ad-client="ca-pub-9551209959871075"
+     data-ad-slot="5555555555"></ins>
+
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+<?php endif; ?>
+
 <!-- Footer -->
 <footer class="footer-landing">
     <p>&copy; <?= date('Y') ?> ClassExpress — Bunny Software E.I.R.L. All rights reserved.</p>
     <p style="margin-top:6px;font-size:12px;">Made with <span style="color:var(--primary);">♥</span> in Chile for the world</p>
 </footer>
+
+<!-- AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9551209959871075"
+     crossorigin="anonymous"></script>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
 
 <script>
 let selectedRole = 'estudiante';

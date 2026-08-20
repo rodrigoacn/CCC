@@ -28,6 +28,11 @@
     <meta name="twitter:image" content="https://classexpress.online/favicon.png?v=4">
     <link rel="icon" href="favico.svg?v=4" type="image/svg+xml">
 
+    {{ if not .AdsFreeActive }}
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9551209959871075"
+        crossorigin="anonymous"></script>
+    {{ end }}
+
     <link rel="alternate" hreflang="es" href="https://classexpress.online/?lang=es">
     <link rel="alternate" hreflang="en" href="https://classexpress.online/?lang=en">
     <link rel="alternate" hreflang="fr" href="https://classexpress.online/?lang=fr">
@@ -264,6 +269,17 @@
     </div>
 </section>
 
+<!-- Banner 728x90 -->
+{{ if not .AdsFreeActive }}
+<div style="display:flex; justify-content:center; padding:28px 16px 4px;">
+    <ins class="adsbygoogle"
+         style="display:inline-block; text-align:center; width:728px; height:90px"
+         data-ad-client="ca-pub-9551209959871075"
+         data-ad-slot="1234567890"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
+{{ end }}
+
 <!-- Connect -->
 <section style="background: rgba(102,221,189,0.03);">
     <div class="section-inner">
@@ -291,6 +307,17 @@
         </div>
     </div>
 </section>
+
+<!-- Medium Rectangle 300x250 -->
+{{ if not .AdsFreeActive }}
+<div style="display:flex; justify-content:center; padding:28px 16px 4px;">
+    <ins class="adsbygoogle"
+         style="display:inline-block; text-align:center; width:300px; height:250px"
+         data-ad-client="ca-pub-9551209959871075"
+         data-ad-slot="9876543210"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
+{{ end }}
 
 <!-- How it Works -->
 <div class="section-divider"></div>
@@ -396,6 +423,17 @@
         </a>
     </div>
 </section>
+
+<!-- Large Rectangle 336x280 -->
+{{ if not .AdsFreeActive }}
+<div style="display:flex; justify-content:center; padding:28px 16px 4px;">
+    <ins class="adsbygoogle"
+         style="display:inline-block; text-align:center; width:336px; height:280px"
+         data-ad-client="ca-pub-9551209959871075"
+         data-ad-slot="5555555555"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
+{{ end }}
 
 <!-- Footer -->
 <footer class="footer-landing">

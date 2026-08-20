@@ -36,13 +36,20 @@ func (g *Gateway) CreatePreference(ctx context.Context, usuarioID int, typ strin
 	if currencyID == "" {
 		currencyID = "CLP"
 	}
-	if currencyID == "CLP" {
+	if typ == "ads_free" {
+		// La oferta recibe el monto ya en CLP (5000).
+		unitPrice = amountUSD
+		currencyID = "CLP"
+	} else if currencyID == "CLP" {
 		unitPrice = float64(usdToCLP(amountUSD, g.cfg.MPClpPerUSD))
 	}
 
 	title := fmt.Sprintf("ClassExpress - %d Créditos", quantity)
 	if typ == "tokens" {
 		title = fmt.Sprintf("ClassExpress - %d MonedasCE", quantity)
+	}
+	if typ == "ads_free" {
+		title = "ClassExpress — Sin anuncios por 1 semana"
 	}
 
 	externalRef := fmt.Sprintf("ce_%d_%s_%d_%d", usuarioID, typ, quantity, time.Now().Unix())
@@ -118,7 +125,7 @@ func (g *Gateway) CreatePreference(ctx context.Context, usuarioID int, typ strin
 			(usuario_id, type, quantity, amount_usd, amount_local, currency,
 			 preference_id, external_reference, status)
 		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')`,
-		usuarioID, typ, quantity, amountUSD, unitPrice, currencyID, preferenceID, externalRef,
+		nullableInt(usuarioID, typ), typ, quantity, amountUSD, unitPrice, currencyID, preferenceID, externalRef,
 	); err != nil {
 		return nil, err
 	}
@@ -247,6 +254,11 @@ func (g *Gateway) FulfillOrder(ctx context.Context, usuarioID int, typ string, q
 			"UPDATE usuarios SET tokens = tokens + ? WHERE usuarioId = ?", quantity, usuarioID); err != nil {
 			return err
 		}
+	} else if typ == "ads_free" {
+		_, err := g.db.Exec(ctx,
+			`INSERT INTO ads_free_compras (monto_clp, valido_hasta, estado)
+			 VALUES (5000, DATE_ADD(NOW(), INTERVAL 1 WEEK), 'activo')`)
+		return err
 	}
 
 	fee := round2(float64(quantity) * 0.05)
@@ -282,6 +294,15 @@ func atoiTrailing(s string) int {
 
 func round2(v float64) float64 {
 	return float64(int64(v*100+0.5)) / 100
+}
+
+// nullableInt returns nil for ads_free orders (no authenticated user),
+// otherwise the usuario ID.
+func nullableInt(usuarioID int, typ string) any {
+	if typ == "ads_free" {
+		return nil
+	}
+	return usuarioID
 }
 
 func usdToCLP(usd float64, clpPerUSD float64) int {

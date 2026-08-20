@@ -25,20 +25,27 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.AsyncImage
 import com.classexpress.app.ui.theme.Danger
 import com.classexpress.app.ui.theme.InkSecondary
 import com.classexpress.app.ui.theme.Mint
 import com.classexpress.app.ui.theme.Star
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdSize
+import com.google.android.gms.ads.AdView
 
 fun parseColorHex(hex: String?): Color {
     if (hex == null) return Mint
@@ -222,4 +229,27 @@ fun FriendLabel() {
         fontSize = 10.sp,
         fontWeight = FontWeight.SemiBold,
     )
+}
+
+@Composable
+fun BannerAd(modifier: Modifier = Modifier) {
+    val adUnitId = "ca-app-pub-5524033374028556/5118081375"
+    val context = LocalContext.current
+    val adView = remember {
+        AdView(context).apply {
+            setAdSize(AdSize.BANNER)
+            setAdUnitId(adUnitId)
+        }
+    }
+    DisposableEffect(Unit) {
+        val request = AdRequest.Builder().build()
+        adView.loadAd(request)
+        onDispose { adView.destroy() }
+    }
+    Box(
+        modifier = modifier.fillMaxWidth().background(Color.White).padding(vertical = 6.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        AndroidView(factory = { adView })
+    }
 }

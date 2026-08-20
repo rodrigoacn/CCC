@@ -25,10 +25,14 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="./styles.css?v=20260805">
   <link rel="icon" href="favico.svg?v=4" type="image/svg+xml">
+    <meta name="google-adsense-account" content="ca-pub-5524033374028556">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
    <meta name="generator" content="ClassExpress - Built with Go">
    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+   {{ if not .NavData.AdsFreeActive }}
+   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5524033374028556" crossorigin="anonymous"></script>
+   {{ end }}
   <style>
   :root{color-scheme:light;--p:#66ddbd;--pb:#4CBFA3;--bg:#eef1f6;--sf:#ffffff;--fg:#1e293b;--sub:#64748b;--bd:#dbe2ee;--s:#16a34a;--d:#dc2626;--tb:#ffffff;--tbi:#64748b;--r:14px}
   *{box-sizing:border-box}
@@ -83,6 +87,18 @@ window.CE_switchLang=function(code){
 </script>
 
 {{ template "content" . }}
+
+{{ if not .NavData.AdsFreeActive }}
+<div style="display:flex; justify-content:center; padding:20px 16px 8px;">
+  <ins class="adsbygoogle"
+       style="display:inline-block; text-align:center; width:320px; height:100px"
+        data-ad-client="ca-pub-5524033374028556"
+        data-ad-slot="1759727199"></ins>
+  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
+{{ end }}
+
+
 
 <script>if(typeof jQuery==='undefined'){var s=document.createElement('script');s.src='https://code.jquery.com/jquery-3.7.1.min.js';s.integrity='sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=';s.crossOrigin='anonymous';document.head.appendChild(s)}</script>
 <footer class="text-center mt-5" style="font-size:12px;color:var(--sub);">

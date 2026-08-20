@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -70,6 +71,9 @@ dependencies {
 
     // WebRTC (videollamada en vivo)
     implementation("io.github.webrtc-sdk:android:125.6422.06")
+
+    // Google Services
+    implementation("com.google.android.gms:play-services-ads:22.3.0")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
 }

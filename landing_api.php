@@ -12,6 +12,78 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 // Parse JSON body
 $input = json_decode(file_get_contents('php://input'), true);
+
+// ── Oferta 5000 CLP: checkout sin anuncios por 1 semana ──
+if (($input['action'] ?? '') === 'ads_free_checkout') {
+    require_once __DIR__ . '/lib/MercadoPagoGateway.php';
+
+    $montoCLP = (int)($input['monto'] ?? 0);
+    if ($montoCLP !== 5000) {
+        echo json_encode(['error' => 'Monto inválido.']);
+        exit;
+    }
+
+    $yaActivo = dbOne("SELECT id FROM ads_free_compras WHERE estado='activo' AND valido_hasta > NOW() LIMIT 1");
+    if ($yaActivo) {
+        echo json_encode(['error' => 'Ya tienes anuncios desactivados.']);
+        exit;
+    }
+
+    $baseUrl = mpGetBaseUrl();
+    $prefData = [
+        'items' => [[
+            'id'          => 'ce_ads_free',
+            'title'       => 'ClassExpress — Sin anuncios por 1 semana',
+            'description' => 'Oferta por tiempo limitado: sin anuncios durante 1 semana.',
+            'category_id' => 'digital_content',
+            'quantity'    => 1,
+            'unit_price'  => $montoCLP,
+            'currency_id' => 'CLP',
+        ]],
+        'external_reference'   => 'ads_free_' . bin2hex(random_bytes(8)),
+        'statement_descriptor' => MP_STATEMENT_DESCRIPTOR,
+        'binary_mode'          => false,
+        'back_urls'            => [
+            'success' => "{$baseUrl}/mp_success.php",
+            'failure' => "{$baseUrl}/mp_failure.php",
+            'pending' => "{$baseUrl}/mp_pending.php",
+        ],
+        'notification_url' => "{$baseUrl}/mp_webhook.php",
+    ];
+    if (strpos($baseUrl, 'https://') === 0) {
+        $prefData['auto_return'] = 'approved';
+    }
+
+    try {
+        MercadoPagoGateway::init();
+        $response = \MercadoPago\SDK::post('/checkout/preferences', ['json_data' => $prefData]);
+        if ($response['code'] >= 200 && $response['code'] < 300) {
+            $prefResult = $response['body'] ?? $response;
+            $preferenceId = $prefResult['id'] ?? '';
+            $initPoint    = $prefResult['init_point'] ?? '';
+
+            dbExec(
+                "INSERT INTO checkout_sessions
+                    (usuario_id, type, quantity, amount_usd, amount_local, currency,
+                     preference_id, external_reference, status)
+                 VALUES (NULL, 'ads_free', 1, ?, ?, 'CLP', ?, ?, 'pending')",
+                [$montoCLP / 950, $montoCLP, $preferenceId, $prefData['external_reference']]
+            );
+
+            echo json_encode([
+                'checkout_url'  => $initPoint,
+                'preference_id' => $preferenceId,
+            ]);
+        } else {
+            $errorMsg = $response['body']['message'] ?? $response['body'] ?? 'Unknown error';
+            echo json_encode(['error' => 'MercadoPago error: ' . json_encode($errorMsg)]);
+        }
+    } catch (\Throwable $e) {
+        echo json_encode(['error' => 'Error al crear el pago: ' . $e->getMessage()]);
+    }
+    exit;
+}
+
 $email = trim($input['email'] ?? '');
 $rol   = $input['rol'] ?? '';
 

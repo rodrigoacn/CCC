@@ -32,6 +32,7 @@ type NavData struct {
 	NavCreditos         string
 	NavRol              string
 	IsTeacher           bool
+	AdsFreeActive       bool
 	NavTabs             []NavTab
 	Translations        template.JS
 }
@@ -67,6 +68,12 @@ func (p *Pages) MenuData(w http.ResponseWriter, r *http.Request, s *Session, cur
 	ctx := r.Context()
 	uid := UID(s)
 	nav := NavData{Page: currentPage, NavCreditos: s.Get("creditos")}
+
+	// A global "sin anuncios" purchase hides ads on every page.
+	if row, err := p.DB.QueryOne(ctx,
+		"SELECT id FROM ads_free_compras WHERE estado='activo' AND valido_hasta > NOW() ORDER BY valido_hasta DESC LIMIT 1"); err == nil && row != nil {
+		nav.AdsFreeActive = true
+	}
 
 	// Pending payment redirect for students (unless they are on pago.php).
 	if currentPage != "pago.php" {

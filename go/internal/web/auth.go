@@ -135,6 +135,12 @@ func (p *Pages) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		idiomas = []map[string]any{}
 	}
 
+	adsFreeActive := false
+	if row, err := p.DB.QueryOne(ctx,
+		"SELECT id FROM ads_free_compras WHERE estado='activo' AND valido_hasta > NOW() ORDER BY valido_hasta DESC LIMIT 1"); err == nil && row != nil {
+		adsFreeActive = true
+	}
+
 	data := map[string]any{
 		"Lang":         lang,
 		"ActiveTab":    activeTab,
@@ -151,6 +157,7 @@ func (p *Pages) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		"LoginRol":     r.FormValue("login_rol"),
 		"SelectedIdiomas": strings.Split(r.FormValue("idiomas"), ","),
 		"Deleted":      r.URL.Query().Get("deleted") == "1",
+		"AdsFreeActive": adsFreeActive,
 		"FooterParams": FooterParams(),
 	}
 	if err := p.Templates.Render(w, "login", p, s, lang, data); err != nil {

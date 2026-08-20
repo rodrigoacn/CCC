@@ -113,10 +113,10 @@ func (p *Pages) HandleRetiro(w http.ResponseWriter, r *http.Request) {
 						_ = tx.Rollback()
 						errorMsg = "Insufficient balance."
 					} else {
-						montoUsd := float64(cantidad)
-						comision := round2(montoUsd * float64(retiroComisionPct) / 100)
-						neto := round2(montoUsd - comision)
-						montoClp := int(float64(int64(neto*float64(retiroExchangeRate)+0.5)))
+montoUsd := float64(cantidad)
+					comision := float64(0)
+					neto := montoUsd
+					montoClp := int(float64(int64(neto*float64(retiroExchangeRate)+0.5)))
 						cuentaVal, bancoVal, tipoVal := "", "PayPal", "paypal"
 						if metodo == "banco" {
 							cuentaVal, bancoVal, tipoVal = cuenta, banco, tipoCuenta

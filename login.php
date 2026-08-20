@@ -27,6 +27,13 @@ $error_signup = '';
 $success_msg  = '';
 $active_tab   = 'signin';
 
+// Compra global "sin anuncios": oculta oferta y anuncios.
+$adsFreeActive = false;
+if (getDB()) {
+    $adsFree = dbOne("SELECT id FROM ads_free_compras WHERE estado='activo' AND valido_hasta > NOW() ORDER BY valido_hasta DESC LIMIT 1");
+    $adsFreeActive = $adsFree !== null;
+}
+
 // â”€â”€â”€ SIGN IN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'signin') {
     $active_tab = 'signin';
@@ -72,16 +79,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             } else {
                 dbExec("UPDATE usuarios SET remember_token = NULL WHERE usuarioId = :id", ['id'=>$row['usuarioId']]);
                 setcookie('ce_remember', '', time() - 3600, '/', '', !empty($_SERVER['HTTPS']), true);
-            }
-            $pending = dbOne(
-                "SELECT sesionId FROM sesiones_clase
-                 WHERE estudianteId = :u AND pagado = 0 AND fin IS NOT NULL
-                 ORDER BY fin ASC LIMIT 1",
-                ['u' => $row['usuarioId']]
-            );
-            if ($pending) {
-                header('Location: pago.php?sesion=' . $pending['sesionId']);
-                exit;
             }
             $loginRol = $_POST['login_rol'] ?? 'student';
             setcookie('ce_app_modo', $loginRol === 'instructor' ? 'teacher' : 'student', time() + 365*24*60*60, '/', '', !empty($_SERVER['HTTPS']), true);
@@ -273,9 +270,13 @@ $resultados = [
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="./styles.css?v=20260804">
     <link rel="icon" href="favico.svg?v=4" type="image/svg+xml">
+    <meta name="google-adsense-account" content="ca-pub-5524033374028556">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <?php if (!$adsFreeActive): ?>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5524033374028556" crossorigin="anonymous"></script>
+    <?php endif; ?>
     <style>
         body {
             background: var(--bg-primary, #f4f6fb);
@@ -339,6 +340,20 @@ $resultados = [
           <h2 class="fw-bold brand-title" style="color:#1e293b">ClassExpress</h2>
           <p class="text-secondary"><?= t('login.tagline') ?></p>
         </div>
+
+        <!-- Oferta 5000 CLP: sin anuncios por 1 semana -->
+        <?php if (!$adsFreeActive): ?>
+        <div class="text-center mb-3">
+          <button type="button" id="adsFreeBtn"
+                  class="btn w-100 fw-bold"
+                  style="padding:16px 20px; border-radius:16px; border:2px solid #f59e0b; background:linear-gradient(135deg,#f59e0b,#fbbf24); color:#fff; box-shadow:0 8px 20px rgba(245,158,11,.35);"
+                  onclick="document.getElementById('adsFreeModal').style.display='flex';">
+            <span style="display:block; font-size:13px; letter-spacing:.5px; opacity:.95;"><i class="bi bi-stars"></i> OFERTA POR TIEMPO LIMITADO</span>
+            <span style="display:block; font-size:30px; font-weight:900; line-height:1.2; text-shadow:0 2px 6px rgba(0,0,0,.2);">5.000 CLP</span>
+            <span style="display:block; font-size:14px; font-weight:600;">elimina anuncios por 1 semana</span>
+          </button>
+        </div>
+        <?php endif; ?>
 
         <div class="login-card p-4">
 
@@ -513,11 +528,23 @@ $resultados = [
           </div>
         </div>
 
+
+
         <footer class="mastfoot mt-auto mt-4">
           <div class="inner float-end">
             <p class="text-secondary small"><?= t('brand') ?> <?= t('general.footer_text', ['bootstrap' => '<a href="https://getbootstrap.com/" class="text-secondary">Bootstrap</a>', 'author' => '<a href="https://www.facebook.com/rodrigo.alejandro.1848816?locale=es_LA" class="text-secondary">@RodrigoConejeros</a>']) ?></p>
           </div>
         </footer>
+
+        <?php if (!$adsFreeActive): ?>
+        <div style="display:flex; justify-content:center; margin-top:24px;">
+          <ins class="adsbygoogle"
+               style="display:inline-block; text-align:center; width:320px; height:100px"
+               data-ad-client="ca-pub-5524033374028556"
+               data-ad-slot="8321266117"></ins>
+          <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
+        <?php endif; ?>
 
       </div>
     </div>
@@ -606,6 +633,53 @@ $resultados = [
       location.reload();
     });
   })();
+  </script>
+
+  <!-- Modal Oferta 5000 CLP -->
+  <?php if (!$adsFreeActive): ?>
+  <div id="adsFreeModal" class="position-fixed top-0 start-0 w-100 h-100 d-none align-items-center justify-content-center" style="z-index:100000;background:rgba(0,0,0,0.75);">
+    <div class="bg-white rounded-4 p-4 text-center" style="max-width:420px;width:90%;">
+      <div class="mb-2" style="font-size:42px;">💎</div>
+      <h4 class="fw-bold text-dark mb-1" style="font-size:16px;">Sin anuncios por 1 semana</h4>
+      <div class="fw-black mb-1" style="font-size:44px; font-weight:900; color:#f59e0b;">5.000 CLP</div>
+      <p class="text-secondary small mb-3">Oferta por tiempo limitado. Paga <strong>5.000 CLP</strong> y no verás anuncios durante 1 semana a partir de hoy.</p>
+      <button type="button" id="adsFreePay" class="btn w-100 fw-bold mb-2" style="padding:16px; background:linear-gradient(135deg,#f59e0b,#fbbf24); color:#fff; border:0; font-size:17px; box-shadow:0 6px 16px rgba(245,158,11,.35);">
+        <i class="bi bi-credit-card-fill"></i> Pagar 5.000 CLP con MercadoPago
+      </button>
+      <button type="button" class="btn btn-outline-secondary w-100 btn-sm" onclick="document.getElementById('adsFreeModal').style.display='none';">
+        Cancelar
+      </button>
+    </div>
+  </div>
+  <?php endif; ?>
+
+  <script>
+  var adsFreePayEl = document.getElementById('adsFreePay');
+  if (adsFreePayEl) adsFreePayEl.addEventListener('click', function() {
+    var btn = this;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Creando pago...';
+    fetch('landing_api.php', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({action: 'ads_free_checkout', monto: 5000})
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.checkout_url) {
+        window.location.href = data.checkout_url;
+      } else {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-credit-card-fill"></i> Pagar 5.000 CLP con MercadoPago';
+        alert(data.error || 'Error al crear el pago.');
+      }
+    })
+    .catch(function() {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-credit-card-fill"></i> Pagar 5.000 CLP con MercadoPago';
+      alert('Error de conexión.');
+    });
+  });
   </script>
 
 </body>

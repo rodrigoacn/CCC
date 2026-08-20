@@ -198,6 +198,14 @@ class MercadoPagoGateway {
             dbExec("UPDATE usuarios SET creditos = creditos + ? WHERE usuarioId = ?", [$quantity, $usuarioId]);
         } elseif ($type === 'tokens') {
             dbExec("UPDATE usuarios SET tokens = tokens + ? WHERE usuarioId = ?", [$quantity, $usuarioId]);
+        } elseif ($type === 'ads_free') {
+            // Registra la compra "sin anuncios por 1 semana" (se aplica globalmente
+            // desde la fecha de pago hasta +1 semana).
+            dbExec(
+                "INSERT INTO ads_free_compras (monto_clp, valido_hasta, estado)
+                 VALUES (5000, DATE_ADD(NOW(), INTERVAL 1 WEEK), 'activo')"
+            );
+            return;
         }
 
         // Log in compras_tokens

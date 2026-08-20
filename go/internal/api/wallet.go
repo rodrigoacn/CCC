@@ -302,12 +302,11 @@ func (a *API) withdrawTokens(r *http.Request, body map[string]any) *resp {
 		return errOut(http.StatusBadRequest, "You already have a pending withdrawal request")
 	}
 
-	exchangeRate := 950
-	comisionPct := 0.15
+exchangeRate := 950
 	montoUsd := float64(cantidad)
-	comision := round2(montoUsd * comisionPct)
-	neto := round2(montoUsd - comision)
-	montoClp := int64(round2(float64(neto*float64(exchangeRate))))
+	comision := float64(0)
+	neto := montoUsd
+	montoClp := int64(round2(float64(neto * float64(exchangeRate))))
 
 	tx, err := a.DB.Begin(ctx(r))
 	if err != nil {
@@ -337,11 +336,11 @@ func (a *API) withdrawTokens(r *http.Request, body map[string]any) *resp {
 		return errOut(http.StatusInternalServerError, "Error processing withdrawal: "+err.Error())
 	}
 
-	return okOut(map[string]any{
+return okOut(map[string]any{
 		"ok":              true,
 		"message":         "Withdrawal request created",
 		"tokens_deducted": cantidad,
-		"comision":        comision,
+		"comision":        0.0,
 		"neto_pagar_usd":  neto,
 		"neto_pagar_clp":  montoClp,
 		"exchange_rate":   exchangeRate,

@@ -43,26 +43,10 @@ func landingCounts(ctx context.Context, db *store.DB) (students, teachers int) {
 	return
 }
 
-// HandleLanding ports landing.php: the public marketing page with the
-// signup pre-registration form and live counters.
+// HandleLanding redirects the public landing page to the login page:
+// the landing is not used, everything goes through login.php.
 func (p *Pages) HandleLanding(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	s := SessionFrom(ctx)
-	lang := "es"
-	if s != nil {
-		lang = p.ResolveLang(s, r)
-	}
-	students, teachers := landingCounts(ctx, p.DB)
-	data := map[string]any{
-		"Lang":            lang,
-		"TotalStudents":   students,
-		"TotalTeachers":   teachers,
-		"TotalRegistered": students + teachers,
-		"Year":            time.Now().Format("2006"),
-	}
-	if err := p.Templates.Render(w, "landing", p, s, lang, data); err != nil {
-		serverError(w, err)
-	}
+	redirect(w, r, "login.php")
 }
 
 // HandleLandingAPI ports landing_api.php: validates the pre-registration
@@ -74,13 +58,41 @@ func (p *Pages) HandleLandingAPI(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var input struct {
-		Email string `json:"email"`
-		Rol   string `json:"rol"`
+		Action string `json:"action"`
+		Email  string `json:"email"`
+		Rol    string `json:"rol"`
+		Monto  int    `json:"monto"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "JSON inválido."})
 		return
 	}
+
+	// ── Oferta 5000 CLP: checkout sin anuncios por 1 semana ──
+	if input.Action == "ads_free_checkout" {
+		if input.Monto != 5000 {
+			writeJSON(w, http.StatusOK, map[string]string{"error": "Monto inválido."})
+			return
+		}
+		if row, err := p.DB.QueryOne(r.Context(),
+			"SELECT id FROM ads_free_compras WHERE estado='activo' AND valido_hasta > NOW() LIMIT 1"); err == nil && row != nil {
+			writeJSON(w, http.StatusOK, map[string]string{"error": "Ya tienes anuncios desactivados."})
+			return
+		}
+		baseURL := mpBaseURL(r)
+
+		pref, err := p.MP.CreatePreference(r.Context(), 0, "ads_free", 1, float64(input.Monto), baseURL)
+		if err != nil {
+			writeJSON(w, http.StatusOK, map[string]string{"error": "Error al crear el pago: " + err.Error()})
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]any{
+			"checkout_url":  pref["checkout_url"],
+			"preference_id": pref["preference_id"],
+		})
+		return
+	}
+
 	email := strings.ToLower(strings.TrimSpace(input.Email))
 	rol := input.Rol
 

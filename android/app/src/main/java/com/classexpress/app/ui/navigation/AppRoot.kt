@@ -3,6 +3,7 @@ package com.classexpress.app.ui.navigation
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -47,6 +48,7 @@ import com.classexpress.app.ui.auth.AuthScreen
 import com.classexpress.app.ui.auth.ForgotPasswordScreen
 import com.classexpress.app.ui.auth.VerifyScreen
 import com.classexpress.app.ui.classes.ClasesScreen
+import com.classexpress.app.ui.components.BannerAd
 import com.classexpress.app.ui.credits.CreditsScreen
 import com.classexpress.app.ui.dashboard.TeacherDashboardScreen
 import com.classexpress.app.ui.payment.PaymentScreen
@@ -86,10 +88,17 @@ private fun SplashView() {
 @Composable
 private fun AuthGraph() {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "login") {
-        composable("login") { AuthScreen(navController) }
-        composable("forgot") { ForgotPasswordScreen(navController) }
-        composable("verify") { VerifyScreen(navController) }
+    Column(Modifier.fillMaxSize()) {
+        NavHost(
+            navController = navController,
+            startDestination = "login",
+            modifier = Modifier.weight(1f),
+        ) {
+            composable("login") { AuthScreen(navController) }
+            composable("forgot") { ForgotPasswordScreen(navController) }
+            composable("verify") { VerifyScreen(navController) }
+        }
+        BannerAd()
     }
 }
 
@@ -128,37 +137,40 @@ fun MainGraph() {
     Scaffold(
         containerColor = PageBackground,
         bottomBar = {
-            if (showBottomBar) {
-                NavigationBar(containerColor = Color.White) {
-                    tabs.forEach { tab ->
-                        val selected = currentRoute == tab.route
-                        NavigationBarItem(
-                            selected = selected,
-                            onClick = {
-                                navController.navigate(tab.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            },
-                            icon = {
-                                Icon(
-                                    tab.icon,
-                                    contentDescription = tab.label,
-                                    modifier = Modifier,
-                                )
-                            },
-                            label = { Text(tab.label, fontSize = 11.sp) },
-                            colors = NavigationBarItemDefaults.colors(
-                                indicatorColor = Mint.copy(alpha = 0.15f),
-                                selectedIconColor = Mint,
-                                selectedTextColor = Mint,
-                                unselectedIconColor = InkSecondary,
-                                unselectedTextColor = InkSecondary,
-                            ),
-                        )
+            Column {
+                if (showBottomBar) {
+                    NavigationBar(containerColor = Color.White) {
+                        tabs.forEach { tab ->
+                            val selected = currentRoute == tab.route
+                            NavigationBarItem(
+                                selected = selected,
+                                onClick = {
+                                    navController.navigate(tab.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                },
+                                icon = {
+                                    Icon(
+                                        tab.icon,
+                                        contentDescription = tab.label,
+                                        modifier = Modifier,
+                                    )
+                                },
+                                label = { Text(tab.label, fontSize = 11.sp) },
+                                colors = NavigationBarItemDefaults.colors(
+                                    indicatorColor = Mint.copy(alpha = 0.15f),
+                                    selectedIconColor = Mint,
+                                    selectedTextColor = Mint,
+                                    unselectedIconColor = InkSecondary,
+                                    unselectedTextColor = InkSecondary,
+                                ),
+                            )
+                        }
                     }
                 }
+                BannerAd()
             }
         },
     ) { padding ->
