@@ -123,8 +123,6 @@ func (a *API) dispatch(action string, r *http.Request, body map[string]any) *res
 		return a.createCheckout(r, body)
 	case "checkout_status":
 		return a.checkoutStatus(r)
-	case "payment":
-		return a.payment(r, body)
 	case "withdraw_tokens":
 		return a.withdrawTokens(r, body)
 	case "withdrawal_history":
@@ -170,8 +168,6 @@ func (a *API) salaDispatch(action string, r *http.Request, body map[string]any) 
 		return a.salaJoin(r, body)
 	case "leave":
 		return a.salaLeave(r, body)
-	case "pay":
-		return a.salaPay(r, body)
 	case "chat":
 		return a.salaChat(r, body)
 	case "signal":

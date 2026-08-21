@@ -24,7 +24,7 @@ func salaErr(msg string) *resp {
 // salaWriteActions mirrors SalaApi::WRITE_ACTIONS (signal is intentionally not
 // listed, matching the PHP quirk where it writes without a CSRF check).
 var salaWriteActions = map[string]bool{
-	"join": true, "leave": true, "chat": true, "pay": true,
+	"join": true, "leave": true, "chat": true,
 	"kick_student": true, "approve_spectator": true, "reject_spectator": true,
 	"end_class": true, "start_class": true,
 }
@@ -120,6 +120,17 @@ func (a *API) salaJoin(r *http.Request, body map[string]any) *resp {
 		joinedN = store.Int(joined["cnt"])
 	}
 	overCapacity := joinedN >= store.Int(clase["alumnos_max"])
+
+	precioBase := store.Float(clase["precio_base"])
+	if precioBase > 0 {
+		creditRow, err := a.DB.QueryOne(ctx(r), "SELECT creditos FROM usuarios WHERE usuarioId = ?", uid)
+		if err != nil {
+			return salaErr("Error interno")
+		}
+		if creditRow != nil && store.Float(creditRow["creditos"]) < precioBase {
+			return salaErr("Insufficient credits")
+		}
+	}
 
 	student, err := a.DB.QueryOne(ctx(r),
 		`SELECT u.pais_id, p.simbolo, p.codigo_moneda, p.tasa_usd
@@ -283,6 +294,16 @@ func (a *API) salaLeave(r *http.Request, body map[string]any) *resp {
 			duracionMin, acumulado, precioUSD, montoLocal, monLocal, simLocal, sesionID); err != nil {
 			return salaErr("Error interno")
 		}
+
+		if precioUSD > 0 {
+			_, _ = a.DB.Exec(ctx(r),
+				`INSERT INTO pagos (sesionId, estudianteId, profesorId, monto_usd, monto_local, moneda_local, simbolo_local, estado)
+				 VALUES (?, ?, ?, ?, ?, ?, ?, 'completado')`,
+				sesionID, uid, store.Str(sesion["instructorId"]), precioUSD, montoLocal, monLocal, simLocal)
+			_, _ = a.DB.Exec(ctx(r), "UPDATE sesiones_clase SET pagado = 1 WHERE sesionId = ?", sesionID)
+			_, _ = a.DB.Exec(ctx(r), "UPDATE usuarios SET creditos = creditos - ? WHERE usuarioId = ?", precioUSD, uid)
+		}
+
 		return salaOK(map[string]any{
 			"sesionId":     sesionID,
 			"duracion_min": duracionMin,
@@ -301,43 +322,6 @@ func (a *API) salaLeave(r *http.Request, body map[string]any) *resp {
 		return salaErr("Error interno")
 	}
 	return salaOK(map[string]any{"paused": true, "sesionId": sesionID})
-}
-
-// salaPay mirrors SalaController::pay.
-func (a *API) salaPay(r *http.Request, body map[string]any) *resp {
-	uid, errResp := a.salaUID(r)
-	if errResp != nil {
-		return errResp
-	}
-	sesionID := bodyInt(body, "sesionId")
-	metodo := store.Str(body["metodo"])
-	if metodo != "tarjeta" && metodo != "transferencia" && metodo != "efectivo" {
-		metodo = "tarjeta"
-	}
-
-	sesion, err := a.DB.QueryOne(ctx(r),
-		`SELECT s.*, cp.instructorId
-		 FROM sesiones_clase s
-		 JOIN clases_programadas cp ON cp.claseId = s.claseId
-		 WHERE s.sesionId=? AND s.estudianteId=? AND s.pagado=0`, sesionID, uid)
-	if err != nil {
-		return salaErr("Error interno")
-	}
-	if sesion == nil {
-		return salaErr("Session not found or already paid")
-	}
-
-	if _, err := a.DB.Exec(ctx(r),		`INSERT INTO pagos (sesionId, estudianteId, profesorId, monto_usd, monto_local, moneda_local, simbolo_local, estado)
-		 VALUES (?, ?, ?, ?, ?, ?, ?, 'completado')`,
-		sesionID, uid, sesion["instructorId"], sesion["precio_usd"], sesion["monto_local"],
-		sesion["moneda_local"], store.Str(store.Coalesce(sesion["simbolo_local"], "$"))); err != nil {
-		return salaErr("Error interno")
-	}
-	if _, err := a.DB.Exec(ctx(r),
-		"UPDATE sesiones_clase SET pagado=1 WHERE sesionId=?", sesionID); err != nil {
-		return salaErr("Error interno")
-	}
-	return salaOK(map[string]any{"message": "Payment confirmed"})
 }
 
 // salaChat mirrors SalaController::chat (Redis path skipped; MySQL fallback).
@@ -551,7 +535,8 @@ func (a *API) salaEndClass(r *http.Request, body map[string]any) *resp {
 	}
 
 	sessions, err := a.DB.QueryAll(ctx(r),
-		`SELECT sc.precio_usd, sc.pagado, sc.fin, sc.ultima_salida, sc.segundos_acumulados
+		`SELECT sc.sesionId, sc.precio_usd, sc.pagado, sc.fin, sc.ultima_salida, sc.segundos_acumulados,
+		        sc.estudianteId, sc.monto_local, sc.moneda_local, sc.simbolo_local
 		 FROM sesiones_clase sc
 		 WHERE sc.claseId = ? AND sc.instructorId = ?`, claseID, uid)
 	if err != nil {
@@ -570,6 +555,27 @@ func (a *API) salaEndClass(r *http.Request, body map[string]any) *resp {
 		 WHERE claseId = ? AND fin IS NULL`, claseID); err != nil {
 		return salaErr("Error interno")
 	}
+
+	unpaid, err := a.DB.QueryAll(ctx(r),
+		`SELECT sc.sesionId, sc.precio_usd, sc.estudianteId, sc.monto_local, sc.moneda_local, sc.simbolo_local
+		 FROM sesiones_clase sc
+		 WHERE sc.claseId = ? AND sc.pagado = 0 AND sc.fin IS NOT NULL`, claseID)
+	if err == nil && unpaid != nil {
+		for _, u := range unpaid {
+			precio := store.Float(u["precio_usd"])
+			if precio <= 0 {
+				continue
+			}
+			_, _ = a.DB.Exec(ctx(r),
+				`INSERT INTO pagos (sesionId, estudianteId, profesorId, monto_usd, monto_local, moneda_local, simbolo_local, estado)
+				 VALUES (?, ?, ?, ?, ?, ?, ?, 'completado')`,
+				u["sesionId"], u["estudianteId"], uid, precio, u["monto_local"], u["moneda_local"], u["simbolo_local"])
+			_, _ = a.DB.Exec(ctx(r), "UPDATE sesiones_clase SET pagado = 1 WHERE sesionId = ?", u["sesionId"])
+			_, _ = a.DB.Exec(ctx(r), "UPDATE usuarios SET creditos = creditos - ? WHERE usuarioId = ?", precio, u["estudianteId"])
+			tokensGanados += precio
+		}
+	}
+
 	return salaOK(map[string]any{"tokens_ganados": tokensGanados})
 }
 

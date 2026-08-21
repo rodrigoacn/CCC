@@ -24,17 +24,6 @@ func validEmail(s string) bool {
 	return addr.Address == s
 }
 
-// getPendingPaymentSessionID mirrors api_helpers::getPendingPaymentSessionID().
-func (a *API) getPendingPaymentSessionID(r *http.Request, userID int64) any {
-	row, err := a.DB.QueryOne(ctx(r),
-		"SELECT sesionId FROM sesiones_clase WHERE estudianteId = ? AND pagado = 0 AND fin IS NOT NULL ORDER BY fin ASC LIMIT 1",
-		userID)
-	if err != nil || row == nil {
-		return nil
-	}
-	return int(store.Int(row["sesionId"]))
-}
-
 // formatUserMap mirrors api_helpers::formatUser().
 func (a *API) formatUserMap(r *http.Request, u map[string]any) map[string]any {
 	id := store.Int(u["usuarioId"])
@@ -69,7 +58,6 @@ func (a *API) formatUserMap(r *http.Request, u map[string]any) map[string]any {
 		"idioma_preferido":     coalesceStr(u["idioma_preferido"], "es"),
 		"ultima_materia":       store.Int(u["ultimaMateria"]),
 		"last_role_switch":     lastSwitch,
-		"pendingPaymentSessionId": a.getPendingPaymentSessionID(r, id),
 	}
 }
 

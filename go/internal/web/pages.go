@@ -140,17 +140,6 @@ func TimeAgo(value any) string {
 	}
 }
 
-// PendingPaymentSession returns the oldest unpaid finished session id or 0.
-func (p *Pages) PendingPaymentSession(ctx context.Context, uid int64) int64 {
-	row, err := p.DB.QueryOne(ctx,
-		"SELECT sesionId FROM sesiones_clase WHERE estudianteId = ? AND pagado = 0 AND fin IS NOT NULL ORDER BY fin ASC LIMIT 1",
-		uid)
-	if err != nil || row == nil {
-		return 0
-	}
-	return store.Int(row["sesionId"])
-}
-
 // NewRememberToken returns a 64-char hex token (bin2hex(random_bytes(32))).
 func NewRememberToken() string {
 	b := make([]byte, 32)

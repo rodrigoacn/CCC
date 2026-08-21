@@ -68,31 +68,6 @@ func (p *Pages) HandleLandingAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// ── Oferta 5000 CLP: checkout sin anuncios por 1 semana ──
-	if input.Action == "ads_free_checkout" {
-		if input.Monto != 5000 {
-			writeJSON(w, http.StatusOK, map[string]string{"error": "Monto inválido."})
-			return
-		}
-		if row, err := p.DB.QueryOne(r.Context(),
-			"SELECT id FROM ads_free_compras WHERE estado='activo' AND valido_hasta > NOW() LIMIT 1"); err == nil && row != nil {
-			writeJSON(w, http.StatusOK, map[string]string{"error": "Ya tienes anuncios desactivados."})
-			return
-		}
-		baseURL := mpBaseURL(r)
-
-		pref, err := p.MP.CreatePreference(r.Context(), 0, "ads_free", 1, float64(input.Monto), baseURL)
-		if err != nil {
-			writeJSON(w, http.StatusOK, map[string]string{"error": "Error al crear el pago: " + err.Error()})
-			return
-		}
-		writeJSON(w, http.StatusOK, map[string]any{
-			"checkout_url":  pref["checkout_url"],
-			"preference_id": pref["preference_id"],
-		})
-		return
-	}
-
 	email := strings.ToLower(strings.TrimSpace(input.Email))
 	rol := input.Rol
 

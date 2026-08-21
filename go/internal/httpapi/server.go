@@ -127,7 +127,6 @@ func (s *Server) routes() {
 		s.register("/admin_retiros.php", p.WithSession(p.HandleAdminRetiros))
 		s.register("/buscar.php", p.WithSession(p.HandleBuscar))
 		s.register("/profesores.php", p.WithSession(p.HandleProfesores))
-		s.register("/pago.php", p.WithSession(p.HandlePago))
 		s.register("/mp_success.php", p.WithSession(p.HandleMPSuccess))
 		s.register("/mp_pending.php", p.WithSession(p.HandleMPPending))
 		s.register("/mp_failure.php", p.WithSession(p.HandleMPFailure))
@@ -140,6 +139,8 @@ func (s *Server) routes() {
 		s.register("/dashboard_profesor.php", p.WithSession(p.HandleDashboardProfesor))
 		s.register("/crear_clase.php", p.WithSession(p.HandleCrearClase))
 		s.register("/calificar.php", p.WithSession(p.HandleCalificar))
+		s.register("/foro.php", p.WithSession(p.HandleForo))
+		s.register("/schedule.php", p.WithSession(p.HandleSchedule))
 		s.register("/mi_sala.php", p.WithSession(p.HandleMiSala))
 		s.register("/sala.php", p.WithSession(p.HandleSala))
 		for _, subjPage := range web.SubjectPages() {

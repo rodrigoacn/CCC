@@ -1,0 +1,126 @@
+{{ define "content" }}<div class="ml-wrap">
+  <div class="ml-wrap-inner">
+
+    {{ if eq .IsTeacher }}
+    {{/* ===== TEACHER SCHEDULE VIEW ===== */}}
+    <div style="padding:0 20px 12px">
+      <a href="foro.php" style="display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--sub);text-decoration:none;margin-bottom:8px">
+        <i data-feather="arrow-left" style="width:16px;height:16px"></i> Volver
+      </a>
+      <div style="font-size:26px;font-weight:700;color:var(--p);margin-bottom:2px">{{ t "schedule.title" }}</div>
+      <div style="font-size:14px;color:var(--sub)">{{ t "schedule.manage_your_schedule" }}</div>
+    </div>
+
+    <div style="padding:0 20px 16px">
+      <button onclick="document.getElementById('newSlotForm').style.display=document.getElementById('newSlotForm').style.display==='none'?'block':'none'" class="ml-btn ml-btn-p" style="width:100%;justify-content:center;font-size:15px;padding:14px 24px">
+        <i data-feather="plus" style="width:20px;height:20px"></i> {{ t "schedule.add_slot" }}
+      </button>
+    </div>
+
+    <div id="newSlotForm" style="display:none;padding:0 20px 20px">
+      <div style="background:var(--sf);border-radius:18px;padding:20px;border:1px solid var(--bd)">
+        <div style="font-weight:600;font-size:16px;color:var(--fg);margin-bottom:14px">{{ t "schedule.add_slot" }}</div>
+        <form method="POST" action="schedule.php">
+          {{ csrf }}
+          <input type="hidden" name="action" value="add_slot">
+          <select name="dia" required
+                  style="width:100%;padding:12px 16px;border-radius:12px;border:1px solid var(--bd);font-size:15px;margin-bottom:8px;box-sizing:border-box;background:var(--bg);color:var(--fg)">
+            <option value="lunes">{{ t "schedule.monday" }}</option>
+            <option value="martes">{{ t "schedule.tuesday" }}</option>
+            <option value="miercoles">{{ t "schedule.wednesday" }}</option>
+            <option value="jueves">{{ t "schedule.thursday" }}</option>
+            <option value="viernes">{{ t "schedule.friday" }}</option>
+            <option value="sabado">{{ t "schedule.saturday" }}</option>
+            <option value="domingo">{{ t "schedule.sunday" }}</option>
+          </select>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <input type="time" name="hora_inicio" required
+                   style="width:48%;padding:10px 12px;border-radius:8px;border:1px solid var(--bd);font-size:14px;background:var(--bg);color:var(--fg)">
+            <input type="time" name="hora_fin" required
+                   style="width:48%;padding:10px 12px;border-radius:8px;border:1px solid var(--bd);font-size:14px;background:var(--bg);color:var(--fg)">
+            <button type="submit" class="ml-btn ml-btn-p" style="padding:10px 24px;font-size:14px;margin-top:8px">{{ t "schedule.save" }}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div style="padding:0 20px 24px">
+      <div style="background:var(--sf);border-radius:18px;padding:20px;border:1px solid var(--bd);min-height:400px">
+        <div style="display:flex;gap:6px;margin-bottom:12px">
+          <div style="flex:1;background:var(--p);color:#fff;border-radius:10px;padding:6px 10px;font-size:12px;font-weight:700;text-align:center">Lunes</div>
+          <div style="flex:1;background:var(--s);color:#fff;border-radius:10px;padding:6px 10px;font-size:12px;font-weight:700;text-align:center">Mar</div>
+          <div style="flex:1;background:var(--d);color:#fff;border-radius:10px;padding:6px 10px;font-size:12px;font-weight:700;text-align:center">Mi</div>
+          <div style="flex:1;background:var(--s);color:#fff;border-radius:10px;padding:6px 10px;font-size:12px;font-weight:700;text-align:center">J</div>
+          <div style="flex:1;background:var(--p);color:#fff;border-radius:10px;padding:6px 10px;font-size:12px;font-weight:700;text-align:center">V</div>
+          <div style="flex:1;background:var(--s);color:#fff;border-radius:10px;padding:6px 10px;font-size:12px;font-weight:700;text-align:center">S</div>
+          <div style="flex:1;background:var(--d);color:#fff;border-radius:10px;padding:6px 10px;font-size:12px;font-weight:700;text-align:center">D</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7, 1fr);gap:8px;padding:12px 0">
+          {{ $totalSlots := 0 }}
+          {{ range .Days }}
+          {{ $totalSlots += len .Slots }}
+          {{ end }}
+          {{ if gt $totalSlots 0 }}
+          {{ range .Days }}
+          <div style="background:var(--bg);border-radius:12px;padding:8px;min-height:50px;display:flex;align-items:center;justify-content:center;color:var(--sub);font-size:11px;position:relative">
+            <span style="position:absolute;top:8px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:700;color:var(--p);white-space:nowrap">{{ .Dia }}</span>
+            {{ range .Slots }}
+            <div style="position:relative;margin-top:28px;padding:6px 10px;border-radius:8px;background:{{ if .IsPrimary }}var(--p){{ else }}var(--sf);color:{{ if .IsPrimary }}#fff{{ else }}var(--fg);{{ end }};font-size:10px;font-weight:500;max-width:90%;text-align:left;white-space:normal;word-break:break-word">
+              {{ .HoraIni }} - {{ .HoraFin }}
+              {{ if not .IsPrimary }}<br><small style="display:block;margin-top:2px;font-size:9px;color:var(--sub)">(secundario)</small>{{ end }}
+            </div>
+            {{ end }}
+          </div>
+          {{ end }}
+          {{ if eq $totalSlots 0 }}
+          <div style="text-align:center;padding:40px;color:var(--sub);">{{ t "schedule.no_slots" }}</div>
+          {{ end }}
+        </div>
+      </div>
+    </div>
+
+    {{ else }}
+    {{/* ===== STUDENT SCHEDULE VIEW ===== */}}
+    <div style="padding:0 20px 12px">
+      <a href="foro.php" style="display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--sub);text-decoration:none;margin-bottom:8px">
+        <i data-feather="arrow-left" style="width:16px;height:16px"></i> {{ t "foro.back" }}
+      </a>
+      <div style="font-size:26px;font-weight:700;color:var(--p);margin-bottom:2px">{{ t "schedule.title" }}</div>
+      <div style="font-size:14px;color:var(--sub)">{{ t "schedule.teacher_availability" }}</div>
+    </div>
+
+    <div style="padding:0 20px 24px">
+      {{ if gt (len .Teachers) 0 }}
+      <div style="display:grid;grid-template-column:repeat(auto-fill,minmax(280px,1fr));gap:24px">
+        {{ range .Teachers }}
+        <div style="background:var(--sf);border-radius:18px;padding:24px;border:1px solid var(--bd);min-height:320px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+            <div style="width:48px;height:48px;border-radius:50%;background:var(--p);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:18px;overflow:hidden">
+              {{ if .Avatar }}<img src="{{ .Avatar }}" style="width:100%;height:100%;object-fit:cover"> {{ else }}{{ slice .Nombre 0 1 | printf "%s" }}{{ end }}
+            </div>
+            <div>
+              <div style="font-size:18px;font-weight:700;color:var(--fg)">{{ .Nombre }}</div>
+              {{ range .Schedule }}
+              <div style="display:flex;align-items:center;gap:4px;margin-top:4px;font-size:13px;color:var(--sub)">
+                <i data-feather="calendar" style="width:12px;height:12px"></i> {{ .Dia }} {{ .HoraIni }} - {{ .HoraFin }}
+              </div>
+              {{ end }}
+            </div>
+          </div>
+          {{ end }}
+        </div>
+        {{ end }}
+      </div>
+      {{ else }}
+      <div style="text-align:center;padding:40px;color:var(--sub)">{{ t "schedule.no_schedules" }}</div>
+      {{ end }}
+    </div>
+
+    {{ end }}
+
+  </div>
+
+<script>
+document.addEventListener('DOMContentLoaded',function(){feather.replace()})
+</script>
+{{ end }}

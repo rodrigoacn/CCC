@@ -57,10 +57,42 @@ func main() {
 	cleaned += n
 	fmt.Printf("checkout_sessions: expired %d pending rows\n", n)
 
-	// 5. Orphaned sessions (no fin, no ultima_salida for >30 minutes)
-	n = execCount(ctx, storeDB, "UPDATE sesiones_clase SET fin = NOW() WHERE fin IS NULL AND ultima_salida IS NULL AND inicio < DATE_SUB(NOW(), INTERVAL 30 MINUTE)")
-	cleaned += n
-	fmt.Printf("sesiones_clase: closed %d orphaned sessions\n", n)
+	// 5. Orphaned sessions (no fin, no ultima_salida for >30 minutes) — auto-pay
+	orphaned, err := storeDB.QueryAll(ctx,
+		`SELECT sc.sesionId, sc.precio_usd, sc.estudianteId, sc.instructorId,
+		        sc.monto_local, sc.moneda_local, sc.simbolo_local
+		 FROM sesiones_clase sc
+		 WHERE sc.fin IS NULL AND sc.ultima_salida IS NULL
+		   AND sc.inicio < DATE_SUB(NOW(), INTERVAL 30 MINUTE)`)
+	if err != nil {
+		log.Printf("cron: query orphaned sessions: %v", err)
+	}
+	if len(orphaned) > 0 {
+		sIDs := make([]any, len(orphaned))
+		for i, s := range orphaned {
+			sIDs[i] = s["sesionId"]
+		}
+		n = execCount(ctx, storeDB,
+			"UPDATE sesiones_clase SET fin = NOW() WHERE fin IS NULL AND ultima_salida IS NULL AND inicio < DATE_SUB(NOW(), INTERVAL 30 MINUTE)")
+		cleaned += n
+		for _, s := range orphaned {
+			precio := store.Float(s["precio_usd"])
+			if precio <= 0 {
+				continue
+			}
+			_, _ = storeDB.Exec(ctx,
+				`INSERT INTO pagos (sesionId, estudianteId, profesorId, monto_usd, monto_local, moneda_local, simbolo_local, estado)
+				 VALUES (?, ?, ?, ?, ?, ?, ?, 'completado')`,
+				s["sesionId"], s["estudianteId"], s["instructorId"], precio, s["monto_local"], s["moneda_local"], s["simbolo_local"])
+			_, _ = storeDB.Exec(ctx, "UPDATE sesiones_clase SET pagado = 1 WHERE sesionId = ?", s["sesionId"])
+			_, _ = storeDB.Exec(ctx, "UPDATE usuarios SET creditos = creditos - ? WHERE usuarioId = ?", precio, s["estudianteId"])
+		}
+		fmt.Printf("sesiones_clase: closed %d orphaned sessions, auto-paid %d\n", n, len(orphaned))
+	} else {
+		n = execCount(ctx, storeDB, "UPDATE sesiones_clase SET fin = NOW() WHERE fin IS NULL AND ultima_salida IS NULL AND inicio < DATE_SUB(NOW(), INTERVAL 30 MINUTE)")
+		cleaned += n
+		fmt.Printf("sesiones_clase: closed %d orphaned sessions\n", n)
+	}
 
 	// 6. Old chat messages (>7 days) — keep DB lean
 	n = execCount(ctx, storeDB, "DELETE FROM mensajes_chat WHERE enviado_at < DATE_SUB(NOW(), INTERVAL 7 DAY)")

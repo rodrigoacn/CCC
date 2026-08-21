@@ -1,0 +1,255 @@
+{{ define "content" }}<div class="ml-wrap">
+  <div class="ml-wrap-inner">
+
+    {{ if eq .View "list" }}
+    {{/* ===== LIST VIEW ===== */}}
+    <div style="padding:0 20px 12px">
+      <a href="materias.php" style="display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--sub);text-decoration:none;margin-bottom:8px">
+        <i data-feather="arrow-left" style="width:16px;height:16px"></i> {{ t "foro.back" }}
+      </a>
+      <div style="font-size:26px;font-weight:700;color:var(--p);margin-bottom:2px">
+        {{ if .MateriaName }}{{ .MateriaName }} — {{ end }}{{ t "foro.title" }}
+      </div>
+      <div style="font-size:14px;color:var(--sub)">{{ .Count }} hilo{{ if ne .Count 1 }}s{{ end }}</div>
+    </div>
+
+    <div style="padding:0 20px 12px;overflow-x:auto;display:flex;gap:8px;flex-wrap:nowrap;-webkit-overflow-scrolling:touch">
+      <a href="foro.php" class="ml-chip {{ if eq .MateriaId 0 }}active{{ end }}" style="flex-shrink:0;font-size:13px;padding:8px 14px">{{ t "foro.all" }}</a>
+      {{ range .Materias }}
+      <a href="foro.php?materia={{ .ID }}" class="ml-chip {{ if eq $.MateriaId .ID }}active{{ end }}" style="flex-shrink:0;font-size:13px;padding:8px 14px">{{ .Nombre }}</a>
+      {{ end }}
+    </div>
+
+    <div style="padding:12px 20px 16px">
+      <button onclick="document.getElementById('newHiloForm').style.display=document.getElementById('newHiloForm').style.display==='none'?'block':'none'" class="ml-btn ml-btn-p" style="width:100%;justify-content:center;font-size:15px;padding:14px 24px">
+        <i data-feather="plus" style="width:20px;height:20px"></i> {{ t "foro.new_thread" }}
+      </button>
+    </div>
+
+    <div id="newHiloForm" style="display:none;padding:0 20px 20px">
+      <div style="background:var(--sf);border-radius:18px;padding:20px;border:1px solid var(--bd)">
+        <div style="font-weight:600;font-size:16px;color:var(--fg);margin-bottom:14px">{{ t "foro.create_thread" }}</div>
+        <form method="POST" action="foro.php">
+          {{ csrf }}
+          <input type="hidden" name="action" value="create_hilo">
+          {{ if gt .MateriaId 0 }}
+          <input type="hidden" name="materia_id" value="{{ .MateriaId }}">
+          {{ else }}
+          <select name="materia_id" required
+                  style="width:100%;padding:12px 16px;border-radius:12px;border:1px solid var(--bd);font-size:15px;margin-bottom:10px;box-sizing:border-box;background:var(--bg);color:var(--fg)">
+            <option value="">{{ t "foro.select_materia" }}</option>
+            {{ range .Materias }}
+            <option value="{{ .ID }}">{{ .Nombre }}</option>
+            {{ end }}
+          </select>
+          {{ end }}
+          <input type="text" name="titulo" placeholder="{{ t "foro.title_placeholder" }}" required maxlength="255"
+                 style="width:100%;padding:12px 16px;border-radius:12px;border:1px solid var(--bd);font-size:15px;margin-bottom:10px;box-sizing:border-box;background:var(--bg);color:var(--fg)">
+          <textarea name="contenido" placeholder="{{ t "foro.content_placeholder" }}" required rows="4"
+                    style="width:100%;padding:12px 16px;border-radius:12px;border:1px solid var(--bd);font-size:14px;resize:vertical;box-sizing:border-box;background:var(--bg);color:var(--fg)"></textarea>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button type="submit" class="ml-btn ml-btn-p" style="padding:10px 24px;font-size:14px">{{ t "foro.publish" }}</button>
+            <button type="button" onclick="document.getElementById('newHiloForm').style.display='none'" class="ml-btn ml-btn-l" style="padding:10px 24px;font-size:14px">{{ t "foro.cancel" }}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div style="padding:0 20px 24px">
+      {{ if eq .Count 0 }}
+      <div class="ml-empty">
+        <i data-feather="message-circle" style="width:40px;height:40px;color:var(--tbi)"></i>
+        <div class="ml-empty-txt">{{ t "foro.empty" }}</div>
+      </div>
+      {{ else }}
+        {{ range .Hilos }}
+        <a href="foro.php?materia={{ .MateriaId }}&hilo={{ .ID }}" style="text-decoration:none;display:flex;gap:14px;border-radius:18px;padding:16px;background:var(--sf);margin-bottom:10px;border:1px solid var(--bd)">
+          <div style="width:42px;height:42px;border-radius:50%;background:var(--p);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;flex-shrink:0;overflow:hidden">
+            {{ if .Avatar }}<img src="{{ .Avatar }}" style="width:100%;height:100%;object-fit:cover"> {{ else }}{{ slice .Autor 0 1 | printf "%s" }}{{ end }}
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+              {{ if .Pinned }}<i data-feather="pin" style="width:14px;height:14px;color:var(--p);flex-shrink:0"></i>{{ end }}
+              {{ if .Closed }}<i data-feather="lock" style="width:14px;height:14px;color:var(--d);flex-shrink:0"></i>{{ end }}
+              <div style="font-weight:600;font-size:15px;color:var(--fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ .Titulo }}</div>
+            </div>
+            <div style="font-size:12px;color:var(--sub);display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <span>{{ .Autor }}</span>
+              {{ if not $.MateriaName }}<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:8px;background:var(--bg);color:var(--p);font-size:11px;font-weight:500">{{ .MateriaName }}</span>{{ end }}
+              <span>·</span>
+              <span>{{ .TimeAgo }}</span>
+              <span>·</span>
+              <span style="display:inline-flex;align-items:center;gap:3px"><i data-feather="message-square" style="width:12px;height:12px"></i>{{ .Respuestas }}</span>
+              <span style="display:inline-flex;align-items:center;gap:3px"><i data-feather="heart" style="width:12px;height:12px"></i>{{ .Likes }}</span>
+              <span style="display:inline-flex;align-items:center;gap:3px"><i data-feather="eye" style="width:12px;height:12px"></i>{{ .Views }}</span>
+            </div>
+          </div>
+        </a>
+        {{ end }}
+      {{ end }}
+    </div>
+
+    {{ else }}
+    {{/* ===== THREAD VIEW ===== */}}
+    <div style="padding:0 20px 12px">
+      <a href="foro.php?materia={{ .Hilo.MateriaId }}" style="display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--sub);text-decoration:none;margin-bottom:8px">
+        <i data-feather="arrow-left" style="width:16px;height:16px"></i> {{ .Hilo.MateriaName }} — {{ t "foro.title" }}
+      </a>
+    </div>
+
+    <div style="padding:0 20px 16px">
+      <div style="background:var(--sf);border-radius:18px;padding:20px;border:1px solid var(--bd)">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
+          {{ if .Hilo.Pinned }}<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:12px;background:#f0fdf4;color:var(--s);font-size:11px;font-weight:600"><i data-feather="pin" style="width:12px;height:12px"></i>{{ t "foro.pinned" }}</span>{{ end }}
+          {{ if .Hilo.Closed }}<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:12px;background:#fef2f2;color:var(--d);font-size:11px;font-weight:600"><i data-feather="lock" style="width:12px;height:12px"></i>{{ t "foro.closed" }}</span>{{ end }}
+        </div>
+        <div style="font-size:20px;font-weight:700;color:var(--fg);margin-bottom:12px;line-height:1.3">{{ .Hilo.Titulo }}</div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+          <div style="width:34px;height:34px;border-radius:50%;background:var(--p);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;overflow:hidden">
+            {{ if .Hilo.Avatar }}<img src="{{ .Hilo.Avatar }}" style="width:100%;height:100%;object-fit:cover"> {{ else }}{{ slice .Hilo.Autor 0 1 | printf "%s" }}{{ end }}
+          </div>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--fg)">{{ .Hilo.Autor }}</div>
+            <div style="font-size:11px;color:var(--sub)">{{ .Hilo.TimeAgo }}</div>
+          </div>
+        </div>
+        <div style="font-size:14px;color:var(--fg);line-height:1.6;white-space:pre-wrap">{{ .Hilo.Contenido }}</div>
+        <div style="display:flex;align-items:center;gap:16px;margin-top:14px;padding-top:12px;border-top:1px solid var(--bd)">
+          <form method="POST" action="foro.php" style="display:inline">
+            {{ csrf }}
+            <input type="hidden" name="action" value="like_hilo">
+            <input type="hidden" name="hilo_id" value="{{ .Hilo.ID }}">
+            <input type="hidden" name="materia_id" value="{{ .Hilo.MateriaId }}">
+            <button type="submit" style="display:inline-flex;align-items:center;gap:4px;background:none;border:0;cursor:pointer;font-size:13px;color:{{ if .Hilo.Iliked }}var(--d){{ else }}var(--sub){{ end }}">
+              <i data-feather="heart" style="width:16px;height:16px;{{ if .Hilo.Iliked }}fill:var(--d){{ end }}"></i> {{ .Hilo.Likes }}
+            </button>
+          </form>
+          <span style="display:inline-flex;align-items:center;gap:4px;font-size:13px;color:var(--sub)">
+            <i data-feather="message-square" style="width:16px;height:16px"></i> {{ .Count }}
+          </span>
+          <span style="display:inline-flex;align-items:center;gap:4px;font-size:13px;color:var(--sub)">
+            <i data-feather="eye" style="width:16px;height:16px"></i> {{ .Hilo.Views }}
+          </span>
+          {{ if .IsOwner }}
+          <form method="POST" action="foro.php" style="display:inline;margin-left:auto">
+            {{ csrf }}
+            <input type="hidden" name="action" value="close_thread">
+            <input type="hidden" name="hilo_id" value="{{ .Hilo.ID }}">
+            <input type="hidden" name="materia_id" value="{{ .Hilo.MateriaId }}">
+            <button type="submit" style="display:inline-flex;align-items:center;gap:4px;background:none;border:0;cursor:pointer;font-size:12px;color:var(--d)">
+              {{ if .Hilo.Closed }}<i data-feather="unlock" style="width:14px;height:14px"></i> {{ t "foro.reopen" }}{{ else }}<i data-feather="lock" style="width:14px;height:14px"></i> {{ t "foro.close" }}{{ end }}
+            </button>
+          </form>
+          {{ end }}
+        </div>
+      </div>
+    </div>
+
+    {{ range .Respuestas }}
+    <div style="padding:0 20px 10px">
+      <div style="background:{{ if .EsMejor }}#f0fdf4{{ else }}var(--sf){{ end }};border-radius:18px;padding:18px;border:1px solid {{ if .EsMejor }}var(--s){{ else }}var(--bd){{ end }}">
+        {{ if .EsMejor }}
+        <div style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:12px;background:var(--s);color:#fff;font-size:11px;font-weight:600;margin-bottom:10px">
+          <i data-feather="check-circle" style="width:12px;height:12px"></i> {{ t "foro.best_answer" }}
+        </div>
+        {{ end }}
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <div style="width:30px;height:30px;border-radius:50%;background:var(--pb);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;overflow:hidden">
+            {{ if .Avatar }}<img src="{{ .Avatar }}" style="width:100%;height:100%;object-fit:cover"> {{ else }}{{ slice .Autor 0 1 | printf "%s" }}{{ end }}
+          </div>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--fg)">{{ .Autor }}</div>
+            <div style="font-size:11px;color:var(--sub)">{{ .TimeAgo }}</div>
+          </div>
+        </div>
+        <div style="font-size:14px;color:var(--fg);line-height:1.6;white-space:pre-wrap">{{ .Contenido }}</div>
+        {{ if .Archivos }}
+        <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px">
+          {{ range .Archivos }}
+          <a href="{{ .URL }}" target="_blank" style="display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:8px;background:var(--bg);font-size:12px;color:var(--p);text-decoration:none">
+            <i data-feather="paperclip" style="width:12px;height:12px"></i> {{ .Nombre }}
+          </a>
+          {{ end }}
+        </div>
+        {{ end }}
+        <div style="display:flex;align-items:center;gap:12px;margin-top:10px;padding-top:8px;border-top:1px solid var(--bd)">
+          <form method="POST" action="foro.php" style="display:inline">
+            {{ csrf }}
+            <input type="hidden" name="action" value="like_resp">
+            <input type="hidden" name="respuesta_id" value="{{ .ID }}">
+            <input type="hidden" name="hilo_id" value="{{ .HiloId }}">
+            <input type="hidden" name="materia_id" value="{{ $.Hilo.MateriaId }}">
+            <button type="submit" style="display:inline-flex;align-items:center;gap:4px;background:none;border:0;cursor:pointer;font-size:13px;color:{{ if .Iliked }}var(--d){{ else }}var(--sub){{ end }}">
+              <i data-feather="heart" style="width:14px;height:14px;{{ if .Iliked }}fill:var(--d){{ end }}"></i> {{ .Likes }}
+            </button>
+          </form>
+          {{ if $.IsOwner }}
+          {{ if not .EsMejor }}
+          <form method="POST" action="foro.php" style="display:inline">
+            {{ csrf }}
+            <input type="hidden" name="action" value="best_answer">
+            <input type="hidden" name="respuesta_id" value="{{ .ID }}">
+            <input type="hidden" name="hilo_id" value="{{ .HiloId }}">
+            <input type="hidden" name="materia_id" value="{{ $.Hilo.MateriaId }}">
+            <button type="submit" style="display:inline-flex;align-items:center;gap:4px;background:none;border:0;cursor:pointer;font-size:12px;color:var(--s)">
+              <i data-feather="check-circle" style="width:14px;height:14px"></i> {{ t "foro.mark_best" }}
+            </button>
+          </form>
+          {{ end }}
+          {{ end }}
+          <button onclick="document.getElementById('reportResp{{ .ID }}').style.display=document.getElementById('reportResp{{ .ID }}').style.display==='none'?'block':'none'" style="display:inline-flex;align-items:center;gap:4px;background:none;border:0;cursor:pointer;font-size:12px;color:var(--sub)">
+            <i data-feather="flag" style="width:12px;height:12px"></i>
+          </button>
+          <div id="reportResp{{ .ID }}" style="display:none;width:100%;margin-top:8px">
+            <form method="POST" action="foro.php" style="display:flex;gap:6px">
+              {{ csrf }}
+              <input type="hidden" name="action" value="report">
+              <input type="hidden" name="target_type" value="respuesta">
+              <input type="hidden" name="target_id" value="{{ .ID }}">
+              <input type="hidden" name="hilo_id" value="{{ .HiloId }}">
+              <input type="hidden" name="materia_id" value="{{ $.Hilo.MateriaId }}">
+              <input type="text" name="motivo" placeholder="{{ t "foro.report_placeholder" }}" required
+                     style="flex:1;padding:8px 12px;border-radius:8px;border:1px solid var(--bd);font-size:12px;background:var(--bg);color:var(--fg)">
+              <button type="submit" style="padding:8px 12px;border-radius:8px;background:var(--d);color:#fff;border:0;font-size:12px;cursor:pointer">{{ t "foro.report" }}</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    {{ end }}
+
+    {{ if not .Hilo.Closed }}
+    <div style="padding:0 20px 20px">
+      <div style="background:var(--sf);border-radius:18px;padding:20px;border:1px solid var(--bd)">
+        <div style="font-weight:600;font-size:15px;color:var(--fg);margin-bottom:12px">{{ t "foro.reply" }}</div>
+        <form method="POST" action="foro.php">
+          {{ csrf }}
+          <input type="hidden" name="action" value="reply">
+          <input type="hidden" name="hilo_id" value="{{ .Hilo.ID }}">
+          <input type="hidden" name="materia_id" value="{{ .Hilo.MateriaId }}">
+          <textarea name="contenido" placeholder="{{ t "foro.reply_placeholder" }}" required rows="3"
+                    style="width:100%;padding:12px 16px;border-radius:12px;border:1px solid var(--bd);font-size:14px;resize:vertical;box-sizing:border-box;background:var(--bg);color:var(--fg)"></textarea>
+          <div style="margin-top:10px">
+            <button type="submit" class="ml-btn ml-btn-p" style="padding:10px 24px;font-size:14px">{{ t "foro.send_reply" }}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    {{ else }}
+    <div style="padding:0 20px 20px">
+      <div style="background:var(--sf);border-radius:18px;padding:16px;border:1px solid var(--bd);text-align:center">
+        <i data-feather="lock" style="width:24px;height:24px;color:var(--d);margin-bottom:6px"></i>
+        <div style="font-size:14px;color:var(--sub)">{{ t "foro.thread_closed" }}</div>
+      </div>
+    </div>
+    {{ end }}
+
+    {{ end }}
+
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded',function(){feather.replace()});
+</script>
+{{ end }}

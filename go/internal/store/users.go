@@ -118,23 +118,6 @@ func (s *UserStore) Languages(ctx context.Context, userID int) ([]string, error)
 	return out, rows.Err()
 }
 
-// PendingPaymentSessionID returns the id of the oldest unpaid finished session,
-// or nil if none.
-func (s *UserStore) PendingPaymentSessionID(ctx context.Context, userID int) (*int, error) {
-	var id int
-	err := s.DB.QueryRowContext(ctx,
-		`SELECT sesionId FROM sesiones_clase
-		 WHERE estudianteId = ? AND pagado = 0 AND fin IS NOT NULL
-		 ORDER BY fin ASC LIMIT 1`, userID).Scan(&id)
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, err
-	}
-	return &id, nil
-}
-
 // InsertMobileToken registers a token for the user (idempotent per user).
 func (s *UserStore) InsertMobileToken(ctx context.Context, userID int, token string) error {
 	_, err := s.DB.ExecContext(ctx,

@@ -75,17 +75,6 @@ func (p *Pages) MenuData(w http.ResponseWriter, r *http.Request, s *Session, cur
 		nav.AdsFreeActive = true
 	}
 
-	// Pending payment redirect for students (unless they are on pago.php).
-	if currentPage != "pago.php" {
-		rol := s.Get("rol")
-		if rol == "estudiante" || rol == "student" {
-			if pid := p.PendingPaymentSession(ctx, uid); pid > 0 {
-				redirect(w, r, "pago.php?sesion="+store.Str(pid))
-				return nav, true
-			}
-		}
-	}
-
 	// Subject color resolution.
 	mp := pageMateria[currentPage]
 	if mp == 0 && r.URL.Query().Get("materia") != "" {
@@ -171,6 +160,7 @@ func (p *Pages) MenuData(w http.ResponseWriter, r *http.Request, s *Session, cur
 	}{
 		{"materias.php", "home", "nav.materias"},
 		{"buscar.php", "search", "nav.buscar"},
+		{"foro.php", "message-circle", "nav.foro"},
 		{"mi_sala.php", "camera", "nav.sala"},
 		{"personas.php", "users", "nav.personas"},
 		{"creditos.php", "credit-card", "nav.creditos"},

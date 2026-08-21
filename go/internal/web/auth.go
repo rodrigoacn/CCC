@@ -115,13 +115,6 @@ func (p *Pages) HandleLogin(w http.ResponseWriter, r *http.Request) {
 
 	// Already-logged-in users get redirected.
 	if LoggedIn(s) {
-		rol := s.Get("rol")
-		if (rol == "estudiante" || rol == "student") {
-			if pid := p.PendingPaymentSession(ctx, UID(s)); pid > 0 {
-				redirect(w, r, "pago.php?sesion="+store.Str(pid))
-				return
-			}
-		}
 		redirect(w, r, "materias.php")
 		return
 	}
@@ -215,10 +208,6 @@ func (p *Pages) doSignIn(ctx context.Context, w http.ResponseWriter, r *http.Req
 		http.SetCookie(w, &http.Cookie{Name: "ce_remember", Value: "", Path: "/", MaxAge: -1, HttpOnly: true, Secure: IsHTTPS(r)})
 	}
 
-	if pid := p.PendingPaymentSession(ctx, store.Int(uid)); pid > 0 {
-		redirect(w, r, "pago.php?sesion="+store.Str(pid))
-		return "", ""
-	}
 	loginRol := r.PostFormValue("login_rol")
 	mode := "student"
 	if loginRol == "instructor" {
