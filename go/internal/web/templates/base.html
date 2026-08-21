@@ -29,9 +29,6 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
    <meta name="generator" content="ClassExpress - Built with Go">
    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
-   {{ if and (not .NavData.AdsFreeActive) .NavData.PropellerZoneID }}
-   <script>(function(s,u,z){var o=document.createElement('script');o.type='text/javascript';o.async=true;o.src='//'+u+'/tag.min.js?z='+z;s.parentNode.insertBefore(o,s)})(document.head||document.getElementsByTagName('head')[0],'cdn.propellerads.com',{{ .NavData.PropellerZoneID }});</script>
-   {{ end }}
   <style>
   :root{color-scheme:light;--p:#66ddbd;--pb:#4CBFA3;--bg:#eef1f6;--sf:#ffffff;--fg:#1e293b;--sub:#64748b;--bd:#dbe2ee;--s:#16a34a;--d:#dc2626;--tb:#ffffff;--tbi:#64748b;--r:14px}
   *{box-sizing:border-box}
@@ -87,7 +84,11 @@ window.CE_switchLang=function(code){
 
 {{ template "content" . }}
 
-
+{{ if and (not .NavData.AdsFreeActive) .NavData.AAAdUnitID }}
+<div style="display:flex;justify-content:center;padding:20px 16px 8px;">
+<iframe data-aa='{{ .NavData.AAAdUnitID }}' src='//ad.a-ads.com/{{ .NavData.AAAdUnitID }}?size=320x100' style='width:320px;height:100px;border:0;padding:0;overflow:hidden;background-color:transparent' scrolling='no'></iframe>
+</div>
+{{ end }}
 
 <script>if(typeof jQuery==='undefined'){var s=document.createElement('script');s.src='https://code.jquery.com/jquery-3.7.1.min.js';s.integrity='sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=';s.crossOrigin='anonymous';document.head.appendChild(s)}</script>
 <footer class="text-center mt-5" style="font-size:12px;color:var(--sub);">

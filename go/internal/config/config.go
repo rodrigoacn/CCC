@@ -41,7 +41,7 @@ type Config struct {
 	LoginAllowedIPs       []string
 	LoginOwnerAccessEmail string
 
-	PropellerZoneID string
+	AAAdUnitID string
 
 	HTTPPort int
 }
@@ -171,8 +171,8 @@ func apply(cfg *Config, key, val string) {
 		cfg.LoginAllowedIPs = splitList(val)
 	case "LOGIN_OWNER_ACCESS_EMAIL":
 		cfg.LoginOwnerAccessEmail = val
-	case "PROPELLER_ZONE_ID":
-		cfg.PropellerZoneID = val
+	case "AA_AD_UNIT_ID":
+		cfg.AAAdUnitID = val
 	}
 }
 

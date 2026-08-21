@@ -33,7 +33,7 @@ type NavData struct {
 	NavRol              string
 	IsTeacher           bool
 	AdsFreeActive       bool
-	PropellerZoneID     string
+	AAAdUnitID          string
 	NavTabs             []NavTab
 	Translations        template.JS
 }
@@ -68,7 +68,7 @@ func (p *Pages) GuardPage(w http.ResponseWriter, r *http.Request, s *Session) bo
 func (p *Pages) MenuData(w http.ResponseWriter, r *http.Request, s *Session, currentPage string, lang string) (NavData, bool) {
 	ctx := r.Context()
 	uid := UID(s)
-	nav := NavData{Page: currentPage, NavCreditos: s.Get("creditos"), PropellerZoneID: p.Cfg.PropellerZoneID}
+	nav := NavData{Page: currentPage, NavCreditos: s.Get("creditos"), AAAdUnitID: p.Cfg.AAAdUnitID}
 
 	// A global "sin anuncios" purchase hides ads on every page.
 	if row, err := p.DB.QueryOne(ctx,
