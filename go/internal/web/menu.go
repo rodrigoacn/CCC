@@ -34,6 +34,10 @@ type NavData struct {
 	IsTeacher           bool
 	AdsFreeActive       bool
 	AAAdUnitID          string
+	SeoTitle            string
+	SeoDesc             string
+	SeoIntro            template.HTML
+	Canonical           string
 	NavTabs             []NavTab
 	Translations        template.JS
 }
@@ -69,6 +73,15 @@ func (p *Pages) MenuData(w http.ResponseWriter, r *http.Request, s *Session, cur
 	ctx := r.Context()
 	uid := UID(s)
 	nav := NavData{Page: currentPage, NavCreditos: s.Get("creditos"), AAAdUnitID: p.Cfg.AAAdUnitID}
+
+	// Per-page SEO metadata (title/description/canonical).
+	if meta := seoFor(currentPage); meta.Title != "" {
+		nav.SeoTitle = meta.Title
+		nav.SeoDesc = meta.Desc
+	}
+	if currentPage != "" {
+		nav.Canonical = siteURL + "/" + currentPage
+	}
 
 	// A global "sin anuncios" purchase hides ads on every page.
 	if row, err := p.DB.QueryOne(ctx,

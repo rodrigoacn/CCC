@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#eef1f6">
-  <title>ClassExpress — Clases Particulares en Línea por Videoconferencia</title>
-  <meta name="description" content="ClassExpress: plataforma de clases particulares en tiempo real. Conecta profesores y estudiantes por videoconferencia. Matemáticas, ciencias, idiomas y más. Aprende desde cualquier lugar.">
+  <title>{{ if .NavData.SeoTitle }}{{ .NavData.SeoTitle }}{{ else }}ClassExpress — Clases Particulares en Línea por Videoconferencia{{ end }}</title>
+  <meta name="description" content="{{ if .NavData.SeoDesc }}{{ .NavData.SeoDesc }}{{ else }}ClassExpress: plataforma de clases particulares en tiempo real. Conecta profesores y estudiantes por videoconferencia. Matemáticas, ciencias, idiomas y más. Aprende desde cualquier lugar.{{ end }}">
   <meta name="keywords" content="clases particulares, clases online, tutorías, videoconferencia, profesor particular, aprender en línea, matemáticas, ciencias, idiomas, educación, e-learning, clases en vivo">
   <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://classexpress.online/">
+  <link rel="canonical" href="{{ if .NavData.Canonical }}{{ .NavData.Canonical }}{{ else }}https://classexpress.online/{{ end }}">
   <meta property="og:type" content="website">
   <meta property="og:title" content="ClassExpress — Clases Particulares en Línea por Videoconferencia">
   <meta property="og:description" content="Plataforma de clases particulares en tiempo real. Conecta profesores y estudiantes por videoconferencia. Aprende desde cualquier lugar.">

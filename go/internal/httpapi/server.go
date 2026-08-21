@@ -145,10 +145,12 @@ func (s *Server) routes() {
 		s.register("/sala.php", p.WithSession(p.HandleSala))
 		for _, subjPage := range web.SubjectPages() {
 			page := subjPage
-			s.register("/"+page, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			s.register("/"+page, p.WithSession(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				p.HandleSubjectPage(w, r, page)
-			}))
+			})))
 		}
+		s.register("/robots.txt", http.HandlerFunc(p.HandleRobots))
+		s.register("/sitemap.xml", http.HandlerFunc(p.HandleSitemap))
 		s.register("/", http.HandlerFunc(s.handleStaticOrRoot))
 	}
 }

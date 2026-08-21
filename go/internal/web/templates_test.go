@@ -188,13 +188,14 @@ func TestEditedTemplatesRenderSmoke(t *testing.T) {
 	ts2 := NewTemplateSet()
 	p2 := &Pages{Templates: ts2}
 	s2 := &Session{Values: map[string]string{"usuarioId": "100"}}
-	data := map[string]any{
-		"Lang":              "es",
-		"NavData":           nav,
-		"Self":              "tecnologia.php",
-		"TranslatedName":    "Technology",
-		"SubjectImage":      "technology.png",
-		"BreadcrumbSubject": "Materias",
+ 	data := map[string]any{
+ 		"Lang":              "es",
+ 		"NavData":           nav,
+ 		"Self":              "tecnologia.php",
+ 		"TranslatedName":    "Technology",
+ 		"SubjectImage":      "technology.png",
+ 		"BreadcrumbSubject": "Materias",
+ 		"IsLoggedIn":        true,
 		"Subtitle":          "Elige hasta 5 temas",
 		"ThemesSelected":    "temas seleccionados",
 		"MaxWarning":        "Máximo 5 temas",

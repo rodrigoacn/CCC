@@ -2,6 +2,7 @@ package web
 
 import (
 	"fmt"
+	"html/template"
 	"net/http"
 	"net/url"
 	"strings"
@@ -486,22 +487,55 @@ func SubjectPages() []string {
 // HandleSubjectPage ports matematicas.php, biologia.php, ... + _subject_page.php.
 // GET renders the theme picker; POST (temas[]) validates CSRF, caps to 5 and
 // redirects to the teacher search, mirroring ce_handle_subject_themes().
+// The page is public: anonymous visitors get the SEO intro plus a signup CTA;
+// only the interactive theme picker requires login.
 func (p *Pages) HandleSubjectPage(w http.ResponseWriter, r *http.Request, page string) {
 	ctx := r.Context()
 	s := SessionFrom(ctx)
-	if s == nil {
-		serverError(w, errNoSession)
-		return
-	}
-	if !p.GuardPage(w, r, s) {
-		return
-	}
+	logged := LoggedIn(s)
+
 	meta, ok := subjectPageMap[page]
 	if !ok {
 		http.NotFound(w, r)
 		return
 	}
 	lang := p.ResolveLang(s, r)
+
+	if !logged {
+		// Anonymous visitors: render the public page with SEO content and a
+		// signup CTA. POSTs from anonymous users go to login.
+		if r.Method == http.MethodPost {
+			redirect(w, r, "login.php")
+			return
+		}
+		nav := NavData{Page: page, AAAdUnitID: p.Cfg.AAAdUnitID}
+		if m := seoFor(page); m.Title != "" {
+			nav.SeoTitle = m.Title
+			nav.SeoDesc = m.Desc
+			nav.SeoIntro = template.HTML(m.Intro)
+		}
+		nav.Canonical = siteURL + "/" + page
+
+		translatedName := i18n.T(lang, "subject.name."+fmt.Sprint(meta.MateriaID), nil)
+		if translatedName == "" {
+			translatedName = meta.SubjectName
+		}
+		data := map[string]any{
+			"Lang":             lang,
+			"NavData":          nav,
+			"Self":             page,
+			"TranslatedName":   translatedName,
+			"SubjectImage":     meta.SubjectImage,
+			"BreadcrumbSubject": i18n.T(lang, "tecnologia.breadcrumb_subjects", nil),
+			"IsLoggedIn":       false,
+			"SeoIntro":         nav.SeoIntro,
+		}
+		if err := p.Templates.Render(w, "subject", p, s, lang, data); err != nil {
+			serverError(w, err)
+		}
+		return
+	}
+
 	nav, stop := p.MenuData(w, r, s, page, lang)
 	if stop {
 		return
@@ -551,6 +585,8 @@ func (p *Pages) HandleSubjectPage(w http.ResponseWriter, r *http.Request, page s
 		"Sections":         meta.Sections,
 		"Completados":      completados,
 		"BreadcrumbSubject": i18n.T(lang, "tecnologia.breadcrumb_subjects", nil),
+		"IsLoggedIn":       true,
+		"SeoIntro":         nav.SeoIntro,
 		"Subtitle":         i18n.T(lang, "tecnologia.subtitle", map[string]string{"max": "5"}),
 		"ThemesSelected":   i18n.T(lang, "tecnologia.themes_selected", map[string]string{"max": "5"}),
 		"MaxWarning":       i18n.T(lang, "tecnologia.max_warning", map[string]string{"max": "5"}),

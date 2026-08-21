@@ -13,9 +13,23 @@
          style="width:56px;height:56px;object-fit:cover;border-radius:.5rem;">
     <div>
       <h1 class="mb-0" style="color:var(--p)">{{ .TranslatedName }}</h1>
-      <p class="text-secondary mb-0">{{ .Subtitle }}</p>
+      {{ if .IsLoggedIn }}<p class="text-secondary mb-0">{{ .Subtitle }}</p>{{ end }}
     </div>
   </div>
+
+  {{ if not .IsLoggedIn }}
+  <div class="card bg-white border-secondary mb-4">
+    <div class="card-body">
+      {{ if .SeoIntro }}<p style="color:var(--fg);line-height:1.7;">{{ .SeoIntro }}</p>{{ end }}
+      <p class="text-secondary mb-3">Elige los temas que necesitas reforzar y encuentra al profesor ideal en minutos.</p>
+      <a href="login.php" class="btn btn-lg px-4 fw-bold" style="background:var(--p);color:#fff;border-color:var(--p)">
+        Regístrate gratis y encuentra tu profesor
+      </a>
+    </div>
+  </div>
+  {{ end }}
+
+  {{ if .IsLoggedIn }}
 
   <div id="selection-banner" class="alert alert-dark border border-secondary d-flex align-items-center justify-content-between mb-4" style="display:none!important;">
     <span class="text-secondary">
@@ -139,4 +153,6 @@
 
   update();
 })();
-</script>{{ end }}
+</script>
+{{ end }}
+{{ end }}
