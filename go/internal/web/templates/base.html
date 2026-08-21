@@ -25,13 +25,12 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="./styles.css?v=20260805">
   <link rel="icon" href="favico.svg?v=4" type="image/svg+xml">
-    <meta name="google-adsense-account" content="ca-pub-5524033374028556">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
    <meta name="generator" content="ClassExpress - Built with Go">
    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
-   {{ if not .NavData.AdsFreeActive }}
-   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5524033374028556" crossorigin="anonymous"></script>
+   {{ if and (not .NavData.AdsFreeActive) .NavData.PropellerZoneID }}
+   <script>(function(s,u,z){var o=document.createElement('script');o.type='text/javascript';o.async=true;o.src='//'+u+'/tag.min.js?z='+z;s.parentNode.insertBefore(o,s)})(document.head||document.getElementsByTagName('head')[0],'cdn.propellerads.com',{{ .NavData.PropellerZoneID }});</script>
    {{ end }}
   <style>
   :root{color-scheme:light;--p:#66ddbd;--pb:#4CBFA3;--bg:#eef1f6;--sf:#ffffff;--fg:#1e293b;--sub:#64748b;--bd:#dbe2ee;--s:#16a34a;--d:#dc2626;--tb:#ffffff;--tbi:#64748b;--r:14px}
@@ -87,16 +86,6 @@ window.CE_switchLang=function(code){
 </script>
 
 {{ template "content" . }}
-
-{{ if not .NavData.AdsFreeActive }}
-<div style="display:flex; justify-content:center; padding:20px 16px 8px;">
-  <ins class="adsbygoogle"
-       style="display:inline-block; text-align:center; width:320px; height:100px"
-        data-ad-client="ca-pub-5524033374028556"
-        data-ad-slot="1759727199"></ins>
-  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-</div>
-{{ end }}
 
 
 

@@ -151,6 +151,7 @@ func (p *Pages) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		"SelectedIdiomas": strings.Split(r.FormValue("idiomas"), ","),
 		"Deleted":      r.URL.Query().Get("deleted") == "1",
 		"AdsFreeActive": adsFreeActive,
+		"PropellerZoneID": p.Cfg.PropellerZoneID,
 		"FooterParams": FooterParams(),
 	}
 	if err := p.Templates.Render(w, "login", p, s, lang, data); err != nil {
