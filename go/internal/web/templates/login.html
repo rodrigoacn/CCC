@@ -113,6 +113,11 @@
                       type="button" role="tab">{{ t "login.iniciar" }}</button>
             </li>
             <li class="nav-item" role="presentation">
+              <button class="nav-link {{ if eq .ActiveTab "quick" }}active{{ end }}"
+                      id="quick-tab" data-bs-toggle="tab" data-bs-target="#quick"
+                      type="button" role="tab">{{ t "login.quick_tab" }}</button>
+            </li>
+            <li class="nav-item" role="presentation">
               <button class="nav-link {{ if eq .ActiveTab "signup" }}active{{ end }}"
                       id="signup-tab" data-bs-toggle="tab" data-bs-target="#signup"
                       type="button" role="tab">{{ t "login.registrar" }}</button>
@@ -253,9 +258,62 @@
                 {{ t "login.already_account" }}
                 <a href="#" class="text-primary" onclick="document.getElementById('signin-tab').click(); return false;">{{ t "login.login_here" }}</a>
               </p>
+</div>
+
+            <!-- QUICK ENTRY (INVITADO) -->
+            <div class="tab-pane fade {{ if eq .ActiveTab "quick" }}show active{{ end }}"
+                 id="quick" role="tabpanel">
+              {{ if .ErrorSignup }}
+                <div class="alert alert-danger py-2 small">{{ .ErrorSignup }}</div>
+              {{ end }}
+              <div class="text-center mb-3">
+                <p class="text-secondary small">{{ t "login.quick_subtitle" }}</p>
+              </div>
+              <form method="POST" action="login.php" novalidate>
+                <input type="hidden" name="action" value="quick">
+                {{ csrf }}
+                <div class="mb-3">
+                  <label for="nickname" class="form-label">{{ t "login.quick_nickname" }}</label>
+                  <input type="text" class="form-control" id="nickname" name="nickname"
+                         placeholder="{{ t "login.quick_nickname_placeholder" }}"
+                         value="{{ .Nickname }}" required>
+                  <div class="form-text">{{ t "login.username_hint" }}</div>
+                </div>
+                <div class="mb-3">
+                  <label for="pais_id_quick" class="form-label">{{ t "login.quick_pais" }}</label>
+                  <input type="text" class="form-control mb-2" id="pais_search_quick"
+                         placeholder="Buscar país…" oninput="filterCountriesQuick()">
+                  <select class="form-select" id="pais_id_quick" name="pais_id" size="6">
+                    <option value="">{{ t "login.pais_placeholder" }}</option>
+                    {{ range .Paises }}
+                      <option value="{{ .paisId }}"
+                              data-nombre="{{ lower .nombre }}"
+                              {{ if eq .PaisID .paisId }}selected{{ end }}>
+                        {{ .nombre }} ({{ .simbolo }}{{ .codigo_moneda }})
+                      </option>
+                    {{ end }}
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label d-block">{{ t "login.quick_rol" }}</label>
+                  <div class="d-flex gap-2">
+                    <label class="form-check form-check-inline" id="quick-student-label" style="cursor:pointer;padding:8px 16px;border-radius:24px;border:1px solid var(--bd);background:{{ if eq .LoginRol "student" }}var(--pb){{ else }}transparent{{ end }}">
+                      <input type="radio" name="rol" value="student" {{ if eq .LoginRol "student" }}checked{{ end }} style="display:none" data-role="student">
+                       <i class="bi bi-person"></i> {{ t "login.quick_estudiante" }}
+                    </label>
+                    <label class="form-check form-check-inline" id="quick-instructor-label" style="cursor:pointer;padding:8px 16px;border-radius:24px;border:1px solid var(--bd);background:{{ if eq .LoginRol "instructor" }}var(--pb){{ else }}transparent{{ end }}">
+                      <input type="radio" name="rol" value="instructor" {{ if eq .LoginRol "instructor" }}checked{{ end }} style="display:none" data-role="instructor">
+                       <i class="bi bi-briefcase"></i> {{ t "login.quick_profesor" }}
+                    </label>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 fw-semibold">{{ t "login.quick_ingresar" }}</button>
+              </form>
             </div>
 
-          </div>
+            </div>
+
+            </div>
         </div>
 
 
@@ -292,6 +350,18 @@
       opt.hidden = name.indexOf(filter) === -1;
     }
   }
+  function filterCountriesQuick() {
+    var input = document.getElementById('pais_search_quick');
+    var filter = input.value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    var select = document.getElementById('pais_id_quick');
+    var first = select.options[0];
+    first.hidden = filter.length > 0;
+    for (var i = 1; i < select.options.length; i++) {
+      var opt = select.options[i];
+      var name = opt.getAttribute('data-nombre').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      opt.hidden = name.indexOf(filter) === -1;
+    }
+  }
   document.addEventListener('DOMContentLoaded', function() {
     var search = document.getElementById('pais_search');
     var select = document.getElementById('pais_id');
@@ -311,6 +381,28 @@
       rolInstructor.addEventListener('click', function() {
         rolInstructor.style.background = 'var(--pb)';
         rolStudent.style.background = 'transparent';
+      });
+    }
+    var qStudent = document.getElementById('quick-student-label');
+    var qInstructor = document.getElementById('quick-instructor-label');
+    if (qStudent && qInstructor) {
+      qStudent.addEventListener('click', function() {
+        qStudent.style.background = 'var(--pb)';
+        qInstructor.style.background = 'transparent';
+      });
+      qInstructor.addEventListener('click', function() {
+        qInstructor.style.background = 'var(--pb)';
+        qStudent.style.background = 'transparent';
+      });
+    }
+    var qSearch = document.getElementById('pais_search_quick');
+    var qSelect = document.getElementById('pais_id_quick');
+    if (qSearch && qSelect) {
+      qSearch.addEventListener('focus', function() {
+        qSelect.size = Math.min(qSelect.options.length, 10);
+      });
+      qSearch.addEventListener('blur', function() {
+        setTimeout(function() { qSelect.size = 6; }, 200);
       });
     }
   });

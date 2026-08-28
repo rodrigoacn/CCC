@@ -75,17 +75,13 @@ func (p *Pages) HandleLogin(w http.ResponseWriter, r *http.Request) {
 					if em == strings.ToLower(strings.TrimSpace(o)) {
 						isOwner = true
 						break
-					}
-				}
-			}
-		}
+}
 		allowed := false
 		for _, a := range p.Cfg.LoginAllowedIPs {
 			if a == clientIP {
 				allowed = true
 				break
-			}
-		}
+}
 		if !isOwner && !allowed {
 			redirect(w, r, "landing.php")
 			return
@@ -150,6 +146,7 @@ func (p *Pages) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		"Email":        r.FormValue("email"),
 		"Nombre":       r.FormValue("nombre"),
 		"Username":     r.FormValue("username"),
+		"Nickname":     r.FormValue("nickname"),
 		"EmailSignup":  r.FormValue("email_signup"),
 		"PaisID":       r.FormValue("pais_id"),
 		"LoginRol":     r.FormValue("login_rol"),
@@ -164,7 +161,7 @@ func (p *Pages) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (p *Pages) doSignIn(ctx context.Context, w http.ResponseWriter, r *http.Request, s *Session, lang, ip string) (string, string) {
+func (p *Pages) doSignIn(ctx context.Context, w http.ResponseWriter, r *http.Request, s *Session, lang string, ip string) (string, string) {
 	email := strings.TrimSpace(r.PostFormValue("email"))
 	password := r.PostFormValue("password")
 
@@ -224,7 +221,7 @@ func (p *Pages) doSignIn(ctx context.Context, w http.ResponseWriter, r *http.Req
 	return "", ""
 }
 
-func (p *Pages) doResendVerify(ctx context.Context, r *http.Request, lang, ip string) (string, string) {
+func (p *Pages) doResendVerify(ctx context.Context, r *http.Request, lang string, ip string) (string, string) {
 	email := strings.TrimSpace(r.PostFormValue("email"))
 	if !p.Rate.Allow(ctx, "resend_verify", ip, 3, 300) {
 		return i18n.T(lang, "login.rate_limit", nil), ""
@@ -241,7 +238,7 @@ func (p *Pages) doResendVerify(ctx context.Context, r *http.Request, lang, ip st
 	return "", i18n.T(lang, "login.resend_sent", nil)
 }
 
-func (p *Pages) doSignUp(ctx context.Context, r *http.Request, lang, ip string) (string, string, string) {
+func (p *Pages) doSignUp(ctx context.Context, r *http.Request, lang string, ip string) (string, string, string) {
 	nombre := strings.TrimSpace(r.PostFormValue("nombre"))
 	email := strings.TrimSpace(r.PostFormValue("email_signup"))
 	username := strings.TrimSpace(r.PostFormValue("username"))
@@ -327,7 +324,6 @@ func (p *Pages) doSignUp(ctx context.Context, r *http.Request, lang, ip string) 
 	if sent {
 		return "", i18n.T(lang, "login.success_created", nil), "signin"
 	}
-	return i18n.T(lang, "login.verify_send_error", nil), "", "signin"
 }
 
 // doQuickEntry creates a guest user with minimal info: nickname, country, role.

@@ -37,7 +37,6 @@ func validEmail(s string) bool {
 	return err == nil
 }
 
-// FooterParams builds the params map for t('general.footer_text').
 func FooterParams() map[string]string {
 	return map[string]string{
 		"bootstrap": `<a href="https://getbootstrap.com/" class="text-secondary">Bootstrap</a>`,
@@ -45,12 +44,24 @@ func FooterParams() map[string]string {
 	}
 }
 
-// redirect is a tiny helper for header('Location: ...') + exit.
 func redirect(w http.ResponseWriter, r *http.Request, url string) {
 	http.Redirect(w, r, url, http.StatusFound)
 }
 
-// HandleLogin ports login.php.
+// serverError logs the error and returns a generic 500 response.
+func serverError(w http.ResponseWriter, err error) {
+	log.Printf("page error: %v", err)
+	http.Error(w, "Error interno del servidor", http.StatusInternalServerError)
+}
+
+// noSessionError is returned when a session is required but not found.
+type noSessionError struct{}
+
+func (e *noSessionError) Error() string { return "sesión no disponible" }
+
+// errNoSession is returned when a session is required but not found.
+var errNoSession = &noSessionError{}
+
 func (p *Pages) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	s := SessionFrom(ctx)
@@ -75,7 +86,139 @@ func (p *Pages) HandleLogin(w http.ResponseWriter, r *http.Request) {
 					if em == strings.ToLower(strings.TrimSpace(o)) {
 						isOwner = true
 						break
-					}
+}
+
+// HandleForgotPassword ports forgot_password.php.
+func (p *Pages) HandleForgotPassword(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	s := SessionFrom(ctx)
+	if s == nil {
+		serverError(w, errNoSession)
+		return
+	}
+	if p.ApplyLangParam(w, r, s) {
+		return
+	}
+	lang := p.ResolveLang(s, r)
+
+	errorMsg, success := "", ""
+	if r.Method == http.MethodPost {
+		if !CSRFRequire(w, r, s) {
+			return
+		}
+		email := strings.TrimSpace(r.PostFormValue("email"))
+		if email == "" {
+			errorMsg = i18n.T(lang, "forgot.error_email", nil)
+		} else if !validEmail(email) {
+			errorMsg = i18n.T(lang, "login.error_email", nil)
+		} else {
+			ctx := r.Context()
+			row, err := p.DB.QueryOne(ctx, "SELECT usuarioId, nombre FROM usuarios WHERE email = ? LIMIT 1", email)
+			if err == nil && row != nil {
+				tok := auth.NewToken()
+				_, _ = p.DB.Exec(ctx, "UPDATE usuarios SET token_verificacion = ? WHERE usuarioId = ?", tok, store.Str(row["usuarioId"]))
+				link := BaseURL(r) + "/reset_password.php?token=" + urlQueryEscape(tok)
+				if p.Mail != nil {
+					p.Mail.Send(email, i18n.T(lang, "forgot.subject", nil), forgotPasswordEmail(store.Str(row["nombre"]), link))
+				}
+			}
+			success = i18n.T(lang, "forgot.success", nil)
+		}
+	}
+	data := map[string]any{
+		"Lang":    lang,
+		"Error":   errorMsg,
+		"Success": success,
+		"Email":   r.FormValue("email"),
+	}
+	if err := p.Templates.Render(w, "forgot_password", p, s, lang, data); err != nil {
+		serverError(w, err)
+	}
+}
+
+// HandleResetPassword ports reset_password.php.
+func (p *Pages) HandleResetPassword(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	s := SessionFrom(ctx)
+	if s == nil {
+		serverError(w, errNoSession)
+		return
+	}
+	if p.ApplyLangParam(w, r, s) {
+		return
+	}
+	lang := p.ResolveLang(s, r)
+
+	token := strings.TrimSpace(r.URL.Query().Get("token"))
+	errorMsg, success := "", ""
+	hasForm := false
+	nombre := ""
+
+	if token != "" {
+		row, err := p.DB.QueryOne(ctx, "SELECT usuarioId, nombre FROM usuarios WHERE token_verificacion = ? LIMIT 1", token)
+		if err == nil && row != nil {
+			hasForm = true
+			nombre = store.Str(row["nombre"])
+		}
+	}
+
+	if r.Method == http.MethodPost && hasForm {
+		if !CSRFRequire(w, r, s) {
+			return
+		}
+		password := r.PostFormValue("password_signup")
+		confirm := r.PostFormValue("password_confirm")
+		if password == "" || confirm == "" {
+			errorMsg = i18n.T(lang, "login.error_fields", nil)
+		} else if len(password) < 6 {
+			errorMsg = i18n.T(lang, "login.error_passshort", nil)
+		} else if password != confirm {
+			errorMsg = i18n.T(lang, "login.error_pass", nil)
+		} else {
+			hash, err := auth.HashPassword(password)
+			if err != nil {
+				errorMsg = i18n.T(lang, "login.error_db", nil)
+			} else {
+				_, _ = p.DB.Exec(ctx, "UPDATE usuarios SET password = ?, token_verificacion = '' WHERE token_verificacion = ?", hash, token)
+				success = i18n.T(lang, "login.success_ver", nil)
+			}
+		}
+	}
+
+	data := map[string]any{
+		"Lang":      lang,
+		"Token":     token,
+		"Error":     errorMsg,
+		"Success":   success,
+		"HasForm":   hasForm,
+		"GreetingParams": map[string]string{
+			"name": `<strong class="text-primary">` + nombre + `</strong>`,
+		},
+	}
+	if err := p.Templates.Render(w, "reset_password", p, s, lang, data); err != nil {
+		serverError(w, err)
+	}
+}
+
+// HandleIndex ports index.php.
+func (p *Pages) HandleIndex(w http.ResponseWriter, r *http.Request) {
+	s := SessionFrom(r.Context())
+	if s == nil {
+		serverError(w, errNoSession)
+		return
+	}
+	p.RememberAutoLogin(r.Context(), w, s, r)
+	if !LoggedIn(s) {
+		redirect(w, r, "login.php")
+		return
+	}
+	rol := s.Get("rol")
+	if rol != "estudiante" && rol != "student" {
+		redirect(w, r, "dashboard_profesor.php")
+		return
+	}
+	redirect(w, r, "materias.php")
+}
 				}
 			}
 		}
@@ -150,6 +293,7 @@ func (p *Pages) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		"Email":        r.FormValue("email"),
 		"Nombre":       r.FormValue("nombre"),
 		"Username":     r.FormValue("username"),
+		"Nickname":     r.FormValue("nickname"),
 		"EmailSignup":  r.FormValue("email_signup"),
 		"PaisID":       r.FormValue("pais_id"),
 		"LoginRol":     r.FormValue("login_rol"),
@@ -159,12 +303,12 @@ func (p *Pages) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		"AAAdUnitID": p.Cfg.AAAdUnitID,
 		"FooterParams": FooterParams(),
 	}
-	if err := p.Templates.Render(w, "login", p, s, lang, data); err != nil {
+	if err := p.Templates.Render(w, "login", p, nil, lang, data); err != nil {
 		serverError(w, err)
 	}
 }
 
-func (p *Pages) doSignIn(ctx context.Context, w http.ResponseWriter, r *http.Request, s *Session, lang, ip string) (string, string) {
+func (p *Pages) doSignIn(ctx context.Context, w http.ResponseWriter, r *http.Request, s *Session, lang string, ip string) (string, string) {
 	email := strings.TrimSpace(r.PostFormValue("email"))
 	password := r.PostFormValue("password")
 
@@ -214,17 +358,10 @@ func (p *Pages) doSignIn(ctx context.Context, w http.ResponseWriter, r *http.Req
 		http.SetCookie(w, &http.Cookie{Name: "ce_remember", Value: "", Path: "/", MaxAge: -1, HttpOnly: true, Secure: IsHTTPS(r)})
 	}
 
-	loginRol := r.PostFormValue("login_rol")
-	mode := "student"
-	if loginRol == "instructor" {
-		mode = "teacher"
-	}
-	http.SetCookie(w, &http.Cookie{Name: "ce_app_modo", Value: mode, Path: "/", MaxAge: 365 * 24 * 60 * 60, Secure: IsHTTPS(r)})
-	redirect(w, r, "materias.php")
-	return "", ""
+	return "", i18n.T(lang, "login.success", nil)
 }
 
-func (p *Pages) doResendVerify(ctx context.Context, r *http.Request, lang, ip string) (string, string) {
+func (p *Pages) doResendVerify(ctx context.Context, r *http.Request, lang string, ip string) (string, string) {
 	email := strings.TrimSpace(r.PostFormValue("email"))
 	if !p.Rate.Allow(ctx, "resend_verify", ip, 3, 300) {
 		return i18n.T(lang, "login.rate_limit", nil), ""
@@ -241,7 +378,7 @@ func (p *Pages) doResendVerify(ctx context.Context, r *http.Request, lang, ip st
 	return "", i18n.T(lang, "login.resend_sent", nil)
 }
 
-func (p *Pages) doSignUp(ctx context.Context, r *http.Request, lang, ip string) (string, string, string) {
+func (p *Pages) doSignUp(ctx context.Context, r *http.Request, lang string, ip string) (string, string, string) {
 	nombre := strings.TrimSpace(r.PostFormValue("nombre"))
 	email := strings.TrimSpace(r.PostFormValue("email_signup"))
 	username := strings.TrimSpace(r.PostFormValue("username"))
@@ -297,7 +434,7 @@ func (p *Pages) doSignUp(ctx context.Context, r *http.Request, lang, ip string) 
 		if sent {
 			return "", i18n.T(lang, "login.verify_resent", nil), "signin"
 		}
-		return i18n.T(lang, "login.verify_send_error", nil), "", "signin"
+		return i18n.T(lang, "login.verify_send_error", nil), "", "signup"
 	}
 
 	hash, err := auth.HashPassword(password)
@@ -327,7 +464,7 @@ func (p *Pages) doSignUp(ctx context.Context, r *http.Request, lang, ip string) 
 	if sent {
 		return "", i18n.T(lang, "login.success_created", nil), "signin"
 	}
-	return i18n.T(lang, "login.verify_send_error", nil), "", "signin"
+	return i18n.T(lang, "login.verify_send_error", nil), "", "signup"
 }
 
 // doQuickEntry creates a guest user with minimal info: nickname, country, role.
@@ -466,176 +603,27 @@ func (p *Pages) HandleVerify(w http.ResponseWriter, r *http.Request) {
 	if token != "" {
 		row, err := p.DB.QueryOne(ctx,
 			"SELECT usuarioId, nombre, verificado FROM usuarios WHERE token_verificacion = ? LIMIT 1", token)
-		if err != nil || row == nil {
-			message = "No se encontró el enlace de verificación. Puede que ya haya sido usado o sea inválido."
-		} else if store.Bool(row["verificado"]) {
-			status = "already"
-			message = "Tu correo ya está verificado. Puedes iniciar sesión."
-		} else {
-			_, _ = p.DB.Exec(ctx,
-				"UPDATE usuarios SET verificado = 1, token_verificacion = '' WHERE usuarioId = ?",
-				store.Str(row["usuarioId"]))
-			status = "success"
-			message = "¡Correo verificado con éxito! Ahora puedes iniciar sesión."
-		}
-	}
-	data := map[string]any{
-		"Lang":         lang,
-		"Status":       status,
-		"Message":      message,
-		"FooterParams": FooterParams(),
-	}
-	if err := p.Templates.Render(w, "verify", p, s, lang, data); err != nil {
-		serverError(w, err)
-	}
-}
-
-// HandleForgotPassword ports forgot_password.php.
-func (p *Pages) HandleForgotPassword(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	s := SessionFrom(ctx)
-	if s == nil {
-		serverError(w, errNoSession)
-		return
-	}
-	if p.ApplyLangParam(w, r, s) {
-		return
-	}
-	lang := p.ResolveLang(s, r)
-
-	errorMsg, success := "", ""
-	if r.Method == http.MethodPost {
-		if !CSRFRequire(w, r, s) {
-			return
-		}
-		email := strings.TrimSpace(r.PostFormValue("email"))
-		if email == "" || !validEmail(email) {
-			errorMsg = i18n.T(lang, "forgot.invalid_email", nil)
-		} else {
-			row, err := p.DB.QueryOne(ctx, "SELECT usuarioId, nombre, verificado FROM usuarios WHERE email = ? LIMIT 1", email)
-			if err == nil && row != nil && store.Bool(row["verificado"]) {
-				tok := auth.NewToken()
-				expiry := timeNow().Unix() + 3600
-				_, _ = p.DB.Exec(ctx,
-					"UPDATE usuarios SET reset_token = ?, reset_token_expiry = ? WHERE usuarioId = ?",
-					tok, expiry, store.Str(row["usuarioId"]))
-				link := BaseURL(r) + "/reset_password.php?token=" + urlQueryEscape(tok)
-				p.Mail.SendReset(email, store.Str(row["nombre"]), link)
+		if err == nil && row != nil {
+			if !store.Bool(row["verificado"]) {
+				_, _ = p.DB.Exec(ctx, "UPDATE usuarios SET verificado = 1, token_verificacion = '' WHERE usuarioId = ?", store.Str(row["usuarioId"]))
+				status = "success"
+				message = "¡Correo verificado con éxito! Ahora puedes iniciar sesión."
+			} else if store.Bool(row["verificado"]) {
+				status = "already"
+				message = "Tu correo ya está verificado. Puedes iniciar sesión."
+			} else {
+				status = "error"
+				message = "No se encontró el enlace de verificación. Puede que ya haya sido usado o sea inválido."
 			}
-			success = i18n.T(lang, "forgot.success", nil)
 		}
 	}
+
 	data := map[string]any{
 		"Lang":    lang,
-		"Error":   errorMsg,
-		"Success": success,
-		"Email":   r.FormValue("email"),
+		"Status":  status,
+		"Message": message,
 	}
-	if err := p.Templates.Render(w, "forgot_password", p, s, lang, data); err != nil {
+	if err := p.Templates.Render(w, "verify", nil, nil, lang, data); err != nil {
 		serverError(w, err)
 	}
 }
-
-// HandleResetPassword ports reset_password.php.
-func (p *Pages) HandleResetPassword(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	s := SessionFrom(ctx)
-	if s == nil {
-		serverError(w, errNoSession)
-		return
-	}
-	if p.ApplyLangParam(w, r, s) {
-		return
-	}
-	lang := p.ResolveLang(s, r)
-
-	token := strings.TrimSpace(r.URL.Query().Get("token"))
-	errorMsg, success := "", ""
-	hasForm := false
-	nombre := ""
-
-	row, err := p.DB.QueryOne(ctx,
-		"SELECT usuarioId, nombre, reset_token_expiry FROM usuarios WHERE reset_token = ? LIMIT 1", token)
-	if err == nil && row != nil {
-		if store.Int(row["reset_token_expiry"]) < timeNow().Unix() {
-			row = nil
-			errorMsg = i18n.T(lang, "reset.expired", nil)
-		}
-	}
-	if token == "" || (row == nil && errorMsg == "") {
-		errorMsg = i18n.T(lang, "reset.invalid_token", nil)
-	}
-
-	if r.Method == http.MethodPost && row != nil {
-		if !CSRFRequire(w, r, s) {
-			return
-		}
-		password := r.PostFormValue("password")
-		confirm := r.PostFormValue("confirm")
-		if len(password) < 6 {
-			errorMsg = i18n.T(lang, "reset.password_short", nil)
-		} else if password != confirm {
-			errorMsg = i18n.T(lang, "reset.password_mismatch", nil)
-		} else {
-			hash, err := auth.HashPassword(password)
-			if err != nil {
-				serverError(w, err)
-				return
-			}
-			_, _ = p.DB.Exec(ctx,
-				"UPDATE usuarios SET password = ?, reset_token = '', reset_token_expiry = 0 WHERE usuarioId = ?",
-				hash, store.Str(row["usuarioId"]))
-			success = i18n.T(lang, "reset.success", nil)
-			row = nil
-		}
-	}
-
-	if row != nil {
-		hasForm = true
-		nombre = store.Str(row["nombre"])
-	}
-	data := map[string]any{
-		"Lang":      lang,
-		"Token":     token,
-		"Error":     errorMsg,
-		"Success":   success,
-		"HasForm":   hasForm,
-		"GreetingParams": map[string]string{
-			"name": `<strong class="text-primary">` + nombre + `</strong>`,
-		},
-	}
-	if err := p.Templates.Render(w, "reset_password", p, s, lang, data); err != nil {
-		serverError(w, err)
-	}
-}
-
-// HandleIndex ports index.php.
-func (p *Pages) HandleIndex(w http.ResponseWriter, r *http.Request) {
-	s := SessionFrom(r.Context())
-	if s == nil {
-		serverError(w, errNoSession)
-		return
-	}
-	p.RememberAutoLogin(r.Context(), w, s, r)
-	if !LoggedIn(s) {
-		redirect(w, r, "login.php")
-		return
-	}
-	rol := s.Get("rol")
-	if rol != "estudiante" && rol != "student" {
-		redirect(w, r, "dashboard_profesor.php")
-		return
-	}
-	redirect(w, r, "materias.php")
-}
-
-func serverError(w http.ResponseWriter, err error) {
-	log.Printf("page error: %v", err)
-	http.Error(w, "Error interno del servidor", http.StatusInternalServerError)
-}
-
-var errNoSession = &noSessionError{}
-
-type noSessionError struct{}
-
-func (e *noSessionError) Error() string { return "sesión no disponible" }
