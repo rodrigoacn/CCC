@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"classexpress/internal/i18n"
 	"classexpress/internal/store"
@@ -29,46 +30,83 @@ type subjectItem struct {
 }
 
 // HandleMaterias ports materias.php.
+// Supports both logged-in users and guests (via remember_token or role param).
 func (p *Pages) HandleMaterias(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	s := SessionFrom(ctx)
-	if s == nil {
-		serverError(w, errNoSession)
-		return
-	}
-	if !p.GuardPage(w, r, s) {
-		return
-	}
-	lang := p.ResolveLang(s, r)
-	page := CurrentPage(r)
-	nav, redirect := p.MenuData(w, r, s, page, lang)
-	if redirect {
-		return
+	lang := p.ResolveLang(nil, r) // Allow lang without session
+
+	// Check for role parameter (from landing page redirect)
+	roleParam := r.URL.Query().Get("rol")
+	if roleParam != "" && (roleParam == "student" || roleParam == "instructor") {
+		http.SetCookie(w, &http.Cookie{
+			Name:     "ce_role",
+			Value:    roleParam,
+			Path:     "/",
+			MaxAge:   365 * 24 * 60 * 60,
+			SameSite: http.SameSiteLaxMode,
+		})
 	}
 
-	uid := UID(s)
-	userRow, err := p.DB.QueryOne(ctx, "SELECT nombre, rol, ultimaMateria FROM usuarios WHERE usuarioId = ?", uid)
-	if err != nil {
-		serverError(w, err)
-		return
-	}
-	first := "Usuario"
-	if userRow != nil {
-		n := store.Str(userRow["nombre"])
-		if n != "" {
-			first = n
-			if i := indexByte(first, ' '); i > 0 {
-				first = first[:i]
+	// Try to get session (may be nil for new guests)
+	if s == nil {
+		// Try to auto-login via remember_token
+		if cookie, err := r.Cookie("ce_remember"); err == nil && cookie.Value != "" {
+			ctx := r.Context()
+			row, err := p.DB.QueryOne(ctx,
+				"SELECT usuarioId, nombre, rol, creditos, idioma_preferido FROM usuarios WHERE remember_token = ? AND remember_token IS NOT NULL AND eliminado = 0 LIMIT 1",
+				HashToken(cookie.Value))
+			if err == nil && row != nil {
+				s = &Session{ID: newSessionID(), Values: map[string]string{}, IsNew: true}
+				s.Set("usuarioId", store.Str(row["usuarioId"]))
+				s.Set("nombre", store.Str(row["nombre"]))
+				s.Set("rol", store.Str(row["rol"]))
+				s.Set("creditos", store.Str(row["creditos"]))
+				if lang := store.Str(row["idioma_preferido"]); lang != "" {
+					s.Set("_lang", lang)
+				}
+				newTok := NewRememberToken()
+				_, _ = p.DB.Exec(ctx, "UPDATE usuarios SET remember_token = ? WHERE usuarioId = ?", HashToken(newTok), store.Str(row["usuarioId"]))
+				http.SetCookie(w, &http.Cookie{Name: "ce_remember", Value: newTok, Path: "/", MaxAge: 30 * 24 * 60 * 60, HttpOnly: true, Secure: IsHTTPS(r), SameSite: http.SameSiteLaxMode})
+				http.SetCookie(w, &http.Cookie{Name: CookieName, Value: s.ID, Path: "/", MaxAge: 30 * 24 * 60 * 60, HttpOnly: true, Secure: IsHTTPS(r), SameSite: http.SameSiteLaxMode})
 			}
 		}
 	}
-	isTeacher := nav.IsTeacher
+
+	// Get nav data (works with nil session)
+	nav, redirect := p.MenuData(w, r, nil, "materias.php", lang)
+	if redirect {
+		return
+	}
+	nav.AAAdUnitID = p.Cfg.AAAdUnitID
+
+	// Determine user state
+	first := "Usuario"
 	ultimaMateria := int64(0)
-	if userRow != nil {
-		ultimaMateria = store.Int(userRow["ultimaMateria"])
+
+	if s != nil && LoggedIn(s) {
+		userRow, err := p.DB.QueryOne(r.Context(), "SELECT nombre, rol, ultimaMateria FROM usuarios WHERE usuarioId = ?", UID(s))
+		if err == nil && userRow != nil {
+			n := store.Str(userRow["nombre"])
+			if n != "" {
+				first = n
+				if i := strings.IndexByte(first, ' '); i > 0 {
+					first = first[:i]
+				}
+			}
+			if store.Str(userRow["rol"]) == "instructor" {
+				nav.IsTeacher = true
+			}
+			ultimaMateria = store.Int(userRow["ultimaMateria"])
+		}
+	} else {
+		if roleCookie, _ := r.Cookie("ce_role"); roleCookie != nil && roleCookie.Value == "instructor" {
+			nav.IsTeacher = true
+		}
 	}
 
-	subjects, err := p.DB.QueryAll(ctx,
+	// Load subjects
+	subjects, err := p.DB.QueryAll(r.Context(),
 		`SELECT m.materiaId AS id, m.nombre,
 		        (SELECT COUNT(*) FROM clases_programadas cp WHERE cp.materiaId = m.materiaId AND cp.activa = true) AS clases_activas
 		 FROM materias m ORDER BY m.nombre`)
@@ -97,29 +135,31 @@ func (p *Pages) HandleMaterias(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	data := map[string]any{
-		"Lang":      lang,
-		"NavData":   nav,
-		"First":     first,
-		"IsTeacher": isTeacher,
-		"Subjects":  items,
-	}
-
-	// Continuar card (last subject opened).
-	if ultimaMateria >= 1 && ultimaMateria <= 11 {
-		for _, it := range items {
-			if it.ID == ultimaMateria {
-				data["Continuar"] = true
-				data["UltimaMateria"] = ultimaMateria
-				data["ContinuarNombre"] = it.Nombre
-				data["ContinuarNombreURL"] = it.NombreURL
-				data["ContinuarColor"] = subjectColors[ultimaMateria]
-				break
+	// Continuar card
+	if s != nil && LoggedIn(s) {
+		if row, _ := p.DB.QueryOne(r.Context(), "SELECT nombre FROM usuarios WHERE usuarioId = ?", UID(s)); row != nil {
+			n := store.Str(row["nombre"])
+			if n != "" {
+				first = n
+				if i := strings.IndexByte(first, ' '); i > 0 {
+					first = first[:i]
+				}
 			}
 		}
 	}
 
-	if err := p.Templates.RenderAuthed(w, "materias", p, s, lang, data); err != nil {
+isTeacher := nav.IsTeacher
+
+data := map[string]any{
+		"Lang":          lang,
+		"NavData":       nav,
+		"First":         first,
+		"IsTeacher":     isTeacher,
+		"Subjects":      items,
+		"UltimaMateria": ultimaMateria,
+	}
+
+	if err := p.Templates.Render(w, "materias", p, nil, lang, data); err != nil {
 		serverError(w, err)
 	}
 }

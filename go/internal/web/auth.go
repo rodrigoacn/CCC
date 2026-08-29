@@ -109,7 +109,7 @@ func (p *Pages) HandleLogin(w http.ResponseWriter, r *http.Request) {
 			errorSignup, successMsg, activeTab = p.doSignUp(ctx, r, lang, ip)
 		case "quick":
 			activeTab = "quick"
-			errorSignup, successMsg, activeTab = p.doQuickEntry(ctx, r, lang, ip)
+			errorSignup, successMsg, activeTab = p.doQuickEntry(ctx, w, r, lang, ip)
 		}
 	}
 
@@ -332,7 +332,7 @@ func (p *Pages) doSignUp(ctx context.Context, r *http.Request, lang, ip string) 
 
 // doQuickEntry creates a guest user with minimal info: nickname, country, role.
 // No email/password required. Returns (error, successMsg, activeTab).
-func (p *Pages) doQuickEntry(ctx context.Context, r *http.Request, lang string, ip string) (string, string, string) {
+func (p *Pages) doQuickEntry(ctx context.Context, w http.ResponseWriter, r *http.Request, lang string, ip string) (string, string, string) {
 	nickname := strings.TrimSpace(r.PostFormValue("nickname"))
 	paisID := r.PostFormValue("pais_id")
 	rol := r.PostFormValue("rol")
@@ -352,6 +352,9 @@ func (p *Pages) doQuickEntry(ctx context.Context, r *http.Request, lang string, 
 	if !usernameRE.MatchString(nickname) {
 		return i18n.T(lang, "login.quick_nickname_chars", nil), "", "quick"
 	}
+
+	// Store the original display name before making username unique
+	originalName := nickname
 
 	// Ensure unique username; append random suffix if taken.
 	baseNick := nickname
@@ -381,24 +384,47 @@ func (p *Pages) doQuickEntry(ctx context.Context, r *http.Request, lang string, 
 	}
 
 	newID, err := p.DB.Exec(ctx,
-		"INSERT INTO usuarios (nombre, email, password, rol, verificado, es_invitado, pais_id, creditos, username, ultimoContenido, ultimaClase, ultimaSala) VALUES (?, '', '', ?, 1, 1, ?, 100, ?, '', '', '')",
-		nickname, rolDB, paisAny, nickname)
+		"INSERT INTO usuarios (nombre, nombre_invitado, email, password, rol, verificado, es_invitado, pais_id, creditos, username, ultimoContenido, ultimaClase, ultimaSala) VALUES (?, ?, '', '', ?, 1, 1, ?, 100, ?, '', '', '')",
+		nickname, originalName, rolDB, paisAny, nickname)
 	if err != nil {
 		log.Printf("quickentry insert: %v", err)
 		return i18n.T(lang, "login.error_db", nil), "", "quick"
 	}
 
+	// Create persistent remember token for auto-login on return
+	tok := NewRememberToken()
+	_, _ = p.DB.Exec(ctx, "UPDATE usuarios SET remember_token = ? WHERE usuarioId = ?", HashToken(tok), newID)
+
 	// Auto-login the new guest user.
-	uid := fmt.Sprint(newID)
 	s := SessionFrom(r.Context())
 	if s != nil {
 		p.Sessions.Regenerate(nil, nil, s)
-		s.Set("usuarioId", uid)
-		s.Set("nombre", nickname)
+		s.Set("usuarioId", fmt.Sprint(newID))
+		s.Set("nombre", originalName) // Use original name for display
 		s.Set("rol", rolDB)
 		s.Set("creditos", "100")
 		s.Set("_lang", "es")
 	}
+
+	// Set persistent remember cookie (30 days) for auto-login on return
+	http.SetCookie(w, &http.Cookie{
+		Name:     CookieName,
+		Value:    tok,
+		Path:     "/",
+		MaxAge:   30 * 24 * 60 * 60,
+		HttpOnly: true,
+		Secure:   IsHTTPS(r),
+		SameSite: http.SameSiteLaxMode,
+	})
+	http.SetCookie(w, &http.Cookie{
+		Name:     "ce_remember",
+		Value:    tok,
+		Path:     "/",
+		MaxAge:   30 * 24 * 60 * 60,
+		HttpOnly: true,
+		Secure:   IsHTTPS(r),
+		SameSite: http.SameSiteLaxMode,
+	})
 
 	return "", i18n.T(lang, "login.quick_success", nil), "quick"
 }
