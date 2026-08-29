@@ -151,6 +151,10 @@ func (a *API) dispatch(action string, r *http.Request, body map[string]any) *res
 		return a.getDirectMessages(r)
 	case "search_people":
 		return a.searchPeople(r)
+	case "get_follower_chat":
+		return a.getFollowerChat(r)
+	case "send_follower_message":
+		return a.sendFollowerMessage(r, body)
 	case "user_profile":
 		return a.userProfile(r, body)
 	case "resenas_profesor":

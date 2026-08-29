@@ -396,3 +396,113 @@ func (a *API) resenasProfesor(r *http.Request) *resp {
 	}
 	return okOut(map[string]any{"resenas": resenas})
 }
+
+// getFollowerChat gets messages between current user and a follower (mutual friend).
+func (a *API) getFollowerChat(r *http.Request) *resp {
+	user, errResp := a.authUser(r, map[string]any{})
+	if errResp != nil {
+		return errResp
+	}
+	uid := store.Int(user["id"])
+	targetID := queryInt(r, "usuario_id")
+	after := queryInt(r, "after")
+
+	if targetID == 0 {
+		return errOut(http.StatusBadRequest, "Usuario requerido")
+	}
+
+	// Verify they are mutual followers (friends)
+	rel, err := a.DB.QueryOne(ctx(r),
+		`SELECT id FROM relaciones
+		 WHERE ((seguidorId = ? AND seguidoId = ?) OR (seguidorId = ? AND seguidoId = ?))
+		   AND estado = 'following'`,
+		uid, targetID, targetID, uid)
+	if err != nil {
+		return errOut(http.StatusInternalServerError, "Error interno")
+	}
+	if rel == nil {
+		return errOut(http.StatusForbidden, "Solo puedes chatear con seguidores mutuos")
+	}
+
+	var where string
+	var args []any
+	if after != 0 {
+		where = "AND md.id > ?"
+		args = []any{uid, targetID, targetID, uid, after}
+	} else {
+		args = []any{uid, targetID, targetID, uid}
+	}
+
+	sqlStr := `SELECT md.*, u.nombre AS remitente_nombre, u.avatar AS remitente_avatar
+		FROM mensajes_directos md
+		JOIN usuarios u ON u.usuarioId = md.remitente_id
+		WHERE 1=1
+		AND ((md.remitente_id = ? AND md.destinatario_id = ?) OR (md.remitente_id = ? AND md.destinatario_id = ?))
+		` + where + `
+		ORDER BY md.id DESC LIMIT 50`
+
+	msgs, err := a.DB.QueryAll(ctx(r), sqlStr, args...)
+	if err != nil {
+		return errOut(http.StatusInternalServerError, "Error interno")
+	}
+	for i, j := 0, len(msgs)-1; i < j; i, j = i+1, j-1 {
+		msgs[i], msgs[j] = msgs[j], msgs[i]
+	}
+	if msgs == nil {
+		msgs = []map[string]any{}
+	}
+	base := baseURLOf(r)
+	for _, m := range msgs {
+		if av := store.Str(m["remitente_avatar"]); av != "" {
+			m["remitente_avatar"] = base + "/" + av
+		}
+	}
+	return okOut(map[string]any{"mensajes": msgs})
+}
+
+// sendFollowerMessage sends a message to a follower (mutual friend).
+func (a *API) sendFollowerMessage(r *http.Request, body map[string]any) *resp {
+	user, errResp := a.authUser(r, body)
+	if errResp != nil {
+		return errResp
+	}
+	uid := store.Int(user["id"])
+	toID := bodyInt(body, "usuario_id")
+	msg := strings.TrimSpace(store.Str(body["mensaje"]))
+	if toID == 0 || msg == "" {
+		return errOut(http.StatusBadRequest, "Datos requeridos")
+	}
+
+	// Verify mutual following
+	rel, err := a.DB.QueryOne(ctx(r),
+		`SELECT id FROM relaciones
+		 WHERE ((seguidorId = ? AND seguidoId = ?) OR (seguidorId = ? AND seguidoId = ?))
+		   AND estado = 'following'`,
+		uid, toID, toID, uid)
+	if err != nil {
+		return errOut(http.StatusInternalServerError, "Error interno")
+	}
+	if rel == nil {
+		return errOut(http.StatusForbidden, "Solo puedes chatear con seguidores mutuos")
+	}
+
+	lastID, err := a.DB.Exec(ctx(r),
+		"INSERT INTO mensajes_directos (remitente_id, destinatario_id, mensaje) VALUES (?, ?, ?)", uid, toID, msg)
+	if err != nil {
+		return errOut(http.StatusInternalServerError, "Error interno")
+	}
+
+	row, err := a.DB.QueryOne(ctx(r),
+		`SELECT md.*, u.nombre AS remitente_nombre, u.avatar AS remitente_avatar
+		 FROM mensajes_directos md
+		 JOIN usuarios u ON u.usuarioId = md.remitente_id
+		 WHERE md.id = ?`, lastID)
+	if err != nil {
+		return errOut(http.StatusInternalServerError, "Error interno")
+	}
+	base := baseURLOf(r)
+	if av := store.Str(row["remitente_avatar"]); av != "" {
+		row["remitente_avatar"] = base + "/" + av
+	}
+	return okOut(map[string]any{"ok": true, "mensaje": row})
+}
