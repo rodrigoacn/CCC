@@ -84,13 +84,6 @@ window.CE_switchLang=function(code){
 
 {{ template "content" . }}
 
-{{ if and (not .NavData.AdsFreeActive) .NavData.AAAdUnitID }}
-<div id="frame" style="width: 100%;margin: auto;position: relative; z-index: 99998;">
-          <iframe data-aa='{{ .NavData.AAAdUnitID }}' src='//acceptable.a-ads.com/{{ .NavData.AAAdUnitID }}/?size=Adaptive'
-                            style='border:0; padding:0; width:70%; height:auto; overflow:hidden;display: block;margin: auto'></iframe>
-        </div>
-{{ end }}
-
 <script>if(typeof jQuery==='undefined'){var s=document.createElement('script');s.src='https://code.jquery.com/jquery-3.7.1.min.js';s.integrity='sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=';s.crossOrigin='anonymous';document.head.appendChild(s)}</script>
 <footer class="text-center mt-5" style="font-size:12px;color:var(--sub);">
   <p style="margin:0">ClassExpress · Hecho en 🇨🇱 con <a href="https://go.dev" target="_blank" style="color:var(--p);text-decoration:none;font-weight:600">Go</a> · { powered by Go }</p>

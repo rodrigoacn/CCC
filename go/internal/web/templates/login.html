@@ -324,13 +324,6 @@
           </div>
         </footer>
 
-        {{ if and (not .AdsFreeActive) .AAAdUnitID }}
-        <div style="display:flex; justify-content:center; margin-top:24px;">
-        <iframe data-aa='{{ .AAAdUnitID }}' src='//acceptable.a-ads.com/{{ .AAAdUnitID }}/?size=Adaptive'
-                          style='border:0; padding:0; width:100%; height:auto; overflow:hidden;display: block;margin: auto'></iframe>
-        </div>
-        {{ end }}
-
       </div>
     </div>
   </div>
