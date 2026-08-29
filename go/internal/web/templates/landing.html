@@ -93,24 +93,13 @@
 <div class="hero-content">
     <h1>Habla tu idioma, <span>aprende en tiempo real</span></h1>
     <p class="hero-sub">ClassExpress te conecta con personas que hablan tu idioma, desde cualquier rincón del mundo. Busca clases en vivo y únete a ellas en tiempo real por videoconferencia.</p>
-    <button class="btn-main" onclick="document.getElementById('roleModal').classList.add('show')">
-        <i class="bi bi-rocket-takeoff-fill"></i> Ingresar gratis
-    </button>
+    <div class="role-row">
+        <a href="materias.php?rol=student" class="role-btn" onclick="setRoleCookie('student')"><i class="bi bi-person-fill"></i>Entrar como Estudiante</a>
+        <a href="materias.php?rol=instructor" class="role-btn" onclick="setRoleCookie('instructor')"><i class="bi bi-briefcase-fill"></i>Entrar como Profesor</a>
+    </div>
     <p class="trust mt-3">Tu nombre se guarda para siempre. La próxima vez entras directo con un clic.</p>
 </div>
 </section>
-
-<!-- Role Modal -->
-<div id="roleModal" class="modal" tabindex="-1" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1050;align-items:center;justify-content:center;padding:24px">
-<div class="modal-dialog" style="max-width:420px;width:100%;background:#fff;border-radius:20px;padding:32px;box-shadow:0 20px 60px rgba(0,0,0,.15);animation:slideUp .3s ease">
-@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-<div class="text-center mb-4"><h3 style="font-size:24px;font-weight:800;margin-bottom:8px">¿Cómo quieres entrar?</h3><p style="color:#64748b">Elige tu rol y entra directo a materias</p></div>
-<div class="role-row">
-<a href="materias.php?rol=student" class="role-btn" onclick="setRoleCookie('student')"><i class="bi bi-person-fill"></i>Estudiante</a>
-<a href="materias.php?rol=instructor" class="role-btn" onclick="setRoleCookie('instructor')"><i class="bi bi-briefcase-fill"></i>Profesor</a>
-</div>
-<button onclick="document.getElementById('roleModal').classList.remove('show')" style="margin-top:16px;width:100%;padding:12px;border-radius:10px;border:1px solid #dbe2ee;background:#fff;color:#64748b;font-weight:600">Cancelar</button>
-</div></div>
 
 <!-- Sections -->
 <section style="background:rgba(102,221,189,.03)">
@@ -124,8 +113,7 @@
 </div></div></section>
 
 <div class="section-divider"></div>
-<section><div class="section-inner"><h2 class="section-title">Cómo funciona</h2><p class="section-sub">En 3 pasos simples, empieza a aprender con profesores en vivo, en tu idioma.</p>
-<div class="steps">
+<section><div class="section-inner"><h2 class="section-title">Cómo funciona</h2><p class="section-sub">En 3 pasos simples, empieza a aprender con profesores en vivo, en tu idioma.</<div class="steps">
 <div class="step"><div class="step-num">1</div><h3>Elige tu rol</h3><p>Estudiante o Profesor. Un clic.</p></div>
 <div class="step"><div class="step-num">2</div><h3>Entra a materias</h3><p>Explora clases en vivo al instante.</p></div>
 <div class="step"><div class="step-num">3</div><h3>Únete a la clase</h3><p>Te pedimos tu nombre y país la primera vez. Se guarda para siempre.</p></div></div></div></section>
@@ -140,12 +128,14 @@
 <div class="feat"><div class="feat-icon teal"><i class="bi bi-star-fill"></i></div><div><h4>Calificaciones reales</h4><p>Reputación verificada. Elige con confianza.</p></div>
 <div class="feat"><div class="feat-icon teal"><i class="bi bi-globe2"></i></div><div><h4>12 idiomas</h4><p>Interfaz en 12 idiomas. Profesores de todo el mundo.</p></div></div></div></section>
 
-<div class="final-cta"><div class="section-inner"><h2 class="section-title">Tu profesor te espera, en tu idioma</h2><p class="section-sub" style="margin-bottom:32px">Únete a ClassExpress y conéctate con personas que hablan tu idioma, desde cualquier parte del mundo.</p><button class="btn-main" onclick="document.getElementById('roleModal').classList.add('show')"><i class="bi bi-rocket-takeoff-fill"></i> Entrar gratis ahora</button></div></section>
+<div class="final-cta"><div class="section-inner"><h2 class="section-title">Tu profesor te espera, en tu idioma</h2><p class="section-sub" style="margin-bottom:32px">Únete a ClassExpress y conéctate con personas que hablan tu idioma, desde cualquier parte del mundo.</<div class="role-row" style="margin-top:24px">
+<a href="materias.php?rol=student" class="btn-main" style="flex:1;text-align:center"><i class="bi bi-person-fill"></i> Entrar como Estudiante</a>
+<a href="materias.php?rol=instructor" class="btn-main" style="flex:1;text-align:center"><i class="bi bi-briefcase-fill"></i> Entrar como Profesor</a>
+</div></div></section>
 
 <footer class="footer"><p>&copy; {{ .Year }} ClassExpress — Bunny Software E.I.R.L. Todos los derechos reservados.</p><p style="margin-top:6px;font-size:12px;">Hecho con <span style="color:#66ddbd">♥</span> en Chile para el mundo</p></footer>
 
 <script>
-const roleModal=document.getElementById('roleModal');
 function setRoleCookie(r){document.cookie='ce_role='+r+';path=/;max-age=31536000;SameSite=Lax'}
 </script>
 </body>

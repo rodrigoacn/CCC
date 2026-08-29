@@ -110,7 +110,7 @@ func TestLandingTemplateRenders(t *testing.T) {
 		t.Fatalf("render landing: %v", err)
 	}
 	out := rec.Body.String()
-	for _, want := range []string{"Ingresar gratis", "ClassExpress — Bunny Software E.I.R.L.", "Habla tu idioma", "Ingresar gratis"} {
+	for _, want := range []string{"Entrar como Estudiante", "Entrar como Profesor", "ClassExpress — Bunny Software E.I.R.L.", "Habla tu idioma"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("landing render missing %q", want)
 		}
