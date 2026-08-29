@@ -9,6 +9,10 @@
     <button class="ml-btn" style="width:44px;height:44px;padding:0;justify-content:center;border-radius:14px;background:var(--pb);color:var(--p)" onclick="location.href='dashboard_profesor.php'">
       <i data-feather="bar-chart-2" style="width:20px;height:20px"></i>
     </button>
+    {{ else if not .IsLoggedIn }}
+    <button class="ml-btn" style="width:44px;height:44px;padding:0;justify-content:center;border-radius:14px;background:var(--p);color:#fff" id="quickEnterBtn">
+      <i data-feather="zap" style="width:20px;height:20px"></i>
+    </button>
     {{ end }}
   </div>
 
