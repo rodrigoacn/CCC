@@ -50,6 +50,10 @@
         .btn-main{display:inline-block;padding:18px 56px;border-radius:14px;font-size:18px;font-weight:700;color:#fff;background:linear-gradient(135deg,#66ddbd 0%,#3b82f6 100%);border:none;cursor:pointer;transition:transform .2s,box-shadow .2s}
         .btn-main:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(102,221,189,.4)}
         .btn-main i{margin-right:10px}
+        .btn-share{display:inline-flex;align-items:center;gap:8px;cursor:pointer;border:2px solid #dbe2ee;background:#fff;color:#1e293b;border-radius:14px;padding:12px 22px;font-size:15px;font-weight:700;transition:all .2s}
+        .btn-share:hover{border-color:#3b82f6;color:#3b82f6;background:rgba(59,130,246,.05);transform:translateY(-2px)}
+        #shareToast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(20px);background:#1e293b;color:#fff;padding:12px 24px;border-radius:40px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:all .25s;z-index:2000}
+        #shareToast.show{opacity:1;transform:translateX(-50%) translateY(0)}
         .role-row{display:flex;gap:16px;justify-content:center;margin-top:24px;flex-wrap:wrap}
         .role-btn{flex:1;min-width:220px;max-width:300px;padding:24px;border-radius:16px;border:2px solid #dbe2ee;background:#fff;cursor:pointer;text-align:center;transition:all .2s;font-weight:600;font-size:16px;display:flex;flex-direction:column;align-items:center;gap:8px}
         .role-btn:hover{border-color:#66ddbd;background:rgba(102,221,189,.06);transform:translateY(-2px)}
@@ -86,18 +90,72 @@
     </style>
 </head>
 <body>
-<div class="topbar">🎉 <strong>ClassExpress: entra directo, sin registro</strong> — Elige Estudiante o Profesor y empieza ya</div>
+<div class="topbar">📱 <strong>Descarga la app — Multiplataforma</strong> — Disponible en Web, iOS y Android</div>
 <nav class="nav"><div class="nav-inner"><div class="nav-brand">ClassExpress</div></div></nav>
 <main>
 <section class="hero">
 <div class="hero-content">
-    <h1>Habla tu idioma, <span>aprende en tiempo real</span></h1>
-    <p class="hero-sub">ClassExpress te conecta con personas que hablan tu idioma, desde cualquier rincón del mundo. Busca clases en vivo y únete a ellas en tiempo real por videoconferencia.</p>
-    <div class="role-row">
-        <a href="materias.php?rol=student" class="role-btn" onclick="setRoleCookie('student')"><i class="bi bi-person-fill"></i>Entrar como Estudiante</a>
-        <a href="materias.php?rol=instructor" class="role-btn" onclick="setRoleCookie('instructor')"><i class="bi bi-briefcase-fill"></i>Entrar como Profesor</a>
+    <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(22,163,74,.1);color:#16a34a;font-weight:800;font-size:15px;padding:10px 20px;border-radius:40px;margin-bottom:20px;border:2px solid rgba(22,163,74,.25)">
+      <span style="font-size:18px">🎉</span> 100% GRATIS
+      <span style="font-size:18px">🎉</span>
     </div>
-    <p class="trust mt-3">Tu nombre se guarda para siempre. La próxima vez entras directo con un clic.</p>
+    <h1>Habla tu idioma, <span>aprende en tiempo real</span></h1>
+    <p class="hero-sub">ClassExpress te conecta con personas que hablan tu idioma, desde cualquier rincón del mundo. Úsala <strong>en tu navegador</strong> o descárgate la <strong>app multiplataforma</strong> (Web, iOS y Android). <strong>Sin costo, sin tarjeta, sin registro.</strong></p>
+
+    <!-- PRIMARY CTA: Descargar app (multiplataforma) -->
+    <div style="margin:34px auto 0;max-width:560px;background:linear-gradient(135deg,#66ddbd 0%,#3b82f6 100%);border-radius:22px;padding:28px 22px;color:#fff;box-shadow:0 16px 40px rgba(59,130,246,.28)">
+      <div style="font-size:15px;font-weight:800;letter-spacing:.5px;opacity:.95;margin-bottom:6px">📱 CLASSEXPRESS · APLICACIÓN</div>
+      <div style="font-size:23px;font-weight:900;margin-bottom:4px">Descarga la app</div>
+      <div style="font-size:14px;opacity:.9;margin-bottom:18px">Multiplataforma: Web · iOS · Android. Toda la experiencia en tu móvil.</div>
+      <button type="button" id="installAppBtn" style="display:inline-flex;align-items:center;justify-content:center;gap:10px;background:#fff;color:#1e293b;padding:15px 34px;font-size:17px;border:none;cursor:pointer;border-radius:14px;font-weight:800;width:100%;max-width:340px;margin:0 auto">
+        <i class="bi bi-phone-fill"></i> Instalar la app
+      </button>
+      <div style="font-size:12px;opacity:.85;margin-top:14px">También puedes usarla desde el navegador — sin instalar nada.</div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:14px;justify-content:center;margin:28px 0 4px;color:#94a3b8;font-weight:700">
+      <span style="flex:1;height:1px;background:#dbe2ee;max-width:130px"></span>
+      <span style="font-size:14px">o entra directo</span>
+      <span style="flex:1;height:1px;background:#dbe2ee;max-width:130px"></span>
+    </div>
+
+    <!-- SECONDARY CTA: Entrar -->
+    <div class="role-row">
+        <button type="button" class="role-btn" onclick="openGuest('student')"><i class="bi bi-person-fill"></i>Entrar como Estudiante</button>
+        <button type="button" class="role-btn" onclick="openGuest('instructor')"><i class="bi bi-briefcase-fill"></i>Entrar como Profesor</button>
+    </div>
+    <p class="trust mt-3">Escoge tu nombre y entra directo a las materias. Tu nombre se guarda para la próxima vez. <strong>Es gratis, para siempre.</strong></p>
+    <div style="margin-top:22px">
+      <a href="login.php?form=1" style="text-decoration:underline;color:#3b82f6;font-size:14px;font-weight:600">¿Ya tienes cuenta? Inicia sesión / Regístrate</a>
+    </div>
+    <div style="margin-top:14px">
+      <button type="button" class="btn-share" onclick="sharePage()"><i class="bi bi-share-fill"></i>Compartir página</button>
+    </div>
+
+    <!-- Guest entry form -->
+    <div id="guestForm" style="display:none;max-width:420px;margin:28px auto 0;background:#fff;border:2px solid var(--primary);border-radius:20px;padding:28px;text-align:left">
+      <div style="font-size:18px;font-weight:800;margin-bottom:4px" id="guestFormTitle">Entrar como Estudiante</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Pon tu nombre (o el que usas) y entra. Puedes cambiarlo después.</div>
+      <form method="POST" action="login.php" novalidate>
+        <input type="hidden" name="action" value="quick">
+        <input type="hidden" name="rol" id="guestRol" value="student">
+        {{ csrf }}
+        <div style="margin-bottom:14px">
+          <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Tu nombre</label>
+          <input type="text" id="guestNickname" name="nickname" placeholder="Ej: Juan" required style="width:100%;padding:14px 16px;border-radius:12px;border:1px solid var(--border);font-size:16px;outline:none;background:#fff;color:var(--text)">
+        </div>
+        <div style="margin-bottom:18px">
+          <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">País <span style="text-transform:none;opacity:.6">(opcional)</span></label>
+          <select name="pais_id" id="guestPais" style="width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--border);font-size:15px;background:#fff;color:var(--text)">
+            <option value=""></option>
+            {{ range .Paises }}
+            <option value="{{ .paisId }}"{{ if eq (printf "%d" $.PaisID) .paisId }} selected{{ end }}>{{ .nombre }}</option>
+            {{ end }}
+          </select>
+        </div>
+        <button type="submit" class="btn-main" style="width:100%;text-align:center;padding:16px">Entrar a Clases</button>
+      </form>
+    </div>
 </div>
 </section>
 
@@ -129,14 +187,59 @@
 <div class="feat"><div class="feat-icon teal"><i class="bi bi-globe2"></i></div><div><h4>12 idiomas</h4><p>Interfaz en 12 idiomas. Profesores de todo el mundo.</p></div></div></div></section>
 
 <div class="final-cta"><div class="section-inner"><h2 class="section-title">Tu profesor te espera, en tu idioma</h2><p class="section-sub" style="margin-bottom:32px">Únete a ClassExpress y conéctate con personas que hablan tu idioma, desde cualquier parte del mundo.</<div class="role-row" style="margin-top:24px">
-<a href="materias.php?rol=student" class="btn-main" style="flex:1;text-align:center"><i class="bi bi-person-fill"></i> Entrar como Estudiante</a>
-<a href="materias.php?rol=instructor" class="btn-main" style="flex:1;text-align:center"><i class="bi bi-briefcase-fill"></i> Entrar como Profesor</a>
+<button type="button" class="btn-main" style="flex:1;text-align:center;border:none" onclick="openGuest('student')"><i class="bi bi-person-fill"></i> Entrar como Estudiante</button>
+<button type="button" class="btn-main" style="flex:1;text-align:center;border:none" onclick="openGuest('instructor')"><i class="bi bi-briefcase-fill"></i> Entrar como Profesor</button>
 </div></div></section>
 
 <footer class="footer"><p>&copy; {{ .Year }} ClassExpress — Bunny Software E.I.R.L. Todos los derechos reservados.</p><p style="margin-top:6px;font-size:12px;">Hecho con <span style="color:#66ddbd">♥</span> en Chile para el mundo</p></footer>
 
 <script>
-function setRoleCookie(r){document.cookie='ce_role='+r+';path=/;max-age=31536000;SameSite=Lax'}
+function getCookie(n){var m=document.cookie.match('(^|;)\\s*'+n+'\\s*=\\s*([^;]+)');return m?m[2]:null}
+function openGuest(rol){
+  var f=document.getElementById('guestForm');
+  var r=document.getElementById('guestRol');
+  var t=document.getElementById('guestFormTitle');
+  r.value=rol;
+  if(rol==='instructor'){t.textContent='Entrar como Profesor';t.style.display='block'} else {t.textContent='Entrar como Estudiante';t.style.display='block'}
+  var saved=getCookie('ce_guest_name');
+  var nick=document.getElementById('guestNickname');
+  if(saved){nick.value=decodeURIComponent(saved)}
+  f.style.display='block';
+  nick.scrollIntoView({behavior:'smooth',block:'center'});
+  nick.focus();
+}
+document.addEventListener('DOMContentLoaded',function(){
+  var nick=document.getElementById('guestNickname');
+  if(nick){var saved=getCookie('ce_guest_name');if(saved){nick.value=decodeURIComponent(saved)}}
+  var form=document.querySelector('#guestForm form');
+  if(form){form.addEventListener('submit',function(){var v=(document.getElementById('guestNickname').value||'').trim();if(v){document.cookie='ce_guest_name='+encodeURIComponent(v)+';path=/;max-age=31536000;SameSite=Lax'}})}
+});
+var sharePage=function(){
+  var url='https://classexpress.online';
+  var text='¡Aprende gratis en vivo en ClassExpress! 🎉 ' + url;
+  var isMobile=/Android|iPhone|iPad|iPod|Mobile|Windows Phone/i.test(navigator.userAgent);
+  if(isMobile){
+    if(navigator.share){navigator.share({title:'ClassExpress',text:text,url:url}).catch(function(){})}
+    else{window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank')}
+  }else{
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(url).then(function(){showToast('¡Enlace copiado! Classexpress.online')}).catch(function(){fallbackCopy(url)});
+    }else{fallbackCopy(url)}
+  }
+};
+var showToast=function(m){
+  var t=document.getElementById('shareToast');
+  if(!t){t=document.createElement('div');t.id='shareToast';t.textContent=m;document.body.appendChild(t)}
+  t.textContent=m;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('show')},2200);
+};
+var fallbackCopy=function(url){
+  var ta=document.createElement('textarea');ta.value=url;document.body.appendChild(ta);ta.select();
+  try{document.execCommand('copy');showToast('¡Enlace copiado! Classexpress.online')}catch(e){showToast('Copia: '+url)}
+  document.body.removeChild(ta);
+};
 </script>
+<div id="shareToast"></div>
+<script src="app-install.js"></script>
 </body>
 </html>

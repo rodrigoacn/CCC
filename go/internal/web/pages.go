@@ -182,6 +182,7 @@ func (p *Pages) Funcs(s *Session, lang string) template.FuncMap {
 		"sub":               func(a, b int64) int64 { return a - b },
 		"mul":               func(a, b int64) int64 { return a * b },
 		"div":               func(a, b int64) int64 { if b == 0 { return 0 }; return a / b },
+		"isEven":            func(a int) bool { return a%2 == 0 },
 		"indexMaybe":        func(m map[string]any, k string) any { return m[k] },
 	}
 }

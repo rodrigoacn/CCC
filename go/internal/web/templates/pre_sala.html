@@ -46,18 +46,35 @@
 
         <!-- Price box -->
         <div class="bg-dark border border-secondary rounded-4 p-4 mb-4">
-          <p class="text-secondary small mb-1">Precio de la clase</p>
-          <p class="fw-bold text-white fs-2 mb-1">{{ .Precio }} créditos</p>
+          <p class="text-secondary small mb-1">{{ t "pre_sala.price_title" }}</p>
+          {{ if .EsNuevo }}
+            <p class="fw-bold text-white fs-2 mb-0">{{ .PrecioDesc }} créditos</p>
+            <p class="text-secondary small mb-1">
+              <span class="text-decoration-line-through">{{ .Precio }}</span>
+              <span class="text-success ms-1"><i class="bi bi-tag-fill"></i> {{ .DescuentoNuevo }}% {{ t "pre_sala.discount_new" }}</span>
+            </p>
+          {{ else }}
+            <p class="fw-bold text-white fs-2 mb-1">{{ .Precio }} créditos</p>
+          {{ end }}
           <p class="text-secondary small mb-0">
             Tu saldo: {{ .Creditos }} cr.
-            {{ if .TieneSaldo }}
-              <span class="text-success ms-2"><i class="bi bi-check-circle"></i> Tienes suficiente</span>
+            {{ if .EsNuevo }}
+              {{ if .TieneSaldoDesc }}
+                <span class="text-success ms-2"><i class="bi bi-check-circle"></i> Tienes suficiente</span>
+              {{ else }}
+                <span class="text-danger ms-2"><i class="bi bi-exclamation-circle"></i> Saldo insuficiente</span>
+              {{ end }}
             {{ else }}
-              <span class="text-danger ms-2"><i class="bi bi-exclamation-circle"></i> Saldo insuficiente</span>
+              {{ if .TieneSaldo }}
+                <span class="text-success ms-2"><i class="bi bi-check-circle"></i> Tienes suficiente</span>
+              {{ else }}
+                <span class="text-danger ms-2"><i class="bi bi-exclamation-circle"></i> Saldo insuficiente</span>
+              {{ end }}
             {{ end }}
           </p>
         </div>
 
+        {{ if or .IsTeacher .EnVivo }}
         <!-- Camera preview -->
         <h3 class="section-title text-white">Vista previa</h3>
         <div class="preview-box mb-3">
@@ -82,11 +99,53 @@
         </div>
 
         <!-- Start button -->
+        {{ if .EnVivo }}
+        <div class="bg-dark border border-danger rounded-4 p-3 mb-4 text-center">
+          <p class="text-white mb-1 fw-semibold"><i class="bi bi-broadcast"></i> {{ t "reserva.live_now" }}</p>
+          <p class="text-secondary small mb-0">{{ t "reserva.join_hint" }}</p>
+        </div>
+        {{ end }}
         <button id="btn-empezar" class="btn btn-success w-100 fw-bold py-3 fs-5 rounded-4"
           {{ if not .IsTeacher }}{{ if not .TieneSaldo }}disabled{{ end }}{{ end }}>
           <i class="bi bi-play-circle me-2"></i>
           {{ if .IsTeacher }}Empezar{{ else }}Entrar a la clase{{ end }}
         </button>
+        {{ else }}
+        <!-- Reservation module -->
+        <h3 class="section-title text-white">{{ t "reserva.title" }}</h3>
+
+        {{ if .FlashReserva }}
+        <div class="alert alert-info border border-secondary bg-secondary bg-opacity-25 text-white">{{ .FlashReserva }}</div>
+        {{ end }}
+
+        {{ if .HasDisp }}
+        <div class="bg-dark border border-secondary rounded-4 p-4 mb-4">
+          <p class="text-secondary small mb-3">{{ t "reserva.hint" }}</p>
+          <form method="POST" action="reservar.php">
+            {{ csrf }}
+            <input type="hidden" name="claseId" value="{{ .ClaseId }}">
+            <label class="text-secondary small mb-1">{{ t "reserva.choose_block" }}</label>
+            <select name="dispId" class="form-select mb-3" required>
+              {{ range .DispDays }}
+              <optgroup label="{{ .Dia }}">
+                {{ range .Slots }}<option value="{{ .DispID }}">{{ .HoraIni }} – {{ .HoraFin }}</option>{{ end }}
+              </optgroup>
+              {{ end }}
+            </select>
+            <label class="text-secondary small mb-1">{{ t "reserva.choose_date" }}</label>
+            <input type="date" name="fecha" class="form-control mb-3" min="{{ .Hoy }}" max="{{ .MaxFecha }}" required>
+            <small class="text-warning d-block mb-2">{{ t "reserva.day_hint" }}</small>
+            <button type="submit" class="btn btn-success w-100 fw-bold py-3 fs-5 rounded-4">
+              <i class="bi bi-calendar-check me-2"></i>{{ t "reserva.request" }}
+            </button>
+          </form>
+        </div>
+        {{ else }}
+        <div class="bg-dark border border-secondary rounded-4 p-4 mb-4 text-center">
+          <p class="text-secondary mb-0">{{ t "reserva.no_availability" }}</p>
+        </div>
+        {{ end }}
+        {{ end }}
 
         <!-- Leave / back button -->
         <button id="btn-salir" class="btn btn-outline-secondary w-100 fw-bold py-2 rounded-4 mt-2">
@@ -107,6 +166,7 @@
 
     async function startPreview() {
       const placeholder = document.getElementById('preview-placeholder');
+      if (!placeholder) return;
       const reqBtn = document.getElementById('btn-request-cam');
       placeholder.querySelector('p').textContent = 'Solicitando permiso…';
       if (reqBtn) reqBtn.classList.add('d-none');
@@ -170,9 +230,13 @@
 
     document.getElementById('btn-request-cam')?.addEventListener('click', startPreview);
 
-    document.getElementById('toggle-cam').addEventListener('click', () => {
+    const toggleCam = document.getElementById('toggle-cam');
+    const toggleMic = document.getElementById('toggle-mic');
+    const btnEmpezar = document.getElementById('btn-empezar');
+
+    if (toggleCam) toggleCam.addEventListener('click', () => {
       camEnabled = !camEnabled;
-      const btn = document.getElementById('toggle-cam');
+      const btn = toggleCam;
       btn.classList.toggle('active', camEnabled);
       btn.classList.toggle('inactive', !camEnabled);
       btn.innerHTML = camEnabled
@@ -196,10 +260,10 @@
       }
     });
 
-    document.getElementById('toggle-mic').addEventListener('click', () => {
+    if (toggleMic) toggleMic.addEventListener('click', () => {
       if (!hasMic()) return;
       micEnabled = !micEnabled;
-      const btn = document.getElementById('toggle-mic');
+      const btn = toggleMic;
       btn.classList.toggle('active', micEnabled);
       btn.classList.toggle('inactive', !micEnabled);
       btn.innerHTML = micEnabled
@@ -211,8 +275,8 @@
       updateMicIndicator();
     });
 
-    document.getElementById('btn-empezar').addEventListener('click', () => {
-      const btn = document.getElementById('btn-empezar');
+    if (btnEmpezar) btnEmpezar.addEventListener('click', () => {
+      const btn = btnEmpezar;
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Entrando...';
       if (previewStream) previewStream.getTracks().forEach(t => t.stop());

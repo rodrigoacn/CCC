@@ -65,7 +65,9 @@ func SecurityHeadersMiddleware(next http.Handler) http.Handler {
 		h.Set("X-XSS-Protection", "1; mode=block")
 		h.Set("Referrer-Policy", "strict-origin-when-cross-origin")
 		h.Set("Permissions-Policy", "geolocation=(), microphone=(self), camera=(self)")
-		h.Set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload")
+		if IsHTTPS(r) {
+			h.Set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload")
+		}
 		h.Set("Content-Security-Policy", "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://code.jquery.com https://cdnjs.cloudflare.com 'unsafe-inline' 'unsafe-eval'; style-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https://cdn.jsdelivr.net; connect-src 'self' https:; frame-src 'self'; media-src 'self' https:;")
 		next.ServeHTTP(w, r)
 	})

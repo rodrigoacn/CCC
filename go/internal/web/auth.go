@@ -92,6 +92,14 @@ func (p *Pages) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// The login URL funnels visitors to the landing (app download first, enter
+	// second). The full login form stays reachable via login.php?form=1, and all
+	// POST actions (quick entry, sign in, sign up) keep working as before.
+	if r.Method == http.MethodGet && !LoggedIn(s) && r.URL.Query().Get("form") != "1" {
+		redirect(w, r, "landing.php")
+		return
+	}
+
 	errorLogin, errorSignup, successMsg := "", "", ""
 	activeTab := "signin"
 	ip := ClientIP(r)
@@ -356,22 +364,6 @@ func (p *Pages) doQuickEntry(ctx context.Context, w http.ResponseWriter, r *http
 	// Store the original display name before making username unique
 	originalName := nickname
 
-	// Ensure unique username; append random suffix if taken.
-	baseNick := nickname
-	for i := 0; i < 10; i++ {
-		var checkNick string
-		if i == 0 {
-			checkNick = baseNick
-		} else {
-			checkNick = fmt.Sprintf("%s_%d", baseNick, rand.Intn(10000))
-		}
-		existing, err := p.DB.QueryOne(ctx, "SELECT usuarioId FROM usuarios WHERE username = ? LIMIT 1", checkNick)
-		if err == nil && existing == nil {
-			nickname = checkNick
-			break
-		}
-	}
-
 	var paisAny any
 	if paisID == "" {
 		paisAny = nil
@@ -383,22 +375,68 @@ func (p *Pages) doQuickEntry(ctx context.Context, w http.ResponseWriter, r *http
 		rolDB = "estudiante"
 	}
 
-	newID, err := p.DB.Exec(ctx,
-		"INSERT INTO usuarios (nombre, nombre_invitado, email, password, rol, verificado, es_invitado, pais_id, creditos, username, ultimoContenido, ultimaClase, ultimaSala) VALUES (?, ?, '', '', ?, 1, 1, ?, 100, ?, '', '', '')",
-		nickname, originalName, rolDB, paisAny, nickname)
-	if err != nil {
-		log.Printf("quickentry insert: %v", err)
-		return i18n.T(lang, "login.error_db", nil), "", "quick"
+	// Reuse the client's existing guest (identified by remember token) so a
+	// returning guest keeps the same identity and their name updates in place.
+	var newID int64
+	var tok string
+	existingGuestID := int64(0)
+	if c, cerr := r.Cookie("ce_remember"); cerr == nil && c.Value != "" {
+		row, qerr := p.DB.QueryOne(ctx,
+			"SELECT usuarioId FROM usuarios WHERE remember_token = ? AND es_invitado = 1 AND eliminado = 0 LIMIT 1",
+			HashToken(c.Value))
+		if qerr == nil && row != nil {
+			existingGuestID = store.Int(row["usuarioId"])
+		}
 	}
 
-	// Create persistent remember token for auto-login on return
-	tok := NewRememberToken()
-	_, _ = p.DB.Exec(ctx, "UPDATE usuarios SET remember_token = ? WHERE usuarioId = ?", HashToken(tok), newID)
+	if existingGuestID > 0 {
+		// Update the existing guest's profile name/role/country.
+		if _, uerr := p.DB.Exec(ctx,
+			"UPDATE usuarios SET nombre = ?, nombre_invitado = ?, rol = ?, pais_id = ? WHERE usuarioId = ?",
+			originalName, originalName, rolDB, paisAny, existingGuestID); uerr != nil {
+			log.Printf("quickentry update: %v", uerr)
+			return i18n.T(lang, "login.error_db", nil), "", "quick"
+		}
+		newID = existingGuestID
+		// Rotate to a fresh plain-text token (like new guests).
+		tok = NewRememberToken()
+		_, _ = p.DB.Exec(ctx, "UPDATE usuarios SET remember_token = ? WHERE usuarioId = ?", HashToken(tok), existingGuestID)
+	} else {
+		// Ensure unique username; append random suffix if taken.
+		baseNick := nickname
+		for i := 0; i < 10; i++ {
+			var checkNick string
+			if i == 0 {
+				checkNick = baseNick
+			} else {
+				checkNick = fmt.Sprintf("%s_%d", baseNick, rand.Intn(10000))
+			}
+			existing, err := p.DB.QueryOne(ctx, "SELECT usuarioId FROM usuarios WHERE username = ? LIMIT 1", checkNick)
+			if err == nil && existing == nil {
+				nickname = checkNick
+				break
+			}
+		}
+
+		var err error
+		newID, err = p.DB.Exec(ctx,
+			"INSERT INTO usuarios (nombre, nombre_invitado, email, password, rol, verificado, es_invitado, pais_id, creditos, username, ultimoContenido, ultimaClase, ultimaSala) VALUES (?, ?, '', '', ?, 1, 1, ?, 100, ?, '', '', '')",
+			nickname, originalName, rolDB, paisAny, nickname)
+		if err != nil {
+			log.Printf("quickentry insert: %v", err)
+			return i18n.T(lang, "login.error_db", nil), "", "quick"
+		}
+
+		// Create persistent remember token for auto-login on return.
+		// (Existing guests already keep their token.)
+		tok = NewRememberToken()
+		_, _ = p.DB.Exec(ctx, "UPDATE usuarios SET remember_token = ? WHERE usuarioId = ?", HashToken(tok), newID)
+	}
 
 	// Auto-login the new guest user.
 	s := SessionFrom(r.Context())
 	if s != nil {
-		p.Sessions.Regenerate(nil, nil, s)
+		p.Sessions.Regenerate(w, r, s)
 		s.Set("usuarioId", fmt.Sprint(newID))
 		s.Set("nombre", originalName) // Use original name for display
 		s.Set("rol", rolDB)
@@ -440,7 +478,7 @@ func (p *Pages) HandleLogout(w http.ResponseWriter, r *http.Request) {
 		p.Sessions.Destroy(w, r, s)
 	}
 	http.SetCookie(w, &http.Cookie{Name: "ce_remember", Value: "", Path: "/", MaxAge: -1, HttpOnly: true, Secure: IsHTTPS(r)})
-	redirect(w, r, "login.php")
+	redirect(w, r, "landing.php")
 }
 
 // HandleLangAPI ports lang_api.php.

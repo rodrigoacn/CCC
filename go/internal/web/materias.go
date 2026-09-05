@@ -159,7 +159,7 @@ data := map[string]any{
 		"UltimaMateria": ultimaMateria,
 	}
 
-	if err := p.Templates.Render(w, "materias", p, nil, lang, data); err != nil {
+	if err := p.Templates.RenderAuthed(w, "materias", p, s, lang, data); err != nil {
 		serverError(w, err)
 	}
 }

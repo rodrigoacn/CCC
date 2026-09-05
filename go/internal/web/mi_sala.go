@@ -42,11 +42,22 @@ func (p *Pages) HandleMiSala(w http.ResponseWriter, r *http.Request) {
 			 WHERE ps.usuarioId = ? AND s.activa = true LIMIT 1`, uid)
 	}
 
+	var reservas []reservaItem
+	if !isTeacher {
+		reservas = p.loadReservasEstudiante(ctx, uid)
+	}
+
+	flashReserva := s.Get("flash_reserva")
+	s.Del("flash_reserva")
+
 	data := map[string]any{
-		"Lang":     lang,
-		"NavData":  nav,
-		"IsTeacher": isTeacher,
-		"HasRoom":  room != nil,
+		"Lang":         lang,
+		"NavData":      nav,
+		"IsTeacher":    isTeacher,
+		"HasRoom":      room != nil,
+		"Reservas":     reservas,
+		"HasReservas":  len(reservas) > 0,
+		"FlashReserva": flashReserva,
 	}
 	if room != nil {
 		precio := store.Float(room["precio"])

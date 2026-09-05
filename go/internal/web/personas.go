@@ -2,7 +2,13 @@ package web
 
 import (
 	"encoding/json"
+	"fmt"
+	"html/template"
+	"io"
+	"mime/multipart"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -10,6 +16,19 @@ import (
 	"classexpress/internal/i18n"
 	"classexpress/internal/store"
 )
+
+// dmTestQ is one question of a fused DM test.
+type dmTestQ struct {
+	Q       string   `json:"q"`
+	Options []string `json:"options"`
+	Correct int      `json:"correct"`
+	Picked  int      `json:"picked"`
+}
+
+// dmTest is the parsed test payload of a DM message.
+type dmTest struct {
+	Questions []dmTestQ `json:"questions"`
+}
 
 type personaItem struct {
 	ID           int64
@@ -25,10 +44,19 @@ type personaItem struct {
 }
 
 type dmItem struct {
-	ID      int64
-	Mine    bool
-	Mensaje string
-	Hora    string
+	ID             int64   `json:"id"`
+	Mine           bool    `json:"mine"`
+	RemitenteID    int64   `json:"remitente_id"`
+	DestinatarioID int64   `json:"destinatario_id"`
+	Mensaje        string  `json:"mensaje"`
+	Hora           string  `json:"hora"`
+	CreatedAt      string  `json:"created_at"`
+	Tipo           string  `json:"tipo"`
+	MediaURL       string  `json:"media_url"`
+	MediaNombre    string  `json:"media_nombre"`
+	Test           *dmTest `json:"test,omitempty"`
+	Respondido     bool    `json:"respondido"`
+	RespondidoPor  int64   `json:"respondido_por"`
 }
 
 type searchResult struct {
@@ -44,12 +72,18 @@ type searchResult struct {
 }
 
 type dmJSON struct {
-	ID              int64  `json:"id"`
-	RemitenteID     int64  `json:"remitente_id"`
-	DestinatarioID  int64  `json:"destinatario_id"`
-	Mensaje         string `json:"mensaje"`
-	CreatedAt       string `json:"created_at"`
-	RemitenteNombre string `json:"remitente_nombre"`
+	ID              int64   `json:"id"`
+	RemitenteID     int64   `json:"remitente_id"`
+	DestinatarioID  int64   `json:"destinatario_id"`
+	Mensaje         string  `json:"mensaje"`
+	Tipo            string  `json:"tipo"`
+	MediaURL        string  `json:"media_url"`
+	MediaNombre     string  `json:"media_nombre"`
+	Test            *dmTest `json:"test,omitempty"`
+	Respondido      bool    `json:"respondido"`
+	RespondidoPor   int64   `json:"respondido_por"`
+	CreatedAt       string  `json:"created_at"`
+	RemitenteNombre string  `json:"remitente_nombre"`
 }
 
 type teacherClaseJSON struct {
@@ -121,12 +155,9 @@ func (p *Pages) personasPost(w http.ResponseWriter, r *http.Request, s *Session,
 		_, _ = p.DB.Exec(ctx,
 			"DELETE FROM relaciones WHERE seguidorId = ? AND seguidoId = ?", uid, targetId)
 	case "send_dm":
-		msg := strings.TrimSpace(r.PostFormValue("mensaje"))
-		if targetId > 0 && msg != "" {
-			_, _ = p.DB.Exec(ctx,
-				"INSERT INTO mensajes_directos (remitente_id, destinatario_id, mensaje) VALUES (?, ?, ?)",
-				uid, targetId, msg)
-		}
+		p.personasSendDM(w, r, uid, targetId, writeJSON)
+	case "responder_test":
+		p.personasRespondTest(w, r, uid, writeJSON)
 	case "search":
 		q := strings.TrimSpace(r.PostFormValue("q"))
 		if len(q) >= 1 {
@@ -163,6 +194,179 @@ func (p *Pages) personasPost(w http.ResponseWriter, r *http.Request, s *Session,
 	writeJSON(200, map[string]any{"ok": true})
 }
 
+// personasSendDM inserts a direct message supporting the fused content types:
+// texto, enlace, opinion, media (file upload) and test.
+func (p *Pages) personasSendDM(w http.ResponseWriter, r *http.Request, uid, targetId int64, writeJSON func(int, any)) {
+	if targetId <= 0 {
+		writeJSON(400, map[string]any{"ok": false, "error": "Sin destino"})
+		return
+	}
+	tipo := r.PostFormValue("tipo")
+	if tipo == "" {
+		tipo = "texto"
+	}
+	switch tipo {
+	case "texto", "enlace", "opinion":
+		msg := strings.TrimSpace(r.PostFormValue("mensaje"))
+		if msg == "" {
+			writeJSON(200, map[string]any{"ok": false})
+			return
+		}
+		_, err := p.DB.Exec(r.Context(),
+			"INSERT INTO mensajes_directos (remitente_id, destinatario_id, mensaje, tipo) VALUES (?, ?, ?, ?)",
+			uid, targetId, msg, tipo)
+		if err != nil {
+			writeJSON(500, map[string]any{"ok": false, "error": "DB"})
+			return
+		}
+	case "media":
+		file, fh, err := r.FormFile("archivo")
+		if err != nil {
+			writeJSON(200, map[string]any{"ok": false})
+			return
+		}
+		defer file.Close()
+		url, nombre, err := p.saveDMFile(fh)
+		if err != nil {
+			writeJSON(500, map[string]any{"ok": false, "error": "Archivo"})
+			return
+		}
+		msg := strings.TrimSpace(r.PostFormValue("mensaje"))
+		_, err = p.DB.Exec(r.Context(),
+			"INSERT INTO mensajes_directos (remitente_id, destinatario_id, mensaje, tipo, media_url, media_nombre) VALUES (?, ?, ?, 'media', ?, ?)",
+			uid, targetId, msg, url, nombre)
+		if err != nil {
+			writeJSON(500, map[string]any{"ok": false, "error": "DB"})
+			return
+		}
+	case "test":
+		testData := strings.TrimSpace(r.PostFormValue("test_data"))
+		if testData == "" || !json.Valid([]byte(testData)) {
+			writeJSON(200, map[string]any{"ok": false})
+			return
+		}
+		msg := strings.TrimSpace(r.PostFormValue("mensaje"))
+		_, err := p.DB.Exec(r.Context(),
+			"INSERT INTO mensajes_directos (remitente_id, destinatario_id, mensaje, tipo, test_data) VALUES (?, ?, ?, 'test', ?)",
+			uid, targetId, msg, testData)
+		if err != nil {
+			writeJSON(500, map[string]any{"ok": false, "error": "DB"})
+			return
+		}
+	default:
+		writeJSON(200, map[string]any{"ok": false})
+		return
+	}
+	writeJSON(200, map[string]any{"ok": true})
+}
+
+// saveDMFile stores an uploaded media file under uploads/dms and returns its
+// URL and original name.
+func (p *Pages) saveDMFile(fh *multipart.FileHeader) (string, string, error) {
+	f, err := fh.Open()
+	if err != nil {
+		return "", "", err
+	}
+	defer f.Close()
+
+	if fh.Size > 50*1024*1024 {
+		return "", "", fmt.Errorf("archivo demasiado grande")
+	}
+
+	dir := filepath.Join(p.WebDir, "uploads", "dms")
+	if p.WebDir == "" {
+		dir = filepath.Join(".", "uploads", "dms")
+	}
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return "", "", err
+	}
+
+	ext := sanitizeExt(filepath.Ext(fh.Filename))
+	if ext == "" {
+		ext = ".bin"
+	}
+	name := "dm_" + strconv.FormatInt(time.Now().UnixNano(), 10) + ext
+	dest := filepath.Join(dir, name)
+
+	out, err := os.Create(dest)
+	if err != nil {
+		return "", "", err
+	}
+	if _, err := io.Copy(out, f); err != nil {
+		out.Close()
+		os.Remove(dest)
+		return "", "", err
+	}
+	out.Close()
+
+	return "uploads/dms/" + name, fh.Filename, nil
+}
+
+// personasRespondTest records the answers to a test DM message. Once the
+// recipient responds, the correct answers are revealed to both.
+func (p *Pages) personasRespondTest(w http.ResponseWriter, r *http.Request, uid int64, writeJSON func(int, any)) {
+	msgID := store.Int(r.PostFormValue("mensaje_id"))
+	if msgID <= 0 || uid <= 0 {
+		writeJSON(400, map[string]any{"ok": false})
+		return
+	}
+	row, err := p.DB.QueryOne(r.Context(),
+		"SELECT remitente_id, destinatario_id, test_data FROM mensajes_directos WHERE id = ? AND tipo = 'test'", msgID)
+	if err != nil || row == nil {
+		writeJSON(200, map[string]any{"ok": false})
+		return
+	}
+	sender := store.Int(row["remitente_id"])
+	dest := store.Int(row["destinatario_id"])
+	// Solo los dos integrantes de la conversación pueden responder.
+	if sender == dest || (uid != sender && uid != dest) {
+		writeJSON(200, map[string]any{"ok": false})
+		return
+	}
+	// Solo un respuesta: si ya está respondido, no aceptar cambios.
+	already, _ := p.DB.QueryOne(r.Context(),
+		"SELECT id FROM mensajes_directos WHERE id = ? AND respondido_por IS NOT NULL", msgID)
+	if already != nil {
+		writeJSON(200, map[string]any{"ok": false, "error": "Ya respondido"})
+		return
+	}
+
+	qids := strings.TrimSpace(r.PostFormValue("opciones"))
+	if qids == "" || !json.Valid([]byte(qids)) {
+		writeJSON(200, map[string]any{"ok": false})
+		return
+	}
+	_, err = p.DB.Exec(r.Context(),
+		"UPDATE mensajes_directos SET respuesta_elegida = ?, respondido_por = ? WHERE id = ?",
+		qids, uid, msgID)
+	if err != nil {
+		writeJSON(500, map[string]any{"ok": false, "error": "DB"})
+		return
+	}
+	writeJSON(200, map[string]any{"ok": true})
+}
+
+// parseDmTest decodes test_data and overlays the picked option indices from
+// respuesta_elegida so the client can reveal correct answers.
+func parseDmTest(testData, respData string) *dmTest {
+	t := &dmTest{}
+	if testData == "" {
+		return t
+	}
+	if err := json.Unmarshal([]byte(testData), t); err != nil {
+		return t
+	}
+	if respData != "" {
+		var picked []int
+		if json.Unmarshal([]byte(respData), &picked) == nil {
+			for i := 0; i < len(t.Questions) && i < len(picked); i++ {
+				t.Questions[i].Picked = picked[i]
+			}
+		}
+	}
+	return t
+}
+
 func (p *Pages) personasNewDMs(w http.ResponseWriter, r *http.Request, uid int64) {
 	ctx := r.Context()
 	writeJSON := func(code int, v any) {
@@ -177,7 +381,8 @@ func (p *Pages) personasNewDMs(w http.ResponseWriter, r *http.Request, uid int64
 		return
 	}
 	rows, err := p.DB.QueryAll(ctx,
-		`SELECT md.id, md.remitente_id, md.destinatario_id, md.mensaje, md.created_at, u.nombre AS remitente_nombre
+		`SELECT md.id, md.remitente_id, md.destinatario_id, md.mensaje, md.tipo, md.media_url, md.media_nombre,
+		        md.test_data, md.respuesta_elegida, md.respondido_por, md.created_at, u.nombre AS remitente_nombre
 		 FROM mensajes_directos md
 		 JOIN usuarios u ON u.usuarioId = md.remitente_id
 		 WHERE ((md.remitente_id = ? AND md.destinatario_id = ?) OR (md.remitente_id = ? AND md.destinatario_id = ?))
@@ -194,6 +399,12 @@ func (p *Pages) personasNewDMs(w http.ResponseWriter, r *http.Request, uid int64
 			RemitenteID:     store.Int(row["remitente_id"]),
 			DestinatarioID:  store.Int(row["destinatario_id"]),
 			Mensaje:         store.Str(row["mensaje"]),
+			Tipo:            store.Str(row["tipo"]),
+			MediaURL:        store.Str(row["media_url"]),
+			MediaNombre:     store.Str(row["media_nombre"]),
+			Test:            parseDmTest(store.Str(row["test_data"]), store.Str(row["respuesta_elegida"])),
+			Respondido:      store.Int(row["respondido_por"]) > 0,
+			RespondidoPor:   store.Int(row["respondido_por"]),
 			CreatedAt:       store.Str(row["created_at"]),
 			RemitenteNombre: store.Str(row["remitente_nombre"]),
 		})
@@ -364,10 +575,19 @@ func (p *Pages) renderPersonas(w http.ResponseWriter, r *http.Request, s *Sessio
 					lastId = id
 				}
 				items = append(items, dmItem{
-					ID:      id,
-					Mine:    store.Int(row["remitente_id"]) == uid,
-					Mensaje: store.Str(row["mensaje"]),
-					Hora:    hmTime(store.Str(row["created_at"])),
+					ID:             id,
+					Mine:           store.Int(row["remitente_id"]) == uid,
+					RemitenteID:    store.Int(row["remitente_id"]),
+					DestinatarioID: store.Int(row["destinatario_id"]),
+					Mensaje:        store.Str(row["mensaje"]),
+					Hora:           hmTime(store.Str(row["created_at"])),
+					CreatedAt:      store.Str(row["created_at"]),
+					Tipo:           store.Str(row["tipo"]),
+					MediaURL:       store.Str(row["media_url"]),
+					MediaNombre:    store.Str(row["media_nombre"]),
+					Test:           parseDmTest(store.Str(row["test_data"]), store.Str(row["respuesta_elegida"])),
+					Respondido:     store.Int(row["respondido_por"]) > 0,
+					RespondidoPor:  store.Int(row["respondido_por"]),
 				})
 			}
 			data["HasChat"] = true
@@ -376,7 +596,8 @@ func (p *Pages) renderPersonas(w http.ResponseWriter, r *http.Request, s *Sessio
 			data["ChatUsername"] = store.Str(chatUser["username"])
 			data["ChatInitial"] = initial
 			data["ChatEsProfesor"] = esProfesor
-			data["Dms"] = items
+			data["DmsJSON"] = template.JS(mustJSON(items))
+			data["MediaBase"] = ""
 			data["DmEmpty"] = len(items) == 0
 			data["LastDmId"] = lastId
 		}
@@ -414,4 +635,40 @@ func hmTime(v string) string {
 		return v
 	}
 	return t.Format("15:04")
+}
+
+func mustJSON(v any) string {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return "[]"
+	}
+	return string(b)
+}
+
+func isVideoExt(ext string) bool {
+	switch strings.ToLower(ext) {
+	case ".mp4", ".webm", ".ogv", ".mov", ".m4v", ".mpg", ".mpeg", ".avi", ".mkv":
+		return true
+	}
+	return false
+}
+
+func isAudioExt(ext string) bool {
+	switch strings.ToLower(ext) {
+	case ".mp3", ".ogg", ".oga", ".wav", ".m4a", ".aac", ".flac", ".wma":
+		return true
+	}
+	return false
+}
+
+func sanitizeExt(ext string) string {
+	ext = strings.ToLower(ext)
+	if isVideoExt(ext) || isAudioExt(ext) {
+		return ext
+	}
+	switch ext {
+	case ".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".bmp", ".avif":
+		return ext
+	}
+	return ""
 }

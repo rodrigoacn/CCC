@@ -238,7 +238,7 @@ func (a *API) salaLeave(r *http.Request, body map[string]any) *resp {
 	}
 
 	sesion, err := a.DB.QueryOne(ctx(r),
-		`SELECT s.*, cp.instructorId, cp.precio_base, cp.alumnos_max,
+		`SELECT s.*, cp.instructorId, cp.precio_base, cp.alumnos_max, cp.descuento_nuevo,
 			est_p.codigo_moneda AS mon_local, est_p.simbolo AS sim_local, est_p.tasa_usd,
 			prof.nombre AS prof_nombre
 		 FROM sesiones_clase s
@@ -285,6 +285,14 @@ func (a *API) salaLeave(r *http.Request, body map[string]any) *resp {
 	monLocal := store.Str(store.Coalesce(sesion["mon_local"], "USD"))
 	simLocal := store.Str(store.Coalesce(sesion["sim_local"], "$"))
 
+	discountPct := store.Int(sesion["descuento_nuevo"])
+	descuentoAplicado := false
+	if discountPct > 0 && !a.salaStudentHasPaid(r, store.Int(sesion["claseId"]), uid) {
+		precioUSD = round2(precioUSD * (1 - float64(discountPct)/100))
+		montoLocal = round2(precioUSD * tasa)
+		descuentoAplicado = true
+	}
+
 	if intentional != 0 {
 		if _, err := a.DB.Exec(ctx(r),
 			`UPDATE sesiones_clase
@@ -305,14 +313,16 @@ func (a *API) salaLeave(r *http.Request, body map[string]any) *resp {
 		}
 
 		return salaOK(map[string]any{
-			"sesionId":     sesionID,
-			"duracion_min": duracionMin,
-			"precio_usd":   precioUSD,
-			"monto_local":  montoLocal,
-			"moneda_local": monLocal,
-			"simbolo":      simLocal,
-			"prof_nombre":  store.Str(sesion["prof_nombre"]),
-			"redirect":     "calificar.php?sesion=" + store.Str(sesion["sesionId"]),
+			"sesionId":          sesionID,
+			"duracion_min":      duracionMin,
+			"precio_usd":        precioUSD,
+			"monto_local":       montoLocal,
+			"moneda_local":      monLocal,
+			"simbolo":           simLocal,
+			"prof_nombre":       store.Str(sesion["prof_nombre"]),
+			"descuento_aplicado": descuentoAplicado,
+			"descuento_pct":     discountPct,
+			"redirect":          "calificar.php?sesion=" + store.Str(sesion["sesionId"]),
 		})
 	}
 
@@ -322,6 +332,18 @@ func (a *API) salaLeave(r *http.Request, body map[string]any) *resp {
 		return salaErr("Error interno")
 	}
 	return salaOK(map[string]any{"paused": true, "sesionId": sesionID})
+}
+
+// salaStudentHasPaid reports whether the student has any previous paid session
+// in the given class (i.e. is NOT a brand-new student for that class).
+func (a *API) salaStudentHasPaid(r *http.Request, claseID, uid int64) bool {
+	row, err := a.DB.QueryOne(ctx(r),
+		`SELECT COUNT(*) AS cnt FROM sesiones_clase
+		 WHERE claseId = ? AND estudianteId = ? AND pagado = 1`, claseID, uid)
+	if err != nil || row == nil {
+		return false
+	}
+	return store.Int(row["cnt"]) > 0
 }
 
 // salaChat mirrors SalaController::chat (Redis path skipped; MySQL fallback).

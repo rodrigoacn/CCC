@@ -16,11 +16,18 @@
     </div>
     <div class="d-flex gap-2 flex-wrap">
       <a href="crear_clase.php" class="btn btn-primary fw-semibold">{{ t "dashboard.post_class" }}</a>
+      <a href="schedule.php" class="btn btn-outline-secondary"><i class="bi bi-calendar3 me-1"></i>{{ t "dashboard.schedule" }}</a>
       <a href="oferta_clase.php" class="btn btn-outline-secondary">{{ t "dashboard.quick_offer_btn" }}</a>
       <a href="buscar.php" class="btn btn-outline-secondary">{{ t "dashboard.find_students" }}</a>
       <a href="perfil.php" class="btn btn-outline-secondary">{{ t "dashboard.my_profile" }}</a>
     </div>
   </div>
+
+  {{ if .FlashDashboard }}
+  <div class="alert alert-success mb-4">
+    <i class="bi bi-check-circle me-2"></i>{{ .FlashDashboard }}
+  </div>
+  {{ end }}
 
   <div class="row g-3 mb-4">
     <div class="col-6 col-md-3">
@@ -87,6 +94,74 @@
 
   <div class="card bg-dark border-secondary mb-4">
     <div class="card-header border-secondary d-flex align-items-center justify-content-between">
+      <span class="text-white fw-semibold">{{ t "dashboard.reservations" }}</span>
+      <a href="schedule.php" class="btn btn-sm btn-outline-secondary"><i class="bi bi-calendar3 me-1"></i>{{ t "dashboard.manage_availability" }}</a>
+    </div>
+    {{ if not .HasReservas }}
+    <div class="card-body text-center py-4">
+      <p class="text-secondary mb-0">{{ t "dashboard.no_reservations" }}</p>
+    </div>
+    {{ else }}
+    <div class="table-responsive">
+      <table class="table table-light table-bordered table-hover mb-0">
+        <thead>
+          <tr>
+            <th class="text-secondary ps-3">{{ t "dashboard.class" }}</th>
+            <th class="text-secondary d-none d-md-table-cell">{{ t "dashboard.student" }}</th>
+            <th class="text-secondary">{{ t "dashboard.date" }}</th>
+            <th class="text-secondary">{{ t "dashboard.time" }}</th>
+            <th class="text-secondary">{{ t "general.status" }}</th>
+            <th class="text-secondary text-end pe-3">{{ t "dashboard.actions" }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{ range .Reservas }}
+          <tr {{ if .Pasada }}style="opacity:.55"{{ end }}>
+            <td class="ps-3 fw-semibold">{{ .ClaseTitulo }}</td>
+            <td class="text-secondary d-none d-md-table-cell">{{ .Estudiante }}</td>
+            <td class="text-secondary">{{ .Fecha }}</td>
+            <td class="text-secondary">{{ .HoraIni }} – {{ .HoraFin }}</td>
+            <td>
+              {{ if eq .Estado "pendiente" }}
+                <span class="badge bg-warning text-dark">{{ t "reserva.pending" }}</span>
+              {{ else if eq .Estado "confirmada" }}
+                <span class="badge bg-success">{{ t "reserva.confirmed" }}</span>
+              {{ else if eq .Estado "rechazada" }}
+                <span class="badge bg-danger">{{ t "reserva.rejected" }}</span>
+              {{ else }}
+                <span class="badge bg-secondary">{{ t "reserva.cancelled" }}</span>
+              {{ end }}
+            </td>
+            <td class="text-end pe-3">
+              {{ if and (eq .Estado "pendiente") (not .Pasada) }}
+              <div class="d-flex gap-1 justify-content-end">
+                <form method="POST" class="d-inline">
+                  {{ csrf }}
+                  <input type="hidden" name="action" value="confirmar">
+                  <input type="hidden" name="reservaId" value="{{ .ReservaId }}">
+                  <button type="submit" class="btn btn-sm btn-outline-success">{{ t "dashboard.confirm_btn" }}</button>
+                </form>
+                <form method="POST" class="d-inline">
+                  {{ csrf }}
+                  <input type="hidden" name="action" value="rechazar">
+                  <input type="hidden" name="reservaId" value="{{ .ReservaId }}">
+                  <button type="submit" class="btn btn-sm btn-outline-danger">{{ t "dashboard.reject_btn" }}</button>
+                </form>
+              </div>
+              {{ else }}
+              <span class="text-secondary small d-none d-md-inline">{{ .CreatedAt }}</span>
+              {{ end }}
+            </td>
+          </tr>
+          {{ end }}
+        </tbody>
+      </table>
+    </div>
+    {{ end }}
+  </div>
+
+  <div class="card bg-dark border-secondary mb-4">
+    <div class="card-header border-secondary d-flex align-items-center justify-content-between">
       <span class="text-white fw-semibold">{{ t "dashboard.my_classes" }}</span>
       <a href="crear_clase.php" class="btn btn-sm btn-primary">{{ t "dashboard.new_class" }}</a>
     </div>
@@ -133,6 +208,7 @@
             <td class="text-secondary small d-none d-lg-table-cell">{{ .CreatedAt }}</td>
             <td class="text-end pe-3">
               <div class="d-flex gap-1 justify-content-end">
+                <a href="schedule.php?clase={{ .ClaseId }}" class="btn btn-sm btn-outline-info" title="{{ t "dashboard.schedule_class" }}"><i data-feather="calendar" style="width:14px;height:14px"></i></a>
                 <a href="pre_sala.php?clase={{ .ClaseId }}&from=dashboard" class="btn btn-sm btn-outline-primary">{{ t "dashboard.join_btn" }}</a>
                 <form method="POST" class="d-inline">
                   {{ csrf }}

@@ -124,6 +124,13 @@ func (p *Pages) HandleSala(w http.ResponseWriter, r *http.Request) {
 	instructorId := store.Int(clase["instructorId"])
 	isTeacher := uid == instructorId
 
+	// Students can only enter an existing live room; otherwise they go back to
+	// pre_sala.php (which shows the reservation flow when the class is off-air).
+	if !isTeacher && !p.claseEstaEnVivo(ctx, claseId) {
+		redirect(w, r, "pre_sala.php?clase="+store.Str(claseId)+"&from="+from)
+		return
+	}
+
 	salaId := store.Int(clase["salaId"])
 	if salaId == 0 {
 		salaId, err = p.DB.Exec(ctx,

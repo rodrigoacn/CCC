@@ -8,15 +8,15 @@ import (
 )
 
 type classItem struct {
-	ID       int64
-	Titulo   string
-	Precio   int64
-	Profesor string
-	Rating   string
-	SalaAct  bool
-	Desc     string
+	ID        int64
+	Titulo    string
+	Precio    int64
+	Profesor  string
+	Rating    string
+	SalaAct   bool
+	Desc      string
 	DescTrunc string
-	DescMore bool
+	DescMore  bool
 }
 
 // HandleContenido ports contenido.php (subject class listing).

@@ -26,11 +26,11 @@ func fmtMoney(sym string, amount float64) string {
 }
 
 type dashStats struct {
-	TotalClases    int64
-	ClasesActivas  int64
-	TotalSesiones  int64
+	TotalClases     int64
+	ClasesActivas   int64
+	TotalSesiones   int64
 	SesionesPagadas int64
-	GananciasUSD   float64
+	GananciasUSD    float64
 }
 
 type dashEarning struct {
@@ -42,32 +42,32 @@ type dashEarning struct {
 }
 
 type dashClase struct {
-	ClaseId      int64
-	Titulo       string
-	Activa       bool
-	Materia      string
-	PrecioStr    string
-	Moneda       string
-	AlumnosMin   int64
-	AlumnosMax   int64
-	NumSesiones  int64
-	NumPagados   int64
-	PagadosTxt   string
-	CreatedAt    string
-	QuickOffer   string
+	ClaseId     int64
+	Titulo      string
+	Activa      bool
+	Materia     string
+	PrecioStr   string
+	Moneda      string
+	AlumnosMin  int64
+	AlumnosMax  int64
+	NumSesiones int64
+	NumPagados  int64
+	PagadosTxt  string
+	CreatedAt   string
+	QuickOffer  string
 }
 
 type dashSesion struct {
-	Estudiante   string
-	Clase        string
-	Materia      string
-	Duracion     string
-	MontoStr     string
-	MonedaLocal  string
-	Pagado       bool
-	Fin          bool
-	Inicio       string
-	QuickOffer   string
+	Estudiante  string
+	Clase       string
+	Materia     string
+	Duracion    string
+	MontoStr    string
+	MonedaLocal string
+	Pagado      bool
+	Fin         bool
+	Inicio      string
+	QuickOffer  string
 }
 
 // fmtDur mirrors fmtDur() in dashboard_profesor.php.
@@ -105,7 +105,7 @@ func (p *Pages) HandleDashboardProfesor(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	// POST actions (deactivate / activate / delete a class).
+	// POST actions (deactivate / activate / delete a class / reservation replies).
 	if r.Method == http.MethodPost {
 		if !CSRFRequire(w, r, s) {
 			return
@@ -122,6 +122,12 @@ func (p *Pages) HandleDashboardProfesor(w http.ResponseWriter, r *http.Request) 
 		case "delete":
 			_, _ = p.DB.Exec(ctx,
 				"DELETE FROM clases_programadas WHERE claseId=? AND instructorId=?", claseId, uid)
+		case "confirmar":
+			p.reservaActualizar(w, r, "confirmada")
+			return
+		case "rechazar":
+			p.reservaActualizar(w, r, "rechazada")
+			return
 		}
 		redirect(w, r, "dashboard_profesor.php")
 		return
@@ -322,6 +328,11 @@ func (p *Pages) HandleDashboardProfesor(w http.ResponseWriter, r *http.Request) 
 		})
 	}
 
+	flashD := s.Get("flash_dashboard")
+	s.Del("flash_dashboard")
+
+	reservas := p.loadReservasInstructor(ctx, uid)
+
 	nombre := store.Str(me["nombre"])
 	rol := store.Str(me["rol"])
 	calificacion := store.Float(me["calificacion"])
@@ -329,27 +340,30 @@ func (p *Pages) HandleDashboardProfesor(w http.ResponseWriter, r *http.Request) 
 	pais := store.Str(me["pais"])
 
 	data := map[string]any{
-		"Lang":         lang,
-		"NavData":      nav,
-		"Nombre":       nombre,
-		"Rol":          rol,
-		"Calificacion": formatNumber(calificacion, 1),
-		"NumResenas":   store.Int(me["num_resenas"]),
-		"HasRating":    hasRating,
-		"Pais":         pais,
-		"Stats":        stats,
-		"Live":         live,
-		"Earnings":     earnings,
-		"Clases":       clases,
-		"Sesiones":     sesiones,
-		"HasClases":    len(clases) > 0,
-		"HasSesiones":  len(sesiones) > 0,
-		"HasEarnings":  len(earnings) > 0,
-		"WelcomeTxt":   i18n.T(lang, "dashboard.welcome", map[string]string{"name": "<span class=\"text-white fw-semibold\">" + htmlEscape(nombre) + "</span>"}),
-		"GananciasStr": fmtMoney("$", stats.GananciasUSD),
-		"TotalPostedTxt":  i18n.T(lang, "dashboard.total_posted", map[string]string{"count": itoa(int(stats.TotalClases))}),
+		"Lang":             lang,
+		"NavData":          nav,
+		"Nombre":           nombre,
+		"Rol":              rol,
+		"Calificacion":     formatNumber(calificacion, 1),
+		"NumResenas":       store.Int(me["num_resenas"]),
+		"HasRating":        hasRating,
+		"Pais":             pais,
+		"Stats":            stats,
+		"Live":             live,
+		"Earnings":         earnings,
+		"Clases":           clases,
+		"Sesiones":         sesiones,
+		"HasClases":        len(clases) > 0,
+		"HasSesiones":      len(sesiones) > 0,
+		"HasEarnings":      len(earnings) > 0,
+		"WelcomeTxt":       i18n.T(lang, "dashboard.welcome", map[string]string{"name": "<span class=\"text-white fw-semibold\">" + htmlEscape(nombre) + "</span>"}),
+		"GananciasStr":     fmtMoney("$", stats.GananciasUSD),
+		"TotalPostedTxt":   i18n.T(lang, "dashboard.total_posted", map[string]string{"count": itoa(int(stats.TotalClases))}),
 		"SessionsTotalTxt": i18n.T(lang, "dashboard.sessions_total", map[string]string{"count": itoa(int(stats.TotalSesiones))}),
-		"PaidOutOfTxt":    i18n.T(lang, "dashboard.paid_out_of", map[string]string{"count": itoa(int(stats.TotalSesiones))}),
+		"PaidOutOfTxt":     i18n.T(lang, "dashboard.paid_out_of", map[string]string{"count": itoa(int(stats.TotalSesiones))}),
+		"FlashDashboard":   flashD,
+		"Reservas":         reservas,
+		"HasReservas":      len(reservas) > 0,
 	}
 	if err := p.Templates.RenderAuthed(w, "dashboard_profesor", p, s, lang, data); err != nil {
 		serverError(w, err)

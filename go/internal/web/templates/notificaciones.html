@@ -1,0 +1,34 @@
+{{ define "content" }}<div class="ml-wrap">
+  <div class="ml-wrap-inner">
+    <div style="padding:0 20px">
+      <div class="ml-head-title" style="margin-bottom:4px">{{ t "notif.title" }}</div>
+      <div class="ml-sub" style="margin:0 0 16px">{{ t "notif.subtitle" }}</div>
+    </div>
+
+    <div style="padding:0 20px">
+      {{ if not .HasNotifs }}
+      <div style="background:var(--sf);border-radius:14px;padding:40px;text-align:center">
+        <i data-feather="bell-off" style="width:44px;height:44px;color:var(--sub)"></i>
+        <div style="font-size:14px;color:var(--sub);margin-top:14px">{{ t "notif.empty" }}</div>
+      </div>
+      {{ else }}
+      <div style="display:flex;flex-direction:column;gap:12px">
+        {{ range .Notifs }}
+        <div style="background:var(--sf);border-radius:14px;padding:16px;border:1px solid var(--bd);{{ if not .Leida }}border-left:4px solid var(--p);{{ end }}">
+          <div style="display:flex;align-items:center;gap:10px">
+            <i data-feather="{{ if eq .Tipo "reserva_nueva" }}calendar-plus{{ else if eq .Tipo "hora_clase" }}bell{{ else }}info{{ end }}" style="width:18px;height:18px;color:var(--p);flex-shrink:0"></i>
+            <div style="flex:1">
+              <div style="font-weight:600;font-size:14px;color:var(--fg)">{{ .Titulo }}</div>
+              {{ if .Cuerpo }}<div style="font-size:13px;color:var(--sub);margin-top:2px">{{ .Cuerpo }}</div>{{ end }}
+              <div style="font-size:11px;color:var(--sub);margin-top:4px">{{ .CreatedAt }}</div>
+            </div>
+            {{ if .Enlace }}<a href="{{ .Enlace }}" style="color:var(--p);font-size:13px;white-space:nowrap;text-decoration:none">{{ t "notif.open" }}</a>{{ end }}
+          </div>
+        </div>
+        {{ end }}
+      </div>
+      {{ end }}
+    </div>
+  </div>
+</div>
+{{ end }}

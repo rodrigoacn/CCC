@@ -1,14 +1,32 @@
 {{ define "content" }}<div class="ml-wrap">
   <div class="ml-wrap-inner">
 
-    {{ if eq .IsTeacher }}
-    {{/* ===== TEACHER SCHEDULE VIEW ===== */}}
+    {{ if .IsTeacher }}
+    {{/* ===== TEACHER SCHEDULE VIEW (per-class availability grid) ===== */}}
     <div style="padding:0 20px 12px">
-      <a href="foro.php" style="display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--sub);text-decoration:none;margin-bottom:8px">
-        <i data-feather="arrow-left" style="width:16px;height:16px"></i> Volver
+      <a href="dashboard_profesor.php" style="display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--sub);text-decoration:none;margin-bottom:8px">
+        <i data-feather="arrow-left" style="width:16px;height:16px"></i> {{ t "dashboard.title" }}
       </a>
       <div style="font-size:26px;font-weight:700;color:var(--p);margin-bottom:2px">{{ t "schedule.title" }}</div>
-      <div style="font-size:14px;color:var(--sub)">{{ t "schedule.manage_your_schedule" }}</div>
+      <div style="font-size:14px;color:var(--sub)">{{ t "schedule.dnd_hint" }}</div>
+    </div>
+
+    {{ if not .HasClases }}
+    <div style="padding:0 20px">
+      <div style="background:var(--sf);border-radius:18px;padding:28px;border:1px solid var(--bd);text-align:center">
+        <div style="font-size:15px;color:var(--sub);margin-bottom:16px">{{ t "schedule.no_classes" }}</div>
+        <a href="crear_clase.php" class="ml-btn ml-btn-p" style="justify-content:center">{{ t "dashboard.first_class" }}</a>
+      </div>
+    </div>
+    {{ else }}
+    <div style="padding:0 20px 16px">
+      <form method="GET" action="schedule.php" style="width:100%">
+        <select name="clase" onchange="this.form.submit()" style="width:100%;padding:12px 16px;border-radius:12px;border:1px solid var(--bd);font-size:15px;box-sizing:border-box;background:var(--sf);color:var(--fg)">
+          {{ range .Clases }}
+          <option value="{{ .ID }}" {{ if .Selected }}selected{{ end }}>{{ .Nombre }}</option>
+          {{ end }}
+        </select>
+      </form>
     </div>
 
     <div style="padding:0 20px 16px">
@@ -20,9 +38,10 @@
     <div id="newSlotForm" style="display:none;padding:0 20px 20px">
       <div style="background:var(--sf);border-radius:18px;padding:20px;border:1px solid var(--bd)">
         <div style="font-weight:600;font-size:16px;color:var(--fg);margin-bottom:14px">{{ t "schedule.add_slot" }}</div>
-        <form method="POST" action="schedule.php">
+        <form method="POST" action="schedule.php?clase={{ .ClaseSel }}">
           {{ csrf }}
           <input type="hidden" name="action" value="add_slot">
+          <input type="hidden" name="claseId" value="{{ .ClaseSel }}">
           <select name="dia" required
                   style="width:100%;padding:12px 16px;border-radius:12px;border:1px solid var(--bd);font-size:15px;margin-bottom:8px;box-sizing:border-box;background:var(--bg);color:var(--fg)">
             <option value="lunes">{{ t "schedule.monday" }}</option>
@@ -38,51 +57,55 @@
                    style="width:48%;padding:10px 12px;border-radius:8px;border:1px solid var(--bd);font-size:14px;background:var(--bg);color:var(--fg)">
             <input type="time" name="hora_fin" required
                    style="width:48%;padding:10px 12px;border-radius:8px;border:1px solid var(--bd);font-size:14px;background:var(--bg);color:var(--fg)">
-            <button type="submit" class="ml-btn ml-btn-p" style="padding:10px 24px;font-size:14px;margin-top:8px">{{ t "schedule.save" }}</button>
           </div>
+          <button type="submit" class="ml-btn ml-btn-p" style="width:100%;justify-content:center;padding:10px 24px;font-size:14px;margin-top:10px">{{ t "schedule.save" }}</button>
         </form>
       </div>
     </div>
 
     <div style="padding:0 20px 24px">
-      <div style="background:var(--sf);border-radius:18px;padding:20px;border:1px solid var(--bd);min-height:400px">
-        <div style="display:flex;gap:6px;margin-bottom:12px">
-          <div style="flex:1;background:var(--p);color:#fff;border-radius:10px;padding:6px 10px;font-size:12px;font-weight:700;text-align:center">Lunes</div>
-          <div style="flex:1;background:var(--s);color:#fff;border-radius:10px;padding:6px 10px;font-size:12px;font-weight:700;text-align:center">Mar</div>
-          <div style="flex:1;background:var(--d);color:#fff;border-radius:10px;padding:6px 10px;font-size:12px;font-weight:700;text-align:center">Mi</div>
-          <div style="flex:1;background:var(--s);color:#fff;border-radius:10px;padding:6px 10px;font-size:12px;font-weight:700;text-align:center">J</div>
-          <div style="flex:1;background:var(--p);color:#fff;border-radius:10px;padding:6px 10px;font-size:12px;font-weight:700;text-align:center">V</div>
-          <div style="flex:1;background:var(--s);color:#fff;border-radius:10px;padding:6px 10px;font-size:12px;font-weight:700;text-align:center">S</div>
-          <div style="flex:1;background:var(--d);color:#fff;border-radius:10px;padding:6px 10px;font-size:12px;font-weight:700;text-align:center">D</div>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(7, 1fr);gap:8px;padding:12px 0">
-          {{ $totalSlots := 0 }}
+      <div style="background:var(--sf);border-radius:18px;padding:16px;border:1px solid var(--bd)">
+        <div style="display:grid;grid-template-columns:44px repeat(7,84px);gap:4px;overflow-x:auto">
+          <div></div>
           {{ range .Days }}
-          {{ $totalSlots += len .Slots }}
+          <div style="text-align:center;font-size:11px;font-weight:700;color:var(--p);padding:6px 2px">@{{ slice .Dia 0 3 }}</div>
           {{ end }}
-          {{ if gt $totalSlots 0 }}
+        </div>
+        <div style="display:grid;grid-template-columns:44px repeat(7,84px);gap:4px;overflow-x:auto;margin-top:2px">
+          <div style="position:relative">
+            {{ range $i, $h := .Hours }}
+            <div style="height:26px;font-size:9px;color:var(--sub);line-height:26px;text-align:right;padding-right:4px">{{ if isEven $i }}{{ $h }}{{ end }}</div>
+            {{ end }}
+          </div>
           {{ range .Days }}
-          <div style="background:var(--bg);border-radius:12px;padding:8px;min-height:50px;display:flex;align-items:center;justify-content:center;color:var(--sub);font-size:11px;position:relative">
-            <span style="position:absolute;top:8px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:700;color:var(--p);white-space:nowrap">{{ .Dia }}</span>
+          <div class="ce-day-col" data-dia="{{ .Dia }}" style="position:relative;min-height:650px">
+            {{ range $i, $h := $.Hours }}
+            <div class="ce-row" data-time="{{ $h }}" style="height:26px;border-bottom:1px solid var(--bd);box-sizing:border-box"></div>
+            {{ end }}
             {{ range .Slots }}
-            <div style="position:relative;margin-top:28px;padding:6px 10px;border-radius:8px;background:{{ if .IsPrimary }}var(--p){{ else }}var(--sf);color:{{ if .IsPrimary }}#fff{{ else }}var(--fg);{{ end }};font-size:10px;font-weight:500;max-width:90%;text-align:left;white-space:normal;word-break:break-word">
-              {{ .HoraIni }} - {{ .HoraFin }}
-              {{ if not .IsPrimary }}<br><small style="display:block;margin-top:2px;font-size:9px;color:var(--sub)">(secundario)</small>{{ end }}
+            <div class="ce-slot" draggable="true"
+                 data-id="{{ .ID }}" data-dia="{{ .Dia }}" data-dur="{{ mul 30 (sub .EndIdx .StartIdx) }}"
+                 style="position:absolute;left:2px;right:2px;top:{{ .Top }}px;height:{{ .Height }}px;background:var(--pb);color:var(--p);border-radius:8px;padding:2px 4px;font-size:10px;font-weight:600;cursor:grab;display:flex;flex-direction:column;justify-content:center;z-index:2">
+              <div style="line-height:1.1">{{ .HoraIni }}-{{ .HoraFin }}</div>
+              <div style="display:flex;gap:6px;margin-top:1px">
+                <form method="POST" action="schedule.php?clase={{ $.ClaseSel }}" style="margin:0;display:inline">
+                  {{ csrf }}<input type="hidden" name="action" value="remove_slot"><input type="hidden" name="claseId" value="{{ $.ClaseSel }}"><input type="hidden" name="slot_id" value="{{ .ID }}">
+                  <button type="submit" title="Eliminar" style="background:none;border:0;color:inherit;padding:0;font-size:9px;line-height:1;cursor:pointer"><i data-feather="x" style="width:9px;height:9px"></i></button>
+                </form>
+              </div>
             </div>
             {{ end }}
           </div>
           {{ end }}
-          {{ if eq $totalSlots 0 }}
-          <div style="text-align:center;padding:40px;color:var(--sub);">{{ t "schedule.no_slots" }}</div>
-          {{ end }}
         </div>
       </div>
     </div>
+    {{ end }}
 
     {{ else }}
-    {{/* ===== STUDENT SCHEDULE VIEW ===== */}}
+    {{/* ===== STUDENT SCHEDULE VIEW (classes + availability + reserve) ===== */}}
     <div style="padding:0 20px 12px">
-      <a href="foro.php" style="display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--sub);text-decoration:none;margin-bottom:8px">
+      <a href="materias.php" style="display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--sub);text-decoration:none;margin-bottom:8px">
         <i data-feather="arrow-left" style="width:16px;height:16px"></i> {{ t "foro.back" }}
       </a>
       <div style="font-size:26px;font-weight:700;color:var(--p);margin-bottom:2px">{{ t "schedule.title" }}</div>
@@ -90,24 +113,26 @@
     </div>
 
     <div style="padding:0 20px 24px">
-      {{ if gt (len .Teachers) 0 }}
-      <div style="display:grid;grid-template-column:repeat(auto-fill,minmax(280px,1fr));gap:24px">
-        {{ range .Teachers }}
-        <div style="background:var(--sf);border-radius:18px;padding:24px;border:1px solid var(--bd);min-height:320px">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
-            <div style="width:48px;height:48px;border-radius:50%;background:var(--p);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:18px;overflow:hidden">
-              {{ if .Avatar }}<img src="{{ .Avatar }}" style="width:100%;height:100%;object-fit:cover"> {{ else }}{{ slice .Nombre 0 1 | printf "%s" }}{{ end }}
+      {{ if gt (len .Classes) 0 }}
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px">
+        {{ range .Classes }}
+        <div style="background:var(--sf);border-radius:18px;padding:24px;border:1px solid var(--bd);min-height:320px;display:flex;flex-direction:column">
+          <div style="flex:1">
+            <div style="font-size:18px;font-weight:700;color:var(--fg);margin-bottom:4px">{{ .Titulo }}</div>
+            <div style="font-size:13px;color:var(--sub);margin-bottom:16px">{{ .Profesor }}</div>
+            {{ range .Slots }}
+            <div style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px;color:var(--sub)">
+              <i data-feather="calendar" style="width:12px;height:12px"></i>
+              <span style="text-transform:capitalize">{{ .Dia }}</span> {{ .HoraIni }} - {{ .HoraFin }}
             </div>
-            <div>
-              <div style="font-size:18px;font-weight:700;color:var(--fg)">{{ .Nombre }}</div>
-              {{ range .Schedule }}
-              <div style="display:flex;align-items:center;gap:4px;margin-top:4px;font-size:13px;color:var(--sub)">
-                <i data-feather="calendar" style="width:12px;height:12px"></i> {{ .Dia }} {{ .HoraIni }} - {{ .HoraFin }}
-              </div>
-              {{ end }}
-            </div>
+            {{ end }}
+            {{ if not .Slots }}
+            <div style="font-size:13px;color:var(--sub);margin-top:8px">{{ t "schedule.no_slots" }}</div>
+            {{ end }}
           </div>
-          {{ end }}
+          <a href="pre_sala.php?clase={{ .ClaseId }}&from=explorar" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;padding:12px 24px;border-radius:12px;background:var(--p);color:#fff;font-weight:700;font-size:14px;text-decoration:none">
+            <i data-feather="calendar-plus" style="width:16px;height:16px"></i> {{ t "reserva.reserve" }}
+          </a>
         </div>
         {{ end }}
       </div>
@@ -120,7 +145,61 @@
 
   </div>
 
+<style>
+  .ce-slot { touch-action:none; transition:box-shadow .12s ease, opacity .12s ease; }
+  .ce-slot:hover { box-shadow:0 4px 14px rgba(0,0,0,.18); }
+  .ce-slot.dragging { opacity:.45; }
+  .ce-row { cursor:pointer; }
+  .ce-row.ce-over { background:var(--pb) !important; outline:2px dashed var(--p); }
+</style>
 <script>
-document.addEventListener('DOMContentLoaded',function(){feather.replace()})
+document.addEventListener('DOMContentLoaded',function(){
+  if(typeof feather!=='undefined') feather.replace();
+  const TOKEN = '{{ csrfToken }}';
+  const CLASE = {{ .ClaseSel }};
+  let draggedId = null;
+  let durMin = 30;
+
+  function addMin(t, m){
+    const parts = t.split(':').map(Number);
+    const total = (parts[0]*60 + parts[1]) + m;
+    const H = Math.floor(total/60), M = total%60;
+    return String(H).padStart(2,'0') + ':' + String(M).padStart(2,'0');
+  }
+
+  document.querySelectorAll('.ce-slot').forEach(function(chip){
+    chip.addEventListener('dragstart', function(e){
+      draggedId = chip.getAttribute('data-id');
+      durMin = parseInt(chip.getAttribute('data-dur'),10) || 30;
+      chip.classList.add('dragging');
+      try { e.dataTransfer.setData('text/plain', draggedId); } catch(_){}
+    });
+    chip.addEventListener('dragend', function(){ chip.classList.remove('dragging'); });
+  });
+
+  document.querySelectorAll('.ce-row').forEach(function(row){
+    row.addEventListener('dragover', function(e){ e.preventDefault(); e.dataTransfer.dropEffect='move'; row.classList.add('ce-over'); });
+    row.addEventListener('dragleave', function(){ row.classList.remove('ce-over'); });
+    row.addEventListener('drop', function(e){
+      e.preventDefault();
+      row.classList.remove('ce-over');
+      if(!draggedId || !CLASE) return;
+      const dia = row.parentElement.getAttribute('data-dia');
+      const start = row.getAttribute('data-time');
+      if(!dia || !start) return;
+      const fd = new FormData();
+      fd.append('action','update_slot');
+      fd.append('claseId', CLASE);
+      fd.append('slot_id', draggedId);
+      fd.append('dia', dia);
+      fd.append('hora_inicio', start);
+      fd.append('hora_fin', addMin(start, durMin));
+      fetch('schedule.php?clase=' + CLASE, {method:'POST', headers:{'X-CSRF-Token':TOKEN}, body:fd})
+        .then(function(){ location.reload(); })
+        .catch(function(){ location.reload(); });
+      draggedId = null;
+    });
+  });
+});
 </script>
 {{ end }}

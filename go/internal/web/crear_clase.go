@@ -22,6 +22,18 @@ func nullableStr(s string) any {
 	return s
 }
 
+// clampPct parses a percentage string and clamps it to [0, 100].
+func clampPct(s string) int64 {
+	v := store.Int(s)
+	if v < 0 {
+		return 0
+	}
+	if v > 100 {
+		return 100
+	}
+	return v
+}
+
 // HandleCrearClase ports crear_clase.php (create a full class listing).
 func (p *Pages) HandleCrearClase(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -64,6 +76,7 @@ func (p *Pages) HandleCrearClase(w http.ResponseWriter, r *http.Request) {
 	precioMax := "0"
 	alumnosMin := "1"
 	alumnosMax := "10"
+	descuentoNuevo := "0"
 	selectedMateria := materiaPref
 
 	if r.Method == http.MethodPost {
@@ -76,12 +89,14 @@ func (p *Pages) HandleCrearClase(w http.ResponseWriter, r *http.Request) {
 		precioMax = r.PostFormValue("precio_max")
 		alumnosMin = r.PostFormValue("alumnos_min")
 		alumnosMax = r.PostFormValue("alumnos_max")
+		descuentoNuevo = r.PostFormValue("descuento_nuevo")
 		selectedMateria = store.Int(r.PostFormValue("materiaId"))
 
 		pmin := maxFloat(0, precioMin)
 		pmax := maxFloat(0, precioMax)
 		amin := maxInt(1, alumnosMin)
 		amax := maxInt(1, alumnosMax)
+		desc := clampPct(descuentoNuevo)
 		moneda := "USD"
 		if teacher != nil {
 			if c := store.Str(teacher["codigo_moneda"]); c != "" {
@@ -104,12 +119,13 @@ func (p *Pages) HandleCrearClase(w http.ResponseWriter, r *http.Request) {
 			claseId, err := p.DB.Exec(ctx,
 				`INSERT INTO clases_programadas
 				     (instructorId, materiaId, titulo, descripcion, precio_min, precio_max,
-				      precio_base, codigo_moneda, alumnos_min, alumnos_max, activa)
-				 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`,
+				      precio_base, codigo_moneda, alumnos_min, alumnos_max, descuento_nuevo, activa)
+				 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`,
 				uid, nullableID(selectedMateria), titulo, nullableStr(descripcion),
-				pmin, pmax, precioBase, moneda, amin, amax)
+				pmin, pmax, precioBase, moneda, amin, amax, desc)
 			if err == nil && claseId > 0 {
-				redirect(w, r, "pre_sala.php?clase="+store.Str(claseId)+"&from=crear")
+				s.Set("flash_dashboard", i18n.T(lang, "crear.created", nil))
+				redirect(w, r, "dashboard_profesor.php")
 				return
 			}
 			errorMsg = i18n.T(lang, "crear.db_error", nil)
@@ -146,20 +162,21 @@ func (p *Pages) HandleCrearClase(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := map[string]any{
-		"Lang":          lang,
-		"NavData":       nav,
-		"Error":         errorMsg,
-		"Materias":      opts,
-		"HasTeacher":    teacher != nil,
-		"Simbolo":       simbolo,
-		"Moneda":        moneda,
-		"PriceInfo":     priceInfo,
-		"Titulo":        titulo,
-		"Descripcion":   descripcion,
-		"PrecioMin":     precioMin,
-		"PrecioMax":     precioMax,
-		"AlumnosMin":    alumnosMin,
-		"AlumnosMax":    alumnosMax,
+		"Lang":           lang,
+		"NavData":        nav,
+		"Error":          errorMsg,
+		"Materias":       opts,
+		"HasTeacher":     teacher != nil,
+		"Simbolo":        simbolo,
+		"Moneda":         moneda,
+		"PriceInfo":      priceInfo,
+		"Titulo":         titulo,
+		"Descripcion":    descripcion,
+		"PrecioMin":      precioMin,
+		"PrecioMax":      precioMax,
+		"AlumnosMin":     alumnosMin,
+		"AlumnosMax":     alumnosMax,
+		"DescuentoNuevo": descuentoNuevo,
 	}
 	if err := p.Templates.RenderAuthed(w, "crear_clase", p, s, lang, data); err != nil {
 		serverError(w, err)

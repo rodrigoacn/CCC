@@ -27,6 +27,55 @@
       </a>
     </div>
     {{ end }}
+
+    {{ if not .IsTeacher }}
+    {{ if .FlashReserva }}
+    <div style="padding:0 20px;margin-top:16px">
+      <div style="border-radius:12px;padding:12px 16px;background:var(--pb);color:#fff;font-size:14px">{{ .FlashReserva }}</div>
+    </div>
+    {{ end }}
+    <div style="padding:24px 20px 0">
+      <div class="ml-sub" style="margin:0 0 12px">{{ t "reserva.my_reservations" }}</div>
+      {{ if not .HasReservas }}
+      <div style="background:var(--sf);border-radius:14px;padding:20px;text-align:center">
+        <div style="font-size:13px;color:var(--sub)">{{ t "reserva.no_reservations" }}</div>
+        <a href="schedule.php" style="display:inline-flex;align-items:center;gap:8px;margin-top:14px;padding:12px 24px;border-radius:12px;background:var(--p);color:#fff;font-weight:700;font-size:14px;text-decoration:none"><i data-feather="calendar-plus" style="width:16px;height:16px"></i>{{ t "reserva.reserve" }}</a>
+      </div>
+      {{ else }}
+      <div style="display:flex;flex-direction:column;gap:12px">
+        {{ range .Reservas }}
+        <div style="background:var(--sf);border-radius:14px;padding:16px;border:1px solid var(--bd);{{ if .Pasada }}opacity:.55{{ end }}">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <div style="flex:1;min-width:160px">
+              <div style="font-weight:600;font-size:15px;color:var(--fg)">{{ .ClaseTitulo }}</div>
+              <div style="font-size:12px;color:var(--sub);margin-top:2px">{{ .Fecha }} · {{ .HoraIni }} – {{ .HoraFin }}
+                {{ if gt .ClaseId 0 }} · <a href="perfil_usuario.php?id={{ .EstudianteId }}" style="color:var(--p);text-decoration:none">{{ .Estudiante }}</a>{{ end }}
+              </div>
+            </div>
+            <span style="padding:4px 10px;border-radius:8px;font-size:11px;font-weight:700;
+              {{ if eq .Estado "pendiente" }}background:#fef3c7;color:#92400e;{{ else if eq .Estado "confirmada" }}background:#dcfce7;color:#166534;{{ else if eq .Estado "rechazada" }}background:#fee2e2;color:#991b1b;{{ else }}background:#f1f5f9;color:#64748b;{{ end }}">
+              {{ t .EstadoKey }}
+            </span>
+          </div>
+          {{ if and (or (eq .Estado "pendiente") (eq .Estado "confirmada")) (not .Pasada) }}
+          <div style="display:flex;gap:8px;margin-top:12px">
+            {{ if eq .Estado "confirmada" }}
+            <a href="pre_sala.php?clase={{ .ClaseId }}&from=mi_sala" style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:12px;background:var(--s);color:#fff;font-weight:700;font-size:13px;text-decoration:none"><i data-feather="video" style="width:16px;height:16px"></i>{{ t "reserva.enter" }}</a>
+            {{ end }}
+            <form method="POST" action="reserva_actualizar.php" style="margin:0">
+              {{ csrf }}
+              <input type="hidden" name="estado" value="cancelada">
+              <input type="hidden" name="reservaId" value="{{ .ReservaId }}">
+              <button type="submit" style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:12px;border:1px solid var(--bd);background:var(--bag,#fff);color:var(--d);font-weight:700;font-size:13px;cursor:pointer"><i data-feather="x" style="width:16px;height:16px"></i>{{ t "reserva.cancel" }}</button>
+            </form>
+          </div>
+          {{ end }}
+        </div>
+        {{ end }}
+      </div>
+      {{ end }}
+    </div>
+    {{ end }}
   </div>
 </div>
 {{ end }}

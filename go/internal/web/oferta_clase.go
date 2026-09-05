@@ -42,6 +42,7 @@ func (p *Pages) HandleOfertaClase(w http.ResponseWriter, r *http.Request) {
 		precioMax := maxFloat(0, r.PostFormValue("precio_max"))
 		alumnosMin := maxInt(1, r.PostFormValue("alumnos_min"))
 		alumnosMax := maxInt(1, r.PostFormValue("alumnos_max"))
+		desc := clampPct(r.PostFormValue("descuento_nuevo"))
 		materiaId := store.Int(r.PostFormValue("materiaId"))
 		soloYo := 0
 		if r.PostFormValue("solo_yo") != "" {
@@ -71,10 +72,10 @@ func (p *Pages) HandleOfertaClase(w http.ResponseWriter, r *http.Request) {
 			_, err := p.DB.Exec(ctx,
 				`INSERT INTO clases_programadas
 				     (instructorId, materiaId, precio_min, precio_max, precio_base,
-				      codigo_moneda, alumnos_min, alumnos_max, solo_yo, activa)
-				 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`,
+				      codigo_moneda, alumnos_min, alumnos_max, solo_yo, descuento_nuevo, activa)
+				 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`,
 				uid, nullableID(materiaId), precioMin, precioMax, precioBase,
-				moneda, alumnosMin, alumnosMax, soloYo)
+				moneda, alumnosMin, alumnosMax, soloYo, desc)
 			if err == nil {
 				successMsg = i18n.T(lang, "oferta.success", nil)
 			} else {
@@ -131,6 +132,7 @@ func (p *Pages) HandleOfertaClase(w http.ResponseWriter, r *http.Request) {
 		"AlumnosMin":    r.PostFormValue("alumnos_min"),
 		"AlumnosMax":    r.PostFormValue("alumnos_max"),
 		"SoloYo":        r.PostFormValue("solo_yo") != "",
+		"DescuentoNuevo": r.PostFormValue("descuento_nuevo"),
 	}
 	if err := p.Templates.RenderAuthed(w, "oferta_clase", p, s, lang, data); err != nil {
 		serverError(w, err)

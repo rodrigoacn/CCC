@@ -118,6 +118,10 @@ func (s *Server) routes() {
 		s.register("/menu.php", p.WithSession(p.HandleMenu))
 		s.register("/contenido.php", p.WithSession(p.HandleContenido))
 		s.register("/pre_sala.php", p.WithSession(p.HandlePreSala))
+		s.register("/reservar.php", p.WithSession(p.HandleReservar))
+		s.register("/reserva_actualizar.php", p.WithSession(p.HandleReservaActualizar))
+		s.register("/notif_api.php", p.WithSession(p.HandleNotifAPI))
+		s.register("/notificaciones.php", p.WithSession(p.HandleNotificaciones))
 		s.register("/oferta_clase.php", p.WithSession(p.HandleOfertaClase))
 		s.register("/perfil.php", p.WithSession(p.HandlePerfil))
 		s.register("/perfil_usuario.php", p.WithSession(p.HandlePerfilUsuario))
@@ -187,7 +191,7 @@ func (s *Server) handleStaticOrRoot(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if path == "/" {
-		s.pages.WithSession(s.pages.HandleIndex)(w, r)
+		s.pages.WithSession(s.pages.HandleLanding)(w, r)
 		return
 	}
 	if s.webDir != "" && isStaticAsset(path) {
@@ -214,7 +218,8 @@ func (s *Server) handleStaticOrRoot(w http.ResponseWriter, r *http.Request) {
 func isStaticAsset(path string) bool {
 	switch filepath.Ext(path) {
 	case ".css", ".js", ".svg", ".png", ".ico", ".webmanifest", ".json", ".txt", ".xml",
-		".jpg", ".jpeg", ".gif", ".webp", ".woff", ".woff2", ".ttf", ".eot", ".otf":
+		".jpg", ".jpeg", ".gif", ".webp", ".woff", ".woff2", ".ttf", ".eot", ".otf",
+		".mp4", ".webm", ".ogv", ".mov", ".mp3", ".ogg", ".oga", ".wav", ".m4a", ".aac":
 		return true
 	}
 	name := filepath.Base(path)

@@ -16,16 +16,9 @@
     </a>
   </div>
 
-  <div id="dm-box" style="flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:8px;min-height:300px;max-height:calc(100vh - 280px)">
+  <div id="dm-box" style="flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:8px;min-height:300px;max-height:calc(100vh - 320px)">
     {{ if .DmEmpty }}
       <div id="dm-empty" style="text-align:center;padding:40px 20px;color:var(--sub);font-size:13px">{{ t "people.dm_empty" }}</div>
-    {{ else }}
-      {{ range .Dms }}
-      <div class="dm-msg" data-id="{{ .ID }}" style="max-width:80%;align-self:{{ if .Mine }}flex-end{{ else }}flex-start{{ end }};background:{{ if .Mine }}var(--p){{ else }}var(--sf){{ end }};border-radius:18px;padding:10px 14px;{{ if .Mine }}border-bottom-right-radius:4px{{ else }}border-bottom-left-radius:4px{{ end }}">
-        <div style="font-size:14px;color:{{ if .Mine }}#fff{{ else }}var(--fg){{ end }}">{{ .Mensaje }}</div>
-        <div style="font-size:10px;color:{{ if .Mine }}rgba(255,255,255,0.6){{ else }}var(--sub){{ end }};margin-top:2px;text-align:right">{{ .Hora }}</div>
-      </div>
-      {{ end }}
     {{ end }}
   </div>
 
@@ -42,7 +35,35 @@
     {{ end }}
   </div>
 
+  <div id="attach-panel" style="display:none;padding:10px 20px;border-top:1px solid var(--bd);background:var(--sf)">
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:12px;border:1px solid var(--bd);background:var(--bg);color:var(--fg);font-size:13px;cursor:pointer" onclick="document.getElementById('dm-file').click()">
+        <i data-feather="image" style="width:16px;height:16px"></i> {{ t "people.attach_media" }}
+      </button>
+      <button style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:12px;border:1px solid var(--bd);background:var(--bg);color:var(--fg);font-size:13px;cursor:pointer" onclick="CE_opinion('{{ .ChatUID }}')">
+        <i data-feather="message-circle" style="width:16px;height:16px"></i> {{ t "people.what_do_you_think" }}
+      </button>
+      <button style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:12px;border:1px solid var(--bd);background:var(--bg);color:var(--fg);font-size:13px;cursor:pointer" onclick="CE_promptLink('{{ .ChatUID }}')">
+        <i data-feather="link" style="width:16px;height:16px"></i> {{ t "people.attach_link" }}
+      </button>
+      <button style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:12px;border:1px solid var(--bd);background:var(--bg);color:var(--fg);font-size:13px;cursor:pointer" onclick="document.getElementById('test-builder').style.display=document.getElementById('test-builder').style.display==='none'?'block':'none'">
+        <i data-feather="check-square" style="width:16px;height:16px"></i> {{ t "people.attach_test" }}
+      </button>
+    </div>
+    <input type="file" id="dm-file" accept="image/*,video/*,audio/*" style="display:none" onchange="CE_sendFile('{{ .ChatUID }}', this)">
+    <div id="test-builder" style="display:none;margin-top:12px;padding:14px;border:1px solid var(--bd);border-radius:14px;background:var(--bg)">
+      <div style="font-weight:600;font-size:14px;color:var(--fg);margin-bottom:10px">{{ t "people.test_builder_title" }}</div>
+      <input type="text" id="test-input" placeholder="{{ t "people.test_placeholder" }}" style="width:100%;padding:10px 14px;border-radius:10px;border:1px solid var(--bd);font-size:14px;margin-bottom:8px;box-sizing:border-box;background:var(--bg);color:var(--fg)">
+      <div style="font-size:12px;color:var(--sub);margin-bottom:8px">{{ t "people.test_options_hint" }}</div>
+      <input type="text" id="test-opts" placeholder="A | B | C | D" style="width:100%;padding:10px 14px;border-radius:10px;border:1px solid var(--bd);font-size:14px;margin-bottom:8px;box-sizing:border-box;background:var(--bg);color:var(--fg)">
+      <div style="font-size:12px;color:var(--sub);margin-bottom:8px">{{ t "people.test_correct_hint" }}</div>
+      <input type="number" id="test-correct" min="1" value="1" style="width:90px;padding:8px 12px;border-radius:10px;border:1px solid var(--bd);font-size:14px;box-sizing:border-box;background:var(--bg);color:var(--fg)">
+      <button style="margin-left:8px;padding:8px 16px;border-radius:10px;border:0;background:var(--p);color:#fff;font-size:14px;cursor:pointer" onclick="CE_sendTest('{{ .ChatUID }}')">{{ t "people.send_test" }}</button>
+    </div>
+  </div>
+
   <div style="display:flex;gap:10px;padding:12px 20px;border-top:1px solid var(--bd);background:var(--sf)">
+    <button style="width:44px;height:44px;border-radius:22px;border:0;background:var(--sf2);color:var(--fg);cursor:pointer;flex-shrink:0" onclick="document.getElementById('attach-panel').style.display=document.getElementById('attach-panel').style.display==='none'?'block':'none'"><i data-feather="plus" style="width:18px;height:18px"></i></button>
     <input type="text" id="dm-input" placeholder="{{ t "people.dm_placeholder" }}" style="flex:1;border-radius:24px;border:1px solid var(--bd);padding:10px 16px;font-size:14px;background:var(--bg);color:var(--fg);outline:none">
     <button style="width:44px;height:44px;border-radius:22px;border:0;background:var(--p);color:#fff;cursor:pointer" onclick="sendDm({{ .ChatUID }})"><i data-feather="send" style="width:18px;height:18px"></i></button>
   </div>
@@ -57,19 +78,73 @@
     if(!inp.value.trim()) return;
     const msg = inp.value.trim();
     inp.value = '';
+    sendDMReq(to, 'texto', msg, null);
+  }
+  function sendQuickMsg(to, msg){
+    sendDMReq(to, 'texto', msg, null);
+  }
+  function sendDMReq(to, tipo, msg, data){
+    const body = 'action=send_dm&usuario_id='+to+'&tipo='+encodeURIComponent(tipo)+'&mensaje='+encodeURIComponent(msg||'')+(data?('&test_data='+encodeURIComponent(data)):'');
     fetch('personas.php', {
       method:'POST',
       headers:{'Content-Type':'application/x-www-form-urlencoded', 'X-CSRF-Token': CSRF_TOKEN},
-      body:'action=send_dm&usuario_id='+to+'&mensaje='+encodeURIComponent(msg)
+      body
     }).then(r=>r.json()).then(d=>{
       if(d.ok) fetchNewDms(to);
     });
   }
-  function sendQuickMsg(to, msg){
+  function CE_sendFile(to, input){
+    const file = input.files && input.files[0];
+    if(!file) return;
+    const msg = document.getElementById('dm-input').value.trim();
+    const fd = new FormData();
+    fd.append('action','send_dm');
+    fd.append('usuario_id', to);
+    fd.append('tipo','media');
+    fd.append('mensaje', msg);
+    fd.append('archivo', file);
+    fetch('personas.php', {method:'POST', headers:{'X-CSRF-Token': CSRF_TOKEN}, body:fd})
+      .then(r=>r.json()).then(d=>{
+        if(d.ok){ document.getElementById('dm-input').value=''; input.value=''; fetchNewDms(to); }
+      });
+  }
+  function CE_opinion(to){
+    const msg = prompt('{{ t "people.what_do_you_think" }}');
+    if(msg && msg.trim()) sendDMReq(to, 'opinion', msg.trim(), null);
+  }
+  function CE_promptLink(to){
+    const url = prompt('{{ t "people.link_url" }}', 'https://');
+    if(url && url.trim()) sendDMReq(to, 'enlace', url.trim(), null);
+  }
+  function CE_sendTest(to){
+    const q = document.getElementById('test-input').value.trim();
+    const optsRaw = document.getElementById('test-opts').value;
+    const correct = parseInt(document.getElementById('test-correct').value,10);
+    if(!q || !optsRaw.trim()) return;
+    const options = optsRaw.split('|').map(s=>s.trim()).filter(Boolean);
+    if(options.length < 2) return;
+    let ci = correct-1;
+    if(ci<0||ci>=options.length) ci=0;
+    const payload = JSON.stringify({questions:[{q, options, correct:ci}]});
+    document.getElementById('test-input').value='';
+    document.getElementById('test-opts').value='';
+    sendDMReq(to, 'test', '', payload);
+  }
+  function responderTest(msgId, to){
+    const qas = document.querySelectorAll('input[data-qid="'+msgId+'"]:checked');
+    const picked = [];
+    const radios = document.querySelectorAll('input[data-qid="'+msgId+'"]');
+    const qids = {};
+    radios.forEach(r => { const q=parseInt(r.getAttribute('data-question'),10); qids[q]=true; });
+    Object.keys(qids).sort((a,b)=>a-b).forEach(q => {
+      const sel = document.querySelector('input[data-qid="'+msgId+'"][data-question="'+q+'"]:checked');
+      picked.push(sel ? parseInt(sel.value,10) : -1);
+    });
+    if(picked.length === 0) return;
     fetch('personas.php', {
       method:'POST',
       headers:{'Content-Type':'application/x-www-form-urlencoded', 'X-CSRF-Token': CSRF_TOKEN},
-      body:'action=send_dm&usuario_id='+to+'&mensaje='+encodeURIComponent(msg)
+      body:'action=responder_test&mensaje_id='+msgId+'&opciones='+encodeURIComponent(JSON.stringify(picked))
     }).then(r=>r.json()).then(d=>{
       if(d.ok) fetchNewDms(to);
     });
@@ -84,11 +159,69 @@
     const div = document.createElement('div');
     div.className = 'dm-msg';
     div.setAttribute('data-id', msg.id);
-    div.style.cssText = 'max-width:80%;align-self:'+(mine?'flex-end':'flex-start')+';background:'+(mine?'var(--p)':'var(--sf)')+';border-radius:18px;padding:10px 14px;'+(mine?'border-bottom-right-radius:4px':'border-bottom-left-radius:4px');
-    div.innerHTML = '<div style="font-size:14px;color:'+(mine?'#fff':'var(--fg)')+'">'+escHtml(msg.mensaje)+'</div><div style="font-size:10px;color:'+(mine?'rgba(255,255,255,0.6)':'var(--sub)')+';margin-top:2px;text-align:right">'+formatTime(msg.created_at)+'</div>';
+    const tipo = msg.tipo || 'texto';
+    const bg = mine ? 'var(--p)' : 'var(--sf)';
+    const fg = mine ? '#fff' : 'var(--fg)';
+    const sub = mine ? 'rgba(255,255,255,0.6)' : 'var(--sub)';
+    let content = '';
+    if(tipo === 'media'){
+      content = '<div style="border-radius:12px;overflow:hidden;margin-bottom:6px">'+renderMedia(msg)+'</div>';
+      if(msg.mensaje) content += '<div style="font-size:14px;color:'+fg+'">'+escHtml(msg.mensaje)+'</div>';
+    } else if(tipo === 'enlace'){
+      content = '<a href="'+escHtml(msg.mensaje)+'" target="_blank" rel="noopener" style="color:'+(mine?'#fff':'var(--p)')+';font-size:14px;word-break:break-all;text-decoration:underline">'+escHtml(msg.mensaje)+'</a>';
+    } else if(tipo === 'opinion'){
+      content = '<div style="font-size:14px;font-style:italic;color:'+fg+'">“'+escHtml(msg.mensaje)+'”</div>';
+    } else if(tipo === 'test'){
+      content = renderTest(msg, mine);
+    } else {
+      content = '<div style="font-size:14px;color:'+fg+'">'+escHtml(msg.mensaje)+'</div>';
+    }
+    div.style.cssText = 'max-width:80%;align-self:'+(mine?'flex-end':'flex-start')+';background:'+bg+';border-radius:18px;padding:10px 14px;'+(mine?'border-bottom-right-radius:4px':'border-bottom-left-radius:4px');
+    div.innerHTML = content + '<div style="font-size:10px;color:'+sub+';margin-top:2px;text-align:right">'+formatTime(msg.created_at)+'</div>';
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
     if(parseInt(msg.id) > lastDmId) lastDmId = parseInt(msg.id);
+  }
+  function renderMedia(msg){
+    const url = '{{ .MediaBase }}' + msg.media_url;
+    const name = msg.media_url || '';
+    if(/\.(mp4|webm|ogv|mov|m4v|mpg|mpeg|avi|mkv)(\?|#|$)/i.test(name)) {
+      return '<video controls preload="metadata" src="'+url+'" style="max-width:240px;border-radius:12px;display:block;background:#000"></video>';
+    }
+    if(/\.(mp3|ogg|oga|wav|m4a|aac|flac|wma)(\?|#|$)/i.test(name)) {
+      return '<audio controls preload="metadata" src="'+url+'" style="width:220px"></audio>';
+    }
+    return '<img src="'+url+'" alt="" style="max-width:220px;max-height:260px;border-radius:12px;display:block;object-fit:cover">';
+  }
+  function renderTest(msg, mine){
+    const t = msg.test;
+    if(!t || !t.questions || !t.questions.length) return '<div style="font-size:14px">Test</div>';
+    const canAnswer = !mine && !msg.respondido;
+    let h = '<div style="font-weight:600;font-size:14px;color:'+(mine?'#fff':'var(--fg)')+';margin-bottom:8px">📝 '+escHtml(msg.mensaje || 'Test')+'</div>';
+    h += t.questions.map((q, qi) => {
+      let qh = '<div style="font-weight:600;font-size:14px;color:'+(mine?'#fff':'var(--fg)')+';margin-bottom:6px">'+(qi+1)+'. '+escHtml(q.q)+'</div>';
+      qh += '<div style="display:flex;flex-direction:column;gap:4px;margin-bottom:10px">';
+      q.options.forEach((op, oi) => {
+        let style = 'font-size:13px;color:'+(canAnswer?(mine?'rgba(255,255,255,0.9)':'var(--fg)'):(mine?'#fff':'var(--fg)'))+';';
+        let badge = '';
+        if(msg.respondido){
+          const isCorrect = oi === q.correct;
+          const isPicked = oi === q.picked;
+          if(isCorrect){ style += 'color:#16a34a;font-weight:600;'; badge = ' ✓'; }
+          else if(isPicked){ style += 'color:#dc2626;font-weight:600;'; badge = ' ✗'; }
+        }
+        const radio = canAnswer ? '<input type="radio" data-qid="'+msg.id+'" data-question="'+qi+'" value="'+oi+'" style="margin-right:6px">' : '';
+        qh += '<label style="'+style+'">'+radio+escHtml(op)+badge+'</label>';
+      });
+      qh += '</div>';
+      return qh;
+    }).join('');
+    if(canAnswer){
+      h += '<button onclick="responderTest('+msg.id+','+{{ .ChatUID }}+')" style="padding:8px 16px;border-radius:10px;border:0;background:'+(mine?'rgba(255,255,255,0.2)':'var(--p)')+';color:#fff;font-size:13px;cursor:pointer">{{ t "people.send_test" }}</button>';
+    } else if(msg.respondido){
+      h += '<div style="font-size:12px;color:'+(mine?'rgba(255,255,255,0.7)':'var(--sub)')+';margin-top:6px">{{ t "people.test_answered" }}</div>';
+    }
+    return h;
   }
 
   function fetchNewDms(to){
@@ -107,6 +240,13 @@
   }
 
   const dmBox = document.getElementById('dm-box');
+  try {
+    const initial = {{ .DmsJSON }};
+    if(initial && initial.length){
+      initial.forEach(m => { if(m.id > lastDmId) lastDmId = parseInt(m.id); });
+      initial.forEach(m => appendDm(m));
+    }
+  } catch(e){}
   if(dmBox) dmBox.scrollTop = dmBox.scrollHeight;
   if(window.location.search.includes('chat=')){
     const chatId = parseInt(new URLSearchParams(window.location.search).get('chat'));

@@ -43,10 +43,36 @@ func landingCounts(ctx context.Context, db *store.DB) (students, teachers int) {
 	return
 }
 
-// HandleLanding redirects the public landing page to the login page:
-// the landing is not used, everything goes through login.php.
+// HandleLanding renders the public landing page with Estudiantes/Profesores
+// guest entry buttons that go straight to materias as a guest.
 func (p *Pages) HandleLanding(w http.ResponseWriter, r *http.Request) {
-	redirect(w, r, "login.php")
+	s := SessionFrom(r.Context())
+	if s == nil {
+		serverError(w, errNoSession)
+		return
+	}
+	p.ApplyLangParam(w, r, s)
+	lang := p.ResolveLang(s, r)
+
+	paises, err := p.DB.QueryAll(r.Context(), "SELECT paisId, nombre FROM paises ORDER BY nombre ASC")
+	if err != nil {
+		paises = []map[string]any{}
+	}
+
+	// Preselect the visitor's country (by IP) so the guest form captures it
+	// even when the user does not touch the select. Degrades to 0 (no
+	// selection) if the lookup fails or the country is unsupported.
+	geoPais := detectedPaisID(ClientIP(r))
+
+	data := map[string]any{
+		"Lang":   lang,
+		"Year":   time.Now().Year(),
+		"Paises": paises,
+		"PaisID": geoPais,
+	}
+	if err := p.Templates.Render(w, "landing", p, s, lang, data); err != nil {
+		serverError(w, err)
+	}
 }
 
 // HandleLandingAPI ports landing_api.php: validates the pre-registration
