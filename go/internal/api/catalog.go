@@ -63,7 +63,7 @@ func (a *API) subjects() *resp {
 func (a *API) teachers(r *http.Request) *resp {
 	sid := queryInt(r, "subject_id")
 
-	sqlStr := `SELECT u.usuarioId AS id, u.nombre, u.email, u.rol, u.creditos,
+	sqlStr := `SELECT u.usuarioId AS id, u.nombre, u.rol,
 		ROUND(COALESCE(AVG(u.calificacion), 4.0), 1) AS rating,
 		COUNT(DISTINCT cp.claseId) AS clases_count
 		FROM usuarios u
@@ -74,7 +74,7 @@ func (a *API) teachers(r *http.Request) *resp {
 		sqlStr += " AND cp.materiaId = ?"
 		args = append(args, sid)
 	}
-	sqlStr += " GROUP BY u.usuarioId, u.nombre, u.email, u.rol, u.creditos ORDER BY rating DESC, clases_count DESC"
+	sqlStr += " GROUP BY u.usuarioId, u.nombre, u.rol ORDER BY rating DESC, clases_count DESC"
 
 	rows, err := a.DB.QueryAll(ctx(r), sqlStr, args...)
 	if err != nil {

@@ -250,6 +250,12 @@ func (a *API) searchPeople(r *http.Request) *resp {
 
 // userProfile mirrors SocialController::userProfile.
 func (a *API) userProfile(r *http.Request, body map[string]any) *resp {
+	viewer, errResp := a.authUser(r, map[string]any{})
+	if errResp != nil {
+		return errResp
+	}
+	viewerID := store.Int(viewer["usuarioId"])
+
 	targetID := bodyInt(body, "usuario_id")
 	if targetID == 0 {
 		targetID = queryInt(r, "usuario_id")
@@ -336,11 +342,17 @@ func (a *API) userProfile(r *http.Request, body map[string]any) *resp {
 		avatar = base + "/" + store.Str(user["avatar"])
 	}
 
+	// El email solo se expone al propio usuario (evita fuga de PII a terceros).
+	email := ""
+	if store.Int(user["usuarioId"]) == targetID && viewerID == targetID {
+		email = store.Str(user["email"])
+	}
+
 	profile := map[string]any{
 		"id":           store.Int(user["usuarioId"]),
 		"nombre":       store.Str(user["nombre"]),
 		"username":     store.Str(user["username"]),
-		"email":        store.Str(user["email"]),
+		"email":        email,
 		"rol":          store.Str(user["rol"]),
 		"avatar":       avatar,
 		"biografia":    store.Str(user["biografia"]),

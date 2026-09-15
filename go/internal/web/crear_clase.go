@@ -53,6 +53,11 @@ func (p *Pages) HandleCrearClase(w http.ResponseWriter, r *http.Request) {
 	}
 	uid := UID(s)
 
+	if !p.isInstructorDB(ctx, uid) {
+		redirect(w, r, "materias.php")
+		return
+	}
+
 	materiaPref := store.Int(r.URL.Query().Get("materia"))
 
 	materias, err := p.DB.QueryAll(ctx, "SELECT materiaId, nombre FROM materias ORDER BY orden ASC")

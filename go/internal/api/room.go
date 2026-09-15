@@ -1,10 +1,27 @@
 package api
 
 import (
+	"context"
 	"net/http"
 
 	"classexpress/internal/store"
 )
+
+// linkedToRoom reports whether uid has any recorded link to the sala (owner,
+// participant, session attendee or spectator). It keeps guests/spectators
+// working while blocking users with no relation to the room.
+func (a *API) linkedToRoom(ctx context.Context, salaID int64, uid int64) (bool, error) {
+	row, err := a.DB.QueryOne(ctx,
+		`SELECT 1 FROM salas WHERE salaId = ? AND instructorId = ?
+		 UNION SELECT 1 FROM participantes_sala WHERE salaId = ? AND usuarioId = ?
+		 UNION SELECT 1 FROM sesiones_clase WHERE salaId = ? AND estudianteId = ?
+		 UNION SELECT 1 FROM espectadores WHERE salaId = ? AND usuarioId = ?
+		 LIMIT 1`, salaID, uid, salaID, uid, salaID, uid, salaID, uid)
+	if err != nil {
+		return false, err
+	}
+	return row != nil, nil
+}
 
 // joinRoom mirrors RoomController::joinRoom.
 func (a *API) joinRoom(r *http.Request, body map[string]any) *resp {
@@ -89,6 +106,13 @@ func (a *API) leaveRoom(r *http.Request, body map[string]any) *resp {
 
 	rol := store.Str(user["rol"])
 	if rol == "instructor" || rol == "both" {
+		owner, err := a.DB.QueryOne(ctx(r), "SELECT instructorId FROM salas WHERE salaId = ?", sid)
+		if err != nil {
+			return errOut(http.StatusInternalServerError, "Error interno")
+		}
+		if owner == nil || store.Int(owner["instructorId"]) != uid {
+			return errOut(http.StatusForbidden, "No autorizado")
+		}
 		if _, err := a.DB.Exec(ctx(r), "UPDATE salas SET activa = false WHERE salaId = ?", sid); err != nil {
 			return errOut(http.StatusInternalServerError, "Error interno")
 		}
@@ -119,7 +143,8 @@ func (a *API) leaveRoom(r *http.Request, body map[string]any) *resp {
 
 // roomStatus mirrors RoomController::roomStatus.
 func (a *API) roomStatus(r *http.Request) *resp {
-	if _, errResp := a.authUser(r, map[string]any{}); errResp != nil {
+	user, errResp := a.authUser(r, map[string]any{})
+	if errResp != nil {
 		return errResp
 	}
 	sid := queryInt(r, "sala_id")
@@ -132,6 +157,14 @@ func (a *API) roomStatus(r *http.Request) *resp {
 	}
 	if sala == nil {
 		return errOut(http.StatusNotFound, "Sala no encontrada")
+	}
+
+	linked, err := a.linkedToRoom(ctx(r), sid, store.Int(user["usuarioId"]))
+	if err != nil {
+		return errOut(http.StatusInternalServerError, "Error interno")
+	}
+	if !linked {
+		return errOut(http.StatusForbidden, "No estás en esta sala")
 	}
 
 	participantes, err := a.DB.QueryAll(ctx(r),
@@ -182,11 +215,20 @@ func (a *API) sendMessage(r *http.Request, body map[string]any) *resp {
 
 // messages mirrors RoomController::messages.
 func (a *API) messages(r *http.Request) *resp {
-	if _, errResp := a.authUser(r, map[string]any{}); errResp != nil {
+	user, errResp := a.authUser(r, map[string]any{})
+	if errResp != nil {
 		return errResp
 	}
 	sid := queryInt(r, "sala_id")
 	after := queryInt(r, "after")
+
+	linked, err := a.linkedToRoom(ctx(r), sid, store.Int(user["usuarioId"]))
+	if err != nil {
+		return errOut(http.StatusInternalServerError, "Error interno")
+	}
+	if !linked {
+		return errOut(http.StatusForbidden, "No estás en esta sala")
+	}
 
 	sqlStr := `SELECT m.mensajeId AS id, m.usuarioId AS usuario_id, m.salaId, m.mensaje, m.enviado_at AS created_at, u.nombre AS usuario FROM mensajes_chat m
 		JOIN usuarios u ON u.usuarioId = m.usuarioId
@@ -260,6 +302,14 @@ func (a *API) pollSignals(r *http.Request) *resp {
 
 	if salaID == 0 {
 		return errOut(http.StatusBadRequest, "sala_id requerido")
+	}
+
+	linked, err := a.linkedToRoom(ctx(r), salaID, uid)
+	if err != nil {
+		return errOut(http.StatusInternalServerError, "Error interno")
+	}
+	if !linked {
+		return errOut(http.StatusForbidden, "No estás en esta sala")
 	}
 
 	rows, err := a.DB.QueryAll(ctx(r),
@@ -538,21 +588,25 @@ func (a *API) rateSession(r *http.Request, body map[string]any) *resp {
 				return errOut(http.StatusInternalServerError, "Error interno")
 			}
 		}
-	}
 
-	prof, err := a.DB.QueryOne(ctx(r), "SELECT calificacion, num_resenas FROM usuarios WHERE usuarioId = ?", profID)
-	if err != nil {
-		return errOut(http.StatusInternalServerError, "Error interno")
-	}
-	curAvg := store.Float(prof["calificacion"])
-	curCount := store.Int(prof["num_resenas"])
-	newCount := curCount + 1
-	newAvg := (curAvg*float64(curCount) + float64(rating)) / float64(max(1, newCount))
-
-	if _, err := a.DB.Exec(ctx(r),
-		"UPDATE usuarios SET calificacion = ?, num_resenas = ? WHERE usuarioId = ?",
-		round2(newAvg), newCount, profID); err != nil {
-		return errOut(http.StatusInternalServerError, "Error interno")
+		// Recalcular el promedio desde las reseñas reales del profesor:
+		// idempotente aunque se envíe rateSession varias veces.
+		aggr, err := a.DB.QueryOne(ctx(r),
+			"SELECT COUNT(rating) AS cnt, COALESCE(AVG(rating), 0) AS avg FROM resenas WHERE profesorId = ?",
+			profID)
+		if err != nil {
+			return errOut(http.StatusInternalServerError, "Error interno")
+		}
+		newCount := int(store.Int(aggr["cnt"]))
+		newAvg := store.Float(aggr["avg"])
+		if newCount == 0 {
+			newAvg = 0
+		}
+		if _, err := a.DB.Exec(ctx(r),
+			"UPDATE usuarios SET calificacion = ?, num_resenas = ? WHERE usuarioId = ?",
+			round2(newAvg), newCount, profID); err != nil {
+			return errOut(http.StatusInternalServerError, "Error interno")
+		}
 	}
 	return okOut(map[string]any{"ok": true})
 }

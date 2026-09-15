@@ -105,6 +105,9 @@ func (p *Pages) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	ip := ClientIP(r)
 
 	if r.Method == http.MethodPost {
+		if !CSRFRequire(w, r, s) {
+			return
+		}
 		switch r.PostFormValue("action") {
 		case "signin":
 			activeTab = "signin"
@@ -343,10 +346,9 @@ func (p *Pages) doSignUp(ctx context.Context, r *http.Request, lang, ip string) 
 func (p *Pages) doQuickEntry(ctx context.Context, w http.ResponseWriter, r *http.Request, lang string, ip string) (string, string, string) {
 	nickname := strings.TrimSpace(r.PostFormValue("nickname"))
 	paisID := r.PostFormValue("pais_id")
-	rol := r.PostFormValue("rol")
-	if rol != "student" && rol != "instructor" {
-		rol = "student"
-	}
+	// Los invitados siempre entran como estudiantes: no pueden elegir un rol
+	// de instructor con créditos gratis (verificado/es_invitado).
+	rol := "student"
 
 	if !p.Rate.Allow(ctx, "quickentry", ip, 20, 300) {
 		return i18n.T(lang, "login.rate_limit", nil), "", "quick"

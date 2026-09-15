@@ -115,6 +115,9 @@ func (p *Pages) HandleSchedule(w http.ResponseWriter, r *http.Request) {
 	claseSel := store.Int(r.URL.Query().Get("clase"))
 
 	if r.Method == http.MethodPost {
+		if !CSRFRequire(w, r, s) {
+			return
+		}
 		p.scheduleHandlePost(w, r, s, uid, lang, isTeacher, claseSel)
 		return
 	}

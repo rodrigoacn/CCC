@@ -1,6 +1,7 @@
 package web
 
 import (
+	"context"
 	"net/http"
 
 	"classexpress/internal/i18n"
@@ -11,6 +12,17 @@ type materiaOption struct {
 	ID       int64
 	Nombre   string
 	Selected bool
+}
+
+// isInstructorDB reports whether the user can publish classes (instructor or
+// both). Guests/students are rejected even if they self-claimed a role.
+func (p *Pages) isInstructorDB(ctx context.Context, uid int64) bool {
+	row, err := p.DB.QueryOne(ctx, "SELECT rol FROM usuarios WHERE usuarioId = ?", uid)
+	if err != nil || row == nil {
+		return false
+	}
+	rol := store.Str(row["rol"])
+	return rol == "instructor" || rol == "both"
 }
 
 // HandleOfertaClase ports oferta_clase.php (create a class offer).
@@ -31,6 +43,11 @@ func (p *Pages) HandleOfertaClase(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	uid := UID(s)
+
+	if !p.isInstructorDB(ctx, uid) {
+		redirect(w, r, "materias.php")
+		return
+	}
 
 	errorMsg, successMsg := "", ""
 

@@ -1,7 +1,6 @@
 package web
 
 import (
-	"math"
 	"net/http"
 	"strings"
 
@@ -40,16 +39,16 @@ func (p *Pages) HandleCalificar(w http.ResponseWriter, r *http.Request) {
 			`SELECT s.sesionId, cp.instructorId
 			 FROM sesiones_clase s
 			 JOIN clases_programadas cp ON cp.claseId = s.claseId
-			 WHERE s.sesionId = ?`, sesionId)
+			 WHERE s.sesionId = ? AND s.estudianteId = ?`, sesionId, uid)
 		if rating >= 1 && rating <= 5 && err == nil && sesion != nil {
 			profId := store.Int(sesion["instructorId"])
 
 			existing, err := p.DB.QueryOne(ctx,
-				"SELECT resenaId FROM resenas WHERE sesionId = ?", sesionId)
+				"SELECT resenaId FROM resenas WHERE sesionId = ? AND estudianteId = ?", sesionId, uid)
 			if err == nil && existing != nil {
 				_, _ = p.DB.Exec(ctx,
-					"UPDATE resenas SET rating = ?, comentario = ? WHERE sesionId = ?",
-					rating, nullableStr(comentario), sesionId)
+					"UPDATE resenas SET rating = ?, comentario = ? WHERE sesionId = ? AND estudianteId = ?",
+					rating, nullableStr(comentario), sesionId, uid)
 			} else {
 				_, _ = p.DB.Exec(ctx,
 					`INSERT INTO resenas (sesionId, estudianteId, profesorId, rating, comentario)
@@ -57,13 +56,16 @@ func (p *Pages) HandleCalificar(w http.ResponseWriter, r *http.Request) {
 					sesionId, uid, profId, rating, nullableStr(comentario))
 			}
 
-			prof, err := p.DB.QueryOne(ctx,
-				"SELECT calificacion, num_resenas FROM usuarios WHERE usuarioId = ?", profId)
-			if err == nil && prof != nil {
-				curAvg := store.Float(prof["calificacion"])
-				curCount := store.Int(prof["num_resenas"])
-				newCount := curCount + 1
-				newAvg := (curAvg*float64(curCount) + float64(rating)) / math.Max(1, float64(newCount))
+			// Recalcular el promedio desde las reseñas reales del profesor:
+			// idempotente aunque se vuelva a calificar la misma sesión.
+			if aggr, err := p.DB.QueryOne(ctx,
+				"SELECT COUNT(rating) AS cnt, COALESCE(AVG(rating), 0) AS avg FROM resenas WHERE profesorId = ?",
+				profId); err == nil && aggr != nil {
+				newCount := int(store.Int(aggr["cnt"]))
+				newAvg := store.Float(aggr["avg"])
+				if newCount == 0 {
+					newAvg = 0
+				}
 				_, _ = p.DB.Exec(ctx,
 					"UPDATE usuarios SET calificacion = ?, num_resenas = ? WHERE usuarioId = ?",
 					round2(newAvg), newCount, profId)

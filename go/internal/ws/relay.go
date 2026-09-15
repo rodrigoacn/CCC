@@ -5,8 +5,10 @@ package ws
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"strings"
 	"sync"
 	"time"
@@ -20,7 +22,19 @@ import (
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
-	CheckOrigin:     func(r *http.Request) bool { return true },
+	// Only accept same-origin browser clients (blocks Cross-Site WebSocket
+	// Hijacking). Non-browser clients such as the mobile app send no Origin.
+	CheckOrigin: func(r *http.Request) bool {
+		origin := r.Header.Get("Origin")
+		if origin == "" {
+			return true
+		}
+		u, err := url.Parse(origin)
+		if err != nil || u.Host == "" {
+			return false
+		}
+		return strings.EqualFold(u.Host, r.Host)
+	},
 }
 
 // connWrap serializes writes on a single socket (gorilla requires at most one
@@ -87,7 +101,11 @@ func (h *Hub) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		switch msg.Type {
 		case "join":
-			h.join(st, store.Str(msg.SalaID), store.Int(msg.UserID))
+			if err := h.join(st, store.Str(msg.SalaID), store.Int(msg.UserID)); err != nil {
+				_ = st.conn.writeText([]byte(`{"type":"error","data":{"reason":"not_allowed"}}`))
+				h.leave(st)
+				return
+			}
 		case "leave":
 			h.leave(st)
 		case "signal":
@@ -98,10 +116,28 @@ func (h *Hub) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// linkedToRoom resolves whether the user has any recorded link to the sala
+// (owner, participant, session attendee or spectator). It keeps espectadores
+// working while rejecting random users.
+func (h *Hub) linkedToRoom(salaID int64, userID int64) bool {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	row, err := h.db.QueryOne(ctx,
+		`SELECT 1 FROM salas WHERE salaId = ? AND instructorId = ?
+		 UNION SELECT 1 FROM participantes_sala WHERE salaId = ? AND usuarioId = ?
+		 UNION SELECT 1 FROM sesiones_clase WHERE salaId = ? AND estudianteId = ?
+		 UNION SELECT 1 FROM espectadores WHERE salaId = ? AND usuarioId = ?
+		 LIMIT 1`, salaID, userID, salaID, userID, salaID, userID, salaID, userID)
+	return err == nil && row != nil
+}
+
 // join registers the socket in the room and notifies everyone (mirrors server.js).
-func (h *Hub) join(st *connState, salaID string, userID int64) {
+func (h *Hub) join(st *connState, salaID string, userID int64) error {
 	if st.left || salaID == "" || userID == 0 {
-		return
+		return nil
+	}
+	if h.db != nil && !h.linkedToRoom(store.Int(salaID), userID) {
+		return fmt.Errorf("no vinculado a la sala")
 	}
 	st.salaID = salaID
 	st.userID = userID
@@ -118,6 +154,7 @@ func (h *Hub) join(st *connState, salaID string, userID int64) {
 	h.mu.Unlock()
 
 	h.broadcastRoomState(salaID)
+	return nil
 }
 
 // leave removes the socket from its room (idempotent).

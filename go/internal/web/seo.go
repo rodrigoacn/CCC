@@ -1,6 +1,9 @@
 package web
 
-import "net/http"
+import (
+	"net/http"
+	"time"
+)
 
 // SeoMeta holds the per-page search engine metadata rendered by base.html.
 type SeoMeta struct {
@@ -97,11 +100,19 @@ func (p *Pages) HandleSitemap(w http.ResponseWriter, r *http.Request) {
 	for _, page := range SubjectPages() {
 		urls = append(urls, siteURL+"/"+page)
 	}
+	lastmod := time.Now().Format("2006-01-02")
 	w.Header().Set("Content-Type", "application/xml; charset=utf-8")
 	w.Write([]byte(`<?xml version="1.0" encoding="UTF-8"?>` + "\n"))
-	w.Write([]byte(`<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">` + "\n"))
+	w.Write([]byte(`<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">` + "\n"))
 	for _, u := range urls {
-		w.Write([]byte("  <url><loc>" + u + "</loc></url>\n"))
+		prio := "0.9"
+		if u != siteURL+"/" {
+			prio = "0.7"
+		}
+		w.Write([]byte("  <url>\n    <loc>" + u + "</loc>\n    <lastmod>" + lastmod + "</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>" + prio + "</priority>\n"))
+		w.Write([]byte(`    <xhtml:link rel="alternate" hreflang="es" href="` + u + `?lang=es"/>` + "\n"))
+		w.Write([]byte(`    <xhtml:link rel="alternate" hreflang="en" href="` + u + `?lang=en"/>` + "\n"))
+		w.Write([]byte("  </url>\n"))
 	}
 	w.Write([]byte("</urlset>\n"))
 }

@@ -220,10 +220,16 @@ func (g *Gateway) ProcessWebhook(ctx context.Context, body map[string]any) (map[
 		return payment, nil
 	}
 
-	if _, err := g.db.Exec(ctx,
-		"UPDATE checkout_sessions SET payment_id = ?, status = ? WHERE id = ?",
-		paymentID, status, store.Str(session["id"])); err != nil {
+	// Actualización atómica: solo un webhook concurrente gana la carrera; los
+	// que lleguen después ven status != 'pending' y no vuelven a acreditar.
+	n, err := g.db.Exec(ctx,
+		"UPDATE checkout_sessions SET payment_id = ?, status = ? WHERE id = ? AND status = 'pending'",
+		paymentID, status, store.Str(session["id"]))
+	if err != nil {
 		return nil, err
+	}
+	if n == 0 {
+		return payment, nil
 	}
 
 	if status == "approved" {
