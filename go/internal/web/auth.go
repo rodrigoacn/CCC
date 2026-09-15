@@ -105,9 +105,6 @@ func (p *Pages) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	ip := ClientIP(r)
 
 	if r.Method == http.MethodPost {
-		if !CSRFRequire(w, r, s) {
-			return
-		}
 		switch r.PostFormValue("action") {
 		case "signin":
 			activeTab = "signin"
