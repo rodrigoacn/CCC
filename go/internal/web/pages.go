@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
+	"encoding/json"
 	"html/template"
 	"net"
 	"net/http"
@@ -176,6 +177,13 @@ func (p *Pages) Funcs(s *Session, lang string) template.FuncMap {
 		"attrs":             func(v any) string { return store.Str(v) },
 		"htmlsafe":          func(v any) template.HTML { return template.HTML(store.Str(v)) },
 		"translationsJSON":  func() template.JS { return template.JS(i18n.QuoteJSON()) },
+		"json": func(v any) template.JS {
+			b, err := json.Marshal(v)
+			if err != nil {
+				return template.JS("null")
+			}
+			return template.JS(b)
+		},
 		"contains":          func(list []string, v any) bool { for _, x := range list { if x == store.Str(v) { return true } }; return false },
 		"lower":             func(v any) string { return strings.ToLower(store.Str(v)) },
 		"add":               func(a, b int64) int64 { return a + b },

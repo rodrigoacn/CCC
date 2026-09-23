@@ -65,10 +65,11 @@ func (p *Pages) HandleLanding(w http.ResponseWriter, r *http.Request) {
 	geoPais := detectedPaisID(ClientIP(r))
 
 	data := map[string]any{
-		"Lang":   lang,
-		"Year":   time.Now().Year(),
-		"Paises": paises,
-		"PaisID": geoPais,
+		"Lang":     lang,
+		"Year":     time.Now().Year(),
+		"Paises":   paises,
+		"PaisID":   geoPais,
+		"LoggedIn": LoggedIn(s),
 	}
 	if err := p.Templates.Render(w, "landing", p, s, lang, data); err != nil {
 		serverError(w, err)

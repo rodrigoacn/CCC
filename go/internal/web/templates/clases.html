@@ -1,0 +1,125 @@
+{{ define "content" }}<div class="ml-wrap">
+  <div class="ml-wrap-inner">
+
+    <div class="ml-head" style="flex-direction:column;align-items:flex-start;gap:6px">
+      <div style="display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:20px;background:var(--s);color:#fff;font-size:12px;font-weight:800;letter-spacing:2px">
+        <i data-feather="target" style="width:15px;height:15px"></i> SE BUSCA
+      </div>
+      <div class="ml-head-title" style="margin:0">El gremio de profesores</div>
+      <div class="ml-sub" style="margin:0 0 4px">Publica lo que quieres aprender y los profesores te enviarán su precio por hora.</div>
+    </div>
+
+    {{ if .Msg }}<div style="margin:12px 4px 0;padding:12px 16px;border-radius:12px;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.4);color:var(--fg);font-size:14px">{{ .Msg }}</div>{{ end }}
+    {{ if .Err }}<div style="margin:12px 4px 0;padding:12px 16px;border-radius:12px;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:var(--fg);font-size:14px">{{ .Err }}</div>{{ end }}
+
+    <div style="margin:16px 4px 0;border-radius:18px;padding:20px;background:var(--sf);border:1px dashed var(--bd)">
+      <form method="POST" action="clases.php">
+        {{ csrf }}
+        <input type="hidden" name="action" value="crear">
+        <input type="text" name="titulo" required minlength="5" maxlength="120"
+               placeholder="¿Qué quieres aprender? Ej: Fusión nuclear"
+               style="width:100%;box-sizing:border-box;padding:14px 16px;border-radius:12px;border:1px solid var(--bd);background:var(--bg,#fff);color:var(--fg);font-size:16px;font-family:inherit;margin-bottom:10px">
+        <textarea name="descripcion" maxlength="600" rows="2"
+                  placeholder="Cuéntale al gremio tu nivel y qué necesitas (opcional)"
+                  style="width:100%;box-sizing:border-box;padding:14px 16px;border-radius:12px;border:1px solid var(--bd);background:var(--bg,#fff);color:var(--fg);font-size:15px;font-family:inherit;margin-bottom:10px;resize:vertical"></textarea>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <select name="materiaId"
+                  style="flex:1;min-width:180px;padding:12px 14px;border-radius:12px;border:1px solid var(--bd);background:var(--bg,#fff);color:var(--fg);font-size:15px;font-family:inherit">
+            <option value="0">Materia (opcional)</option>
+            {{ range .FormMaterias }}<option value="{{ .ID }}">{{ .Nombre }}</option>{{ end }}
+          </select>
+          <button type="submit" class="ml-btn ml-btn-s" style="padding:12px 24px;font-size:15px;white-space:nowrap">
+            <i data-feather="send" style="width:18px;height:18px"></i> Publicar «se busca»
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div style="display:flex;gap:8px;overflow-x:auto;padding:16px 4px 4px;-webkit-overflow-scrolling:touch">
+      <a class="ml-chip {{ if eq .FilterMateria 0 }}active{{ end }}" href="clases.php">Todas</a>
+      {{ range .Materias }}
+      <a class="ml-chip {{ if .Selected }}active{{ end }}" href="clases.php?m={{ .ID }}">{{ .Nombre }}</a>
+      {{ end }}
+    </div>
+
+    {{ if not .HasItems }}
+    <div class="ml-empty">
+      <i data-feather="search" style="width:48px;height:48px;color:var(--tbi)"></i>
+      <div class="ml-empty-txt">Aún no hay pedidos. ¡Sé el primero en publicar tu «se busca»!</div>
+    </div>
+    {{ end }}
+
+    {{ range .Items }}
+    <div style="margin:14px 4px 0;border-radius:18px;padding:18px;background:var(--sf);border:1px solid var(--bd);{{ if .EsMia }}border-color:var(--s){{ end }}">
+      <div style="display:flex;gap:12px;align-items:flex-start">
+        <div style="width:44px;height:44px;flex:0 0 44px;border-radius:50%;background:var(--p);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px">{{ .EstudianteInitial }}</div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:4px">
+            <span style="padding:3px 10px;border-radius:20px;background:var(--s);color:#fff;font-size:10px;font-weight:800;letter-spacing:1px">SE BUSCA</span>
+            {{ if .Materia }}<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;background:{{ .MateriaColor }};color:#fff;font-size:11px;font-weight:600">
+              {{ if .MateriaIcon }}<i data-feather="{{ .MateriaIcon }}" style="width:12px;height:12px"></i>{{ end }}{{ .Materia }}</span>{{ end }}
+            {{ if .Tiempo }}<span style="font-size:12px;color:var(--sub)">{{ .Tiempo }}</span>{{ end }}
+            {{ if .EsMia }}<span style="font-size:11px;font-weight:700;color:var(--s)">· TU PEDIDO</span>{{ end }}
+          </div>
+          <div style="font-weight:700;font-size:17px;color:var(--fg);line-height:1.3">{{ .Titulo }}</div>
+          {{ if .Descripcion }}<div style="font-size:14px;color:var(--sub);margin-top:4px;line-height:1.45">{{ .Descripcion }}</div>{{ end }}
+          <div style="font-size:13px;color:var(--sub);margin-top:8px">
+            {{ .Estudiante }} · {{ .Ofertas }} presupuesto{{ if ne .Ofertas 1 }}s{{ end }}{{ if gt .Alumnos 1 }} · {{ .Alumnos }} interesados{{ end }}
+          </div>
+        </div>
+      </div>
+
+      {{ if .EsMia }}
+        {{ if .Bids }}
+        <div style="margin-top:14px;border-top:1px solid var(--bd);padding-top:12px;display:flex;flex-direction:column;gap:10px">
+          {{ range .Bids }}
+          <div style="display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:14px;background:var(--bg,#fff);border:1px solid var(--bd)">
+            <div style="width:36px;height:36px;flex:0 0 36px;border-radius:50%;background:var(--pb,var(--p));color:var(--p);display:flex;align-items:center;justify-content:center;font-weight:700">{{ .InstructorInitial }}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:600;color:var(--fg);font-size:15px">{{ .Instructor }}</div>
+              <div style="font-weight:800;color:var(--s);font-size:16px">{{ .Precio }} <span style="font-weight:500;font-size:12px;color:var(--sub)">/ hora</span></div>
+              {{ if .Mensaje }}<div style="font-size:14px;color:var(--sub);margin-top:4px;line-height:1.4">{{ .Mensaje }}</div>{{ end }}
+              <form method="POST" action="clases.php" style="margin-top:8px">
+                {{ csrf }}
+                <input type="hidden" name="action" value="aceptar">
+                <input type="hidden" name="oferta_id" value="{{ .OfertaID }}">
+                <button type="submit" class="ml-btn ml-btn-p" style="padding:8px 18px;font-size:13px">
+                  <i data-feather="check" style="width:15px;height:15px"></i> Aceptar y coordinar
+                </button>
+              </form>
+            </div>
+          </div>
+          {{ end }}
+        </div>
+        {{ else }}
+        <div style="margin-top:12px;font-size:14px;color:var(--sub)">Todavía no hay presupuestos. El gremio ya está siendo avisado.</div>
+        {{ end }}
+      {{ else if .YaOferto }}
+        <div style="margin-top:12px;font-size:14px;color:var(--s);font-weight:600">
+          <i data-feather="check-circle" style="width:16px;height:16px"></i> Ya enviaste tu presupuesto para este pedido.
+        </div>
+      {{ else if $.IsTeacher }}
+        <details style="margin-top:12px">
+          <summary style="cursor:pointer;font-weight:700;color:var(--p);font-size:14px;list-style:none">
+            <i data-feather="tag" style="width:16px;height:16px"></i> Ofrecer precio por hora
+          </summary>
+          <form method="POST" action="clases.php" style="margin-top:10px">
+            {{ csrf }}
+            <input type="hidden" name="action" value="ofertar">
+            <input type="hidden" name="solicitud_id" value="{{ .SolicitudID }}">
+            <input type="number" name="precio_hora" required min="0.01" step="0.01" placeholder="Precio por hora"
+                   style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1px solid var(--bd);background:var(--bg,#fff);color:var(--fg);font-size:15px;font-family:inherit;margin-bottom:8px">
+            <textarea name="mensaje" maxlength="500" rows="2" placeholder="Mensaje para el alumno (opcional)"
+                      style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1px solid var(--bd);background:var(--bg,#fff);color:var(--fg);font-size:15px;font-family:inherit;margin-bottom:8px;resize:vertical"></textarea>
+            <button type="submit" class="ml-btn ml-btn-p" style="padding:10px 20px;font-size:14px">
+              <i data-feather="send" style="width:16px;height:16px"></i> Enviar presupuesto
+            </button>
+          </form>
+        </details>
+      {{ end }}
+    </div>
+    {{ end }}
+
+    <div style="height:90px"></div>
+  </div>
+</div>{{ end }}

@@ -46,6 +46,36 @@ func (p *Pages) HandleUpdateBio(w http.ResponseWriter, r *http.Request) {
 	redirect(w, r, "perfil.php")
 }
 
+// HandleUpdateCompetencias saves a teacher's skills/specialties (gremio).
+func (p *Pages) HandleUpdateCompetencias(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	s := SessionFrom(ctx)
+	if s == nil {
+		serverError(w, errNoSession)
+		return
+	}
+	if !p.GuardPage(w, r, s) {
+		return
+	}
+	if r.Method != http.MethodPost {
+		redirect(w, r, "perfil.php")
+		return
+	}
+	if !CSRFRequire(w, r, s) {
+		return
+	}
+	lang := p.ResolveLang(s, r)
+	uid := UID(s)
+	comp := strings.TrimSpace(r.PostFormValue("competencias"))
+
+	if len([]rune(comp)) > 1000 {
+		comp = string([]rune(comp)[:1000])
+	}
+	_, _ = p.DB.Exec(ctx, "UPDATE usuarios SET competencias = ? WHERE usuarioId = ?", comp, uid)
+	s.Set("competencias_msg", i18n.T(lang, "profile.competencias_saved", nil))
+	redirect(w, r, "perfil.php")
+}
+
 // HandleUpdateLanguages ports update_languages.php.
 func (p *Pages) HandleUpdateLanguages(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()

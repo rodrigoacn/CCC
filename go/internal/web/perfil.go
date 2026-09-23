@@ -65,6 +65,7 @@ func (p *Pages) HandlePerfil(w http.ResponseWriter, r *http.Request) {
 	calificacion := store.Float(user["calificacion"])
 	numResenas := store.Int(user["num_resenas"])
 	biografia := store.Str(user["biografia"])
+	competencias := store.Str(user["competencias"])
 	pais := store.Str(user["pais"])
 	sitioWebRaw := strings.TrimSpace(store.Str(user["sitio_web"]))
 
@@ -141,6 +142,8 @@ func (p *Pages) HandlePerfil(w http.ResponseWriter, r *http.Request) {
 		"NumResenas":       numResenas,
 		"ShowRating":       calificacion > 0,
 		"Biografia":        biografia,
+		"Competencias":     competencias,
+		"Catalogo":         competenciasCatalogoData(),
 		"Pais":             pais,
 		"Idiomas":          idiomas,
 		"IdiomasJoined":    strings.Join(idiomas, ", "),
@@ -156,6 +159,7 @@ func (p *Pages) HandlePerfil(w http.ResponseWriter, r *http.Request) {
 		"SwitchError":      Flash(s, "error_switch"),
 		"AvatarMsg":        Flash(s, "avatar_msg"),
 		"BioMsg":           Flash(s, "bio_msg"),
+		"CompetenciasMsg":  Flash(s, "competencias_msg"),
 		"DeleteError":      Flash(s, "error_delete"),
 		"TodosIdiomas":     idiomaChecks(todosIdiomas, userLangIds),
 	}

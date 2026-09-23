@@ -16,6 +16,7 @@ type NavTab struct {
 	Icon   string
 	Label  string
 	Active bool
+	Off    bool
 }
 
 // NavData carries everything the base layout needs, ported from menu.php.
@@ -32,6 +33,7 @@ type NavData struct {
 	NavCreditos         string
 	NavRol              string
 	IsTeacher           bool
+	SalaActiva          bool
 	AdsFreeActive       bool
 	AAAdUnitID          string
 	SeoTitle            string
@@ -158,6 +160,21 @@ func (p *Pages) MenuData(w http.ResponseWriter, r *http.Request, s *Session, cur
 	nav.NavRol = navRol
 	nav.IsTeacher = navRol != "estudiante" && navRol != "student"
 
+	// Active room availability drives the (disabled) room tab.
+	if nav.IsTeacher {
+		if row, err := p.DB.QueryOne(ctx,
+			`SELECT s.salaId FROM salas s JOIN clases_programadas cp ON cp.claseId = s.claseId
+			 WHERE cp.instructorId = ? AND s.activa = true LIMIT 1`, uid); err == nil && row != nil {
+			nav.SalaActiva = true
+		}
+	} else {
+		if row, err := p.DB.QueryOne(ctx,
+			`SELECT s.salaId FROM participantes_sala ps JOIN salas s ON s.salaId = ps.salaId
+			 WHERE ps.usuarioId = ? AND s.activa = true LIMIT 1`, uid); err == nil && row != nil {
+			nav.SalaActiva = true
+		}
+	}
+
 	// Active tab: subject pages map to materias.php.
 	page := currentPage
 	for k := range pageMateria {
@@ -173,30 +190,21 @@ func (p *Pages) MenuData(w http.ResponseWriter, r *http.Request, s *Session, cur
 		file, icon, key string
 	}{
 		{"materias.php", "home", "nav.materias"},
-		{"buscar.php", "search", "nav.buscar"},
-		{"foro.php", "message-circle", "nav.foro"},
+		{"clases.php", "target", "nav.clases"},
 		{"mi_sala.php", "camera", "nav.sala"},
-		{"personas.php", "users", "nav.personas"},
-		{"creditos.php", "credit-card", "nav.creditos"},
-		{"retiro.php", "dollar-sign", "retiro.withdraw"},
-		{"perfil.php", "user", "nav.perfil"},
+		{"perfil.php", "user", "nav.menu"},
 	}
 	for _, tb := range tabs {
-		if tb.file == "buscar.php" && nav.IsTeacher {
-			continue
-		}
-		if tb.file == "retiro.php" && !nav.IsTeacher {
-			continue
-		}
-		if tb.file == "creditos.php" && nav.IsTeacher {
-			continue
-		}
-		nav.NavTabs = append(nav.NavTabs, NavTab{
+		tab := NavTab{
 			File:   tb.file,
 			Icon:   tb.icon,
 			Label:  i18n.T(lang, tb.key, nil),
 			Active: page == tb.file,
-		})
+		}
+		if tb.file == "mi_sala.php" {
+			tab.Off = !nav.SalaActiva
+		}
+		nav.NavTabs = append(nav.NavTabs, tab)
 	}
 	nav.Translations = template.JS(i18n.QuoteJSON())
 	return nav, false

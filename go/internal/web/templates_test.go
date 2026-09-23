@@ -80,10 +80,10 @@ func TestMiSalaTemplateRenders(t *testing.T) {
 	p := &Pages{Templates: ts}
 	s := &Session{Values: map[string]string{"usuarioId": "100"}}
 	data := map[string]any{
-		"Lang":     "es",
-		"NavData":  NavData{NavRol: "estudiante"},
+		"Lang":      "es",
+		"NavData":   NavData{NavRol: "estudiante"},
 		"IsTeacher": false,
-		"HasRoom":  false,
+		"HasRoom":   false,
 	}
 	var rec2 = httptest.NewRecorder()
 	if err := ts.RenderAuthed(rec2, "mi_sala", p, s, "es", data); err != nil {
@@ -110,9 +110,45 @@ func TestLandingTemplateRenders(t *testing.T) {
 		t.Fatalf("render landing: %v", err)
 	}
 	out := rec.Body.String()
-	for _, want := range []string{"Entrar como Estudiante", "Entrar como Profesor", "ClassExpress — Bunny Software E.I.R.L.", "Tu Suite de", "clases particulares en vivo", "Todo lo que hace ClassExpress", "Clases particulares online en ClassExpress"} {
+	for _, want := range []string{"Entrar como Estudiante", "Entrar como Profesor", "ClassExpress — Bunny Software E.I.R.L.", "Publica tu", "«se busca»", "¿Cómo funciona el «se busca»?", "Gremio de profesores", "Todo lo que hace ClassExpress"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("landing render missing %q", want)
+		}
+	}
+}
+
+func TestClasesTemplateRenders(t *testing.T) {
+	ts := NewTemplateSet()
+	p := &Pages{Templates: ts}
+	s := &Session{Values: map[string]string{"usuarioId": "100"}}
+	nav := NavData{NavRol: "estudiante", NavTabs: []NavTab{
+		{File: "materias.php", Icon: "home", Label: "Materias"},
+		{File: "clases.php", Icon: "target", Label: "Clases", Active: true},
+	}}
+	data := map[string]any{
+		"Lang":          "es",
+		"NavData":       nav,
+		"IsTeacher":     false,
+		"HasItems":      true,
+		"FilterMateria": int64(0),
+		"Materias":      []materiaOption{},
+		"FormMaterias":  []materiaOption{{ID: 3, Nombre: "Física"}},
+		"Items": []solicitudItem{{
+			SolicitudID: 7, Titulo: "Fusión nuclear", Descripcion: "Quiero entenderla",
+			Materia: "Física", MateriaID: 3, MateriaColor: "#2563EB", MateriaIcon: "zap",
+			Estudiante: "Ana", EstudianteID: 5, EstudianteInitial: "A",
+			Ofertas: 1, Alumnos: 1, EsMia: true, Tiempo: "hace 5 min",
+			Bids: []ofertaItem{{OfertaID: 9, Instructor: "Profe", InstructorInitial: "P", Precio: "$ 10.00", Moneda: "USD"}},
+		}},
+	}
+	rec := httptest.NewRecorder()
+	if err := ts.RenderAuthed(rec, "clases", p, s, "es", data); err != nil {
+		t.Fatalf("render clases: %v", err)
+	}
+	out := rec.Body.String()
+	for _, want := range []string{"SE BUSCA", "Fusión nuclear", "Aceptar y coordinar"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("clases render missing %q", want)
 		}
 	}
 }
@@ -187,14 +223,14 @@ func TestEditedTemplatesRenderSmoke(t *testing.T) {
 	ts2 := NewTemplateSet()
 	p2 := &Pages{Templates: ts2}
 	s2 := &Session{Values: map[string]string{"usuarioId": "100"}}
- 	data := map[string]any{
- 		"Lang":              "es",
- 		"NavData":           nav,
- 		"Self":              "tecnologia.php",
- 		"TranslatedName":    "Technology",
- 		"SubjectImage":      "technology.png",
- 		"BreadcrumbSubject": "Materias",
- 		"IsLoggedIn":        true,
+	data := map[string]any{
+		"Lang":              "es",
+		"NavData":           nav,
+		"Self":              "tecnologia.php",
+		"TranslatedName":    "Technology",
+		"SubjectImage":      "technology.png",
+		"BreadcrumbSubject": "Materias",
+		"IsLoggedIn":        true,
 		"Subtitle":          "Elige hasta 5 temas",
 		"ThemesSelected":    "temas seleccionados",
 		"MaxWarning":        "Máximo 5 temas",
